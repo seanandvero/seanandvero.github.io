@@ -183,12 +183,14 @@
 		</div>
 		<script type='text/javascript' src='blazy.min.js'></script>
 		<script type='text/javascript' language='javascript'>
-		  ;(function() {
+		  var oldOnLoad = window.onLoad;
+		  window.onload = function() {
 				var blazy = new Blazy({
 					selector: 'img'
 				});
 				blazy.revalidate();
-			})();
+				if (oldOnLoad) { oldOnLoad(); }
+			};
 		</script>
   </body>
 </html>
