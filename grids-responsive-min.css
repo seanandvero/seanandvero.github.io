@@ -217,6 +217,10 @@ label.articleClose {
 }
 label.articleClose,
 label.article {
+  	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 	cursor: pointer;
 }
 input,button {
