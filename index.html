@@ -2,7 +2,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Homepage of sean and veronica">
+    <meta name="description" content="Homepage of Sean and Veronica">
     <title>SEAN AND VERONICA</title>
 	<link rel="stylesheet" href="pure-min.css" />
     <link rel="stylesheet" href="grids-responsive-min.css" />
@@ -42,37 +42,189 @@
 					</div>
 				</div>
 				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-					<img src="9a54a031-ad91-45c1-a615-f7386f16385c.jpg" alt="Having some fun in a phone box" />
+					<img src="f827f1b2-0125-4d54-b837-840075b46175.jpg" alt="Museum 21c Hotel" />
 					 <aside class="photo-box-caption">
-						 <span>Having some fun in a phone box</span>
+						 <span>Museum 21c Hotel</span>
 					 </aside>
 				</div>
-				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-					<img src="142b9975-93ee-4a2e-b5e6-a487544c933a.jpg" alt="Yard Art" />
-					 <aside class="photo-box-caption">
-						 <span>Yard Art</span>
-					 </aside>
+				<div class="text-box u-1 u-med-2-3 u-lrg-3-4">
+					<div class="l-box">
+						<p class="text-box-head">Where to stay</h1>
+						<p>
+							We've arranged a block of rooms at the 21c museum hotel, along with a discounted rate. 
+							They will set you up in a beautiful room, and are centrally located downtown along the street car route.
+							You can make your reservation <a id="weddingHotelLink" href="https://gc.synxis.com/rez.aspx?Hotel=56599&Chain=7748&arrive=6/23/2017&depart=6/25/2017&adult=1&child=0&group=NHWEDD17">for the Hanna-Nava wedding block here</a>.
+						</p>
+					</div>
 				</div>
-				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img class="pure-img" src="581791b6-1034-4046-b8b8-4cfe99f91d56.jpg" alt="New Years 2016" />
-						 <aside class="photo-box-caption">
-							 <span>New Years 2016</span>
-						 </aside>
-				</div>
-				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="925c641b-cbe2-45b7-96b5-2522c0e76744.jpg" alt="Colorado Botanical Garden" />
-						 <aside class="photo-box-caption">
-							 <span>Colorado Botanical Garden</span>
-						 </aside>
-				</div>
-				<div class="text-box u-1 hidden">
+				<div class="text-box u-1 full-row">
 					<div class="l-box">
 						<h1 class="text-box-head">Wedding Registry</h1>
-						<p>Ronnie didn't give me permission to put this on here. If you are reading this you should probably just ignore it... for now</p>
-						<p>We would prefer to accept any wedding gifts in the form of cash to put towards our honeymoon. You may use the form below to
-							submit a gift in any amount you feel comfortable with. You are also welcome to provide us with cash or check
-                            in person or via mail, which will also avoid the processing fees.</p> 
-						<form class="pure-form pure-g" 
+						<p>We are so thankful having you as part of our wedding- that is a gift we will cherish forever. If you'd like to help us celebrate our Honeymoon, or our first Home Renovation that would be amazing too!</p> 
+					</div>
+					<input type="radio" name="giftScreenState" id="giftScreenStateMain" class="giftScreenState" checked="checked" />
+					<div class="giftScreen"><div class="animated bounceInDown"><div class="pure-g">
+						<div class="u-1-3 grid-list-left">
+							<label for="giftScreenStateReno" onclick="" class="giftScreen">
+								<img src="4857c73b-e229-47d7-86c2-a20d641c93f9.jpg" alt="Home Rennovation Gift" class="grid-list-image" />
+							</label>
+						</div>
+						<div class="u-2-3 grid-list-right">
+							<label for="giftScreenStateReno" onclick="" class="giftScreen">
+								<p class="text-box-head grid-list-text">Home Rennovations</p>
+							</label>
+						</div>
+						<div class="u-1-3 grid-list-left">
+							<label for="giftScreenStateHoney" onclick="" class="giftScreen">
+								<img src="ea80d3e7-fe00-4a88-bf2a-be3462c0a9b2.jpg" alt="Honeymoon Gift" class="grid-list-image" />
+							</label>
+						</div>
+						<div class="u-2-3 grid-list-right">
+							<label for="giftScreenStateHoney" onclick="" class="giftScreen">
+								<p class="text-box-head grid-list-text">Honeymoon</p>
+							</label>
+						</div>
+						<div class="u-1-3 grid-list-left">
+							<label for="giftScreenStateOther" onclick="" class="giftScreen">
+								<img src="63a689f2-296e-4d8d-92c9-a2b466d7ed3d.jpg" alt="Other gift" class="grid-list-image" />
+							</label>
+						</div>
+						<div class="u-2-3 grid-list-right">
+							<label for="giftScreenStateOther" onclick="" class="giftScreen">
+								<p class="text-box-head grid-list-text">Other</p>
+							</label>
+						</div>
+					</div></div></div>
+					<input type="radio" name="giftScreenState" id="giftScreenStateReno" class="giftScreenState" style="top:15em;" />
+					<div class="giftScreen"><div class="animated bounceInDown"><div class="pure-g">
+						<p class="u-1 giftScreenBack2"><label for="giftScreenStateMain" onclick="" class="giftScreen">&lt; Back</label></p>
+						<div class="u-1-3 grid-list-left">
+							<form id='gift-form-doorsensor' class="gift-form pure-form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+								<fieldset class="pure-input-1">
+									<!-- Identify your business so that you can collect the payments. -->
+									<input type="hidden" name="business" value="clsales.rsndev.01@gmail.com">
+									<!-- Specify a Buy Now button. -->
+									<input type="hidden" name="cmd" value="_xclick">
+									<!-- Specify details about the item that buyers will purchase. -->
+									<input type="hidden" name="item_name" value="Smarthome Door Sensor">
+									<input type="hidden" name="amount" value="15.00">
+									<input type="hidden" name="currency_code" value="USD">
+
+									<!-- Display the payment button. -->
+									<button type="submit" name="gift-submit" class="giftSubmit">
+										<img src="85e7b6e4-a9e1-4ee0-aad3-602235f6f3f6.jpg" alt="Smarthome Sensor" class="grid-list-image" />
+									</button>
+								</fieldset>
+							</form>
+						</div>
+						<div class="u-2-3 grid-list-right"><div class="grid-list-text">
+							<div class="text-box-head">Smarthome Sensor - $15.00</div>
+							<div >This smarthome sensor can detect things like a door opening and closing.</div>
+						</div></div>
+						<p class="u-1 giftScreenBack2"><label for="giftScreenStateMain" onclick="" class="giftScreen">&lt; Back</label></p>
+					</div></div></div>
+					<input type="radio" name="giftScreenState" id="giftScreenStateHoney" class="giftScreenState" />
+					<div class="giftScreen"><div class="animated bounceInDown"><div class="pure-g">
+						<p class="u-1 giftScreenBack2"><label for="giftScreenStateMain" onclick="" class="giftScreen">&lt; Back</label></p>
+						<div class="u-1-3 grid-list-left">
+							<form id='gift-form-streetfood' class="gift-form pure-form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+								<fieldset class="pure-input-1">
+									<!-- Identify your business so that you can collect the payments. -->
+									<input type="hidden" name="business" value="clsales.rsndev.01@gmail.com">
+									<!-- Specify a Buy Now button. -->
+									<input type="hidden" name="cmd" value="_xclick">
+									<!-- Specify details about the item that buyers will purchase. -->
+									<input type="hidden" name="item_name" value="Street Food">
+									<input type="hidden" name="amount" value="30.00">
+									<input type="hidden" name="currency_code" value="USD">
+
+									<!-- Display the payment button. -->
+									<button type="submit" name="gift-submit" class="giftSubmit">
+										<img src="021e8a40-cef4-4549-9406-10f5311c3f7d.jpg" alt="Street Food Dinner" class="grid-list-image" />
+									</button>
+								</fieldset>
+							</form>
+						</div>
+						<div class="u-2-3 grid-list-right"><div class="grid-list-text">
+							<div class="text-box-head">Street Food - $30.00</div>
+							<div>You can treat Sean & Veronica to street food vendors across Singapore, Kuala Lumpur, Thailand and Seoul.</div>
+						</div></div>
+						<div class="u-1-3 grid-list-left">
+							<form id='gift-form-jetski' class="gift-form pure-form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+								<fieldset class="pure-input-1">
+									<!-- Identify your business so that you can collect the payments. -->
+									<input type="hidden" name="business" value="clsales.rsndev.01@gmail.com">
+									<!-- Specify a Buy Now button. -->
+									<input type="hidden" name="cmd" value="_xclick">
+									<!-- Specify details about the item that buyers will purchase. -->
+									<input type="hidden" name="item_name" value="Jetski Rental">
+									<input type="hidden" name="amount" value="50.00">
+									<input type="hidden" name="currency_code" value="USD">
+
+									<!-- Display the payment button. -->
+									<button type="submit" name="gift-submit" class="giftSubmit">
+										<img src="473ad08c-fa7a-41ab-ae91-8ba5e6061534.jpg" alt="Jetski Rental" class="grid-list-image" />
+									</button>
+								</fieldset>
+							</form>
+						</div>
+						<div class="u-2-3 grid-list-right"><div class="grid-list-text">
+							<div class="text-box-head">Jetski Rental - $50.00</div>
+							<div>We will be staying on the perhentian islands for 5 days, treat us to a jetski rental for a couple hours.</div>
+						</div></div>
+						<div class="u-1-3 grid-list-left">
+							<form id='gift-form-hotelroom' class="gift-form pure-form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+								<fieldset class="pure-input-1">
+									<!-- Identify your business so that you can collect the payments. -->
+									<input type="hidden" name="business" value="clsales.rsndev.01@gmail.com">
+									<!-- Specify a Buy Now button. -->
+									<input type="hidden" name="cmd" value="_xclick">
+									<!-- Specify details about the item that buyers will purchase. -->
+									<input type="hidden" name="item_name" value="Hotel Room">
+									<input type="hidden" name="amount" value="70.00">
+									<input type="hidden" name="currency_code" value="USD">
+
+									<!-- Display the payment button. -->
+									<button type="submit" name="gift-submit" class="giftSubmit">
+										<img src="6a93cf2f-fc12-4151-ac57-6a3e3a6869e4.jpg" alt="Hotel" class="grid-list-image" />
+									</button>
+								</fieldset>
+							</form>
+						</div>
+						<div class="u-2-3 grid-list-right"><div class="grid-list-text">
+							<div class="text-box-head">Hotel Stay - $70.00</div>
+							<div>We will be staying on the perhentian islands for 5 days, cover the cost of our hotel room for one night.</div>
+						</div></div>
+						<div class="u-1-3 grid-list-left">
+							<form id='gift-form-snorkellingtour' class="gift-form pure-form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+								<fieldset class="pure-input-1">
+									<!-- Identify your business so that you can collect the payments. -->
+									<input type="hidden" name="business" value="clsales.rsndev.01@gmail.com">
+									<!-- Specify a Buy Now button. -->
+									<input type="hidden" name="cmd" value="_xclick">
+									<!-- Specify details about the item that buyers will purchase. -->
+									<input type="hidden" name="item_name" value="Snorkeling Tour">
+									<input type="hidden" name="amount" value="100.00">
+									<input type="hidden" name="currency_code" value="USD">
+
+									<!-- Display the payment button. -->
+									<button type="submit" name="gift-submit" class="giftSubmit">
+										<img src="364c1c6c-14d6-489e-b397-7c79ac9f501a.jpg" alt="Snorkelling Tour" class="grid-list-image" />
+									</button>
+								</fieldset>
+							</form>
+						</div>
+						<div class="u-2-3 grid-list-right"><div class="grid-list-text">
+							<div class="text-box-head">Snorkelling Tour - $100.00</div>
+							<div>We will be staying on the perhentian islands for 5 days, treat us to a snorkelling tour.</div>
+						</div></div>
+						<p class="u-1 giftScreenBack2"><label for="giftScreenStateMain" onclick="" class="giftScreen">&lt; Back</label></p>
+					</div></div></div>
+					<input type="radio" name="giftScreenState" id="giftScreenStateOther" class="giftScreenState" />
+					<div class="giftScreen"><div class="animated bounceInDown"><div class="pure-g" style="padding-left: 2em;">
+						<p class="u-1 giftScreenBack"><label for="giftScreenStateMain" onclick="" class="giftScreen">&lt; Back</label></p>
+						<p class="u-1">We'd be very thankful for any gifts, even if it's not something we already thought of. Please bring them with you to the reception, or you can descibe your gift in the form below:</p>
+						<div class="u-1"><form id='gift-form'custom' class="gift-form pure-form" 
 							  action="https://www.paypal.com/cgi-bin/webscr" method="post">
 							<fieldset class="pure-input-1">
 								<!-- Identify your business so that you can collect the payments. -->
@@ -82,35 +234,62 @@
 
 								<div class="pure-u-1">
 									<!-- Specify details about the item that buyers will purchase. -->
-									<input type="hidden" name="item_name" value="Wedding Gift">
-									<input id="giftAmount" class="pure-input-rounded" type="number" name="amount" min="1" max="10000" pattern="[0-9]{1,5}(.[0-9]{0,1}[0-9]){0,1}" required="required" value="5.00" step="0.01">
-									<input type="hidden" name="currency_code" value="USD">
+									<div><input type="text" class="pure-input-rounded" name="item_name" value="Wedding Gift Description" style="width:80%;text-align:left;"></div>
+									<div style="width:80%;text-align:right;">
+										<input id="giftAmount" class="pure-input-rounded" type="number" name="amount" min="1" max="10000" pattern="[0-9]{1,5}(.[0-9]{0,1}[0-9]){0,1}" required="required" value="5.00" step="0.01">
+										<input type="hidden" name="currency_code" value="USD">
 
-									<!-- Display the payment button. -->
-									<button type="submit" name="submit" class="pure-button pure-button-primary">Send a Gift</button>
-									<img alt="" border="0" width="1" height="1" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" >
-								</div>
-								<div class="pure-u-1">
-									<img style="margin-left:2em;margin-top:0.5em;" src="dashinfinity.svg" data-src="ccpayments.png"></img>
+										<!-- Display the payment button. -->
+										<button type="submit" name="gift-submit" class="pure-button pure-button-primary">Send a Gift</button>
+										<img alt="" border="0" width="1" height="1" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" >
+									</div>
+									<div style="width:80%;text-align:right;">
+										<img style="margin-right:2em;margin-top:0.5em;" src="ccpayments.png"></img>
+									</div>
 								</div>
 							</fieldset>
-						</form>
-					</div>
+						</form></div>
+						<p class="u-1 giftScreenBack"><label for="giftScreenStateMain" onclick="" class="giftScreen">&lt; Back</label></p>
+					</div></div></div>
 				</div>
 				<div class="text-box u-1 u-med-2-3 u-lrg-3-4">
 					<div class="l-box">
 						<p class="text-box-head">Wedding Band</h1>
-						<p class="text-box-subhead">
+						<p>
 							Daniel Bennet and the Dirty Shirleys will play our reception. 
 							You can check out their <a href="http://thedirtyshirleys.com/">website here</a>
 						</p>
 					</div>
 				</div>
 				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-					<img src="wedding_band_2017/4c88fbc6-af07-4505-9a9c-9c3786764b9c.jpg" alt="Daniel Bennet and the Dirty Shirleys" />
+					<img src="dashinfinity.svg" data-src="wedding_band_2017/4c88fbc6-af07-4505-9a9c-9c3786764b9c.jpg" alt="Daniel Bennet and the Dirty Shirleys" />
 					 <aside class="photo-box-caption">
 						 <span>Daniel Bennet and the Dirty Shirleys</span>
 					 </aside>
+				</div>
+				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
+					<img src="dashinfinity.svg" data-src="9a54a031-ad91-45c1-a615-f7386f16385c.jpg" alt="Having some fun in a phone box" />
+					 <aside class="photo-box-caption">
+						 <span>Having some fun in a phone box</span>
+					 </aside>
+				</div>
+				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
+					<img src="dashinfinity.svg" data-src="142b9975-93ee-4a2e-b5e6-a487544c933a.jpg" alt="Yard Art" />
+					 <aside class="photo-box-caption">
+						 <span>Yard Art</span>
+					 </aside>
+				</div>
+				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
+						<img class="pure-img" src="dashinfinity.svg" data-src="581791b6-1034-4046-b8b8-4cfe99f91d56.jpg" alt="New Years 2016" />
+						 <aside class="photo-box-caption">
+							 <span>New Years 2016</span>
+						 </aside>
+				</div>
+				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
+						<img src="dashinfinity.svg" data-src="925c641b-cbe2-45b7-96b5-2522c0e76744.jpg" alt="Colorado Botanical Garden" />
+						 <aside class="photo-box-caption">
+							 <span>Colorado Botanical Garden</span>
+						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
 						<img src="dashinfinity.svg" data-src="80147071-3434-4d32-8884-7a298993c451.jpg" alt="Flowers for Veronica" />
@@ -348,5 +527,72 @@
 				if (oldOnLoad) { oldOnLoad(); }
 			};
 		</script>
+		<script>
+		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+		  var GA_LOCAL_STORAGE_KEY = 'ga:clientId';
+		  ga('create', 'UA-91685258-1', {
+			'storage': 'none',
+    		'clientId': localStorage.getItem(GA_LOCAL_STORAGE_KEY)
+	 	  });
+		  ga(function(tracker) {
+			localStorage.setItem(GA_LOCAL_STORAGE_KEY, tracker.get('clientId'));
+		  });
+		  ga('set', 'page', 'https://hannasm.github.io/index.html');
+		  ga('set', 'checkProtocolTask', null);
+		  ga('require', 'outboundLinkTracker');
+		  //ga('require', 'impressionTracker'); // TODO: setup
+		  ga('require', 'maxScrollTracker');
+		  ga('require', 'pageVisibilityTracker');
+		  ga('send', 'pageview');
+
+		  var articleStates = document.getElementsByClassName('articleState');
+          for(var i =0; i < articleStates.length; i++) {
+            var articleState = articleStates[i];
+			var handler = (function() { 
+				var articleName = articleState.id; 
+				return function() { 
+					ga('send', 'event', 'article-' + articleName, 'articleView'); 
+			}})();
+            articleState.addEventListener('change', handler);
+		  }
+		  var giftScreenStates = document.getElementsByClassName('giftScreenState');
+          for(var i =0; i < giftScreenStates.length; i++) {
+            var giftScreenState = giftScreenStates[i];
+			var handler = (function() { 
+				var giftScreenName = giftScreenState.id; 
+				return function() { 
+					ga('send', 'event', giftScreenName, 'giftScreenView'); 
+			}})();
+            giftScreenState.addEventListener('change', handler);
+		  }
+		  // Gets a reference to the form element, assuming
+		  // it contains the id attribute "signup-form".
+		  var giftForms = document.getElementsByClassName('gift-form');
+		  for (var i = 0; i < giftForms.length; i++) {
+			var handler = (function() {
+				var form = giftForms[i];
+				var name = form.id;
+				return function(event) {
+				  // Prevents the browser from submiting the form
+				  // and thus unloading the current page.
+				  event.preventDefault();
+
+				  // Sends the event to Google Analytics and
+				  // resubmits the form once the hit is done.
+				  ga('send', 'event', name, 'submit', {
+					hitCallback: function() {
+					  form.submit();
+					}
+				  });
+				};
+			})();
+			giftForms[i].addEventListener('submit', handler);
+		}
+		</script>
+		<script async src="autotrack.js"></script>
   </body>
 </html>
