@@ -246,7 +246,7 @@ div.article {
     -moz-transition: max-height 0.5s ease;
 }
 .articleState:checked + div.article {
-	max-height: 10000px;
+	max-height: 1000000px;
     transition: max-height 0.5s ease-in;
     -moz-transition: max-height 0.5s ease-in;
     -webkit-transition: max-height 0.5s ease-in;
