@@ -167,6 +167,9 @@ body {
     color: #FAA;
 }
 
+label.link {
+  color: #FAA; text-decoration: underline; cursor: pointer;
+}
 a:link {color: #FAA; text-decoration: underline; }
 a:active {color: #FAA; text-decoration: underline; }
 a:visited {color: #AAF; text-decoration: underline; }
@@ -216,7 +219,8 @@ label.articleClose {
 	color: #FAA;
 }
 label.articleClose,
-label.article {
+label.article,
+label.photoViewer {
   	-webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
@@ -251,6 +255,115 @@ div.article {
     -moz-transition: max-height 0.5s ease-in;
     -webkit-transition: max-height 0.5s ease-in;
     -o-transition: max-height 0.5s ease-in;
+    border: thin solid #AAA;
+}
+div.photoViewer {
+  position: relative;
+  max-height: 0px;
+  max-width: 0px;
+}
+div.photoViewer {
+  position: fixed;
+  display: none;
+  overflow: hidden;
+}
+input.photoViewer {
+	position: relative;
+	bottom: -25em;
+	max-height: 0px;
+	max-width: 0px;
+}
+.photoViewer:checked + div.photoViewer {
+  background: rgba(11,11,11,0.9);
+  display: block;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 100%;
+  max-height: 100%;
+  margin: auto;
+  overflow: auto;
+  z-index: 10000000 !important;
+  padding: 2% 2%;
+}
+.photoViewer:checked + div.photoViewer img {
+  max-height: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  display: block;
+  padding: 0;
+}
+.photoViewer:checked + div.photoViewer .close {
+	cursor: pointer;
+	content: "";
+	background-image: url('close.svg');
+	background-size: cover;
+	width: 10vh;
+	height: 10vh; 
+	display: block;
+	position: absolute;
+	color: #A30;
+	top: 2vh;
+	right: 4vw;
+	z-index: 10000001;
+	transition: all .2s ease-in-out;
+}
+.photoViewer:checked + div.photoViewer .close:hover,
+.photoViewer:checked + div.photoViewer .prev:hover,
+.photoViewer:checked + div.photoViewer .next:hover {
+	transform: scale(1.2);
+}
+.photoViewer:checked + div.photoViewer .prev {
+	cursor: pointer;
+	content: "";
+	background-image: url('prev_image.svg');
+	background-size: cover;
+	width: 10vh;
+	height: 10vh; 
+	display: block;
+	position: absolute;
+	color: #A30;
+	bottom: 2vh;
+	left: 4vw;
+	z-index: 10000001;
+	transition: all .2s ease-in-out;
+}
+.photoViewer:checked + div.photoViewer .next {
+	cursor: pointer;
+	content: "";
+	background-image: url('next_image.svg');
+	background-size: cover;
+	width: 10vh;
+	height: 10vh; 
+	display: block;
+	position: absolute;
+	color: #A30;
+	bottom: 2vh;
+	right: 4vw;
+	z-index: 10000001;
+	transition: all .2s ease-in-out;
+}
+#wedding_article .photo-box {
+  padding: 10px;
+}
+label.photoViewer:after {
+	content: "";
+	background-image: url('maximize.svg');
+	background-size: 20px auto;
+	width: 20px;
+	height: 20px;
+	display: block;
+	position: absolute;
+	color: #A30;
+	top: 1em;
+	right: 1em;
+	z-index: 100002;
+	transition: all .2s ease-in-out;
+}
+label.photoViewer:hover:after {
+	transform: scale(1.5);
 }
 /* allow full-row elements have dynamic height */
 .u-1.full-row  {

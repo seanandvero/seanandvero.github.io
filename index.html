@@ -17,10 +17,12 @@
 			</div>
 			<div class="pure-g">
 				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-						<img src="0f0ef144-c2b9-4402-96b2-daa99af560d2.jpg" alt="Wedding 2017" />
+					<label class="article" onclick="" for="wedding_photos">
+						<img src="9029831f-fd45-48a9-8e8c-4c7be7c25879.jpg" alt="Wedding 2017" />
 						 <aside class="photo-box-caption">
-							 <span>Wedding 2017</span>
+							 <span>Wedding Photos - 2017</span>
 						 </aside>
+          </label>
 				</div>
 				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
 						<img src="01aac8a4-344b-4bb2-b2f9-79b3c45ad8c3.jpg" alt="Christmas in Tulum 2015" />
@@ -35,6 +37,19 @@
               <span>Save the date we're getting married</span>
             </aside>
           </label>
+        </div>
+				<input type="radio" name="article" id="wedding_photos" class="articleState" />
+				<div class="text-box u-1 full-row article">
+					<div><label class="articleClose" for="closeArticle">Close</label></div>
+          <div style="clear:both;"></div>
+          <div class="l-box">
+            <h1 class="text-box-head">Wedding Photos</h1>
+          </div>
+          <div style="clear:both;"></div>
+          <input type="radio" name="photoViewer" id="photoViewer_wedding_none" class="photoViewer" checked="checked" />
+          <div class="pure-g" id="wedding_article">
+            
+          </div>
         </div>
 				<input type="radio" name="article" id="savethedate" class="articleState" />
 				<div class="text-box u-1 full-row article" id="SaveTheDate">
@@ -319,7 +334,7 @@
                       </button>
                     </fieldset>
                   </form>
-                </div>17494611_1678246759146722_1238645169184571392_n.jpg
+                </div>
                 <div class="u-2-3 grid-list-right"><div class="grid-list-text">
                   <div class="text-box-head">Snorkelling Tour - $100.00</div>
                   <div>We will be staying on the perhentian islands for 5 days, treat us to a snorkelling tour.</div>
@@ -479,6 +494,8 @@
                 <source src="wedding_video_cesar_claire.mp4" type="video/mp4">
               </video>
             </div> 
+
+            <p><label class="link" onclick="" for="wedding_photos">You can click here for our wedding photo gallery!</label></p>
           </div>
         </div>
 				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
@@ -730,17 +747,7 @@
 				Created by Sean and Veronica With Love - 2017
 			</div>
 		</div>
-		<script type='text/javascript' src='blazy.min.js'></script>
-		<script type='text/javascript' language='javascript'>
-		  var oldOnLoad = window.onLoad;
-		  window.onload = function() {
-				var blazy = new Blazy({
-					selector: 'img,iframe'
-				});
-				blazy.revalidate();
-				if (oldOnLoad) { oldOnLoad(); }
-			};
-		</script>
+		<script type='text/javascript' src='blazy.js'></script>
 		<script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -808,5 +815,69 @@
 		}
 		</script>
 		<script async src="autotrack.js"></script>
+    <script async src="webcomponents-hi.js"></script>
+		<script async src="hammer.min.js"></script>
+    <input type="radio" name="photoViewer" id="photoViewer_none" class="photoViewer" checked="checked" />
+    <div class="photoViewer" style="display:none;"></div>
+    <link rel="import" href="wedding/final/gallery_generated.html" id="wedding_gallery_generated" />
+    <script type="text/javascript" language="javascript">
+      var wedding_article = document.getElementById('wedding_article');
+      var wedding_gallery = document.getElementById('wedding_gallery_generated');
+
+      var swipeHandler = function(node, prev, next) {
+        var hammer = new Hammer(node, {
+          recognizers: [
+            // RecognizerClass, [options], [recognizeWith, ...], [requireFailure, ...]
+            [Hammer.Swipe,{ direction: Hammer.DIRECTION_HORIZONTAL }],
+          ]
+        });
+        if(prev) {
+          hammer.on('swiperight', function() {
+              prev.click();
+          });
+        }
+        if (next) {
+          hammer.on('swipeleft', function() {
+            next.click();
+          });
+        }
+      };
+
+      var nodes = wedding_gallery.import.querySelector('.root').children;
+      for (i=0;i<nodes.length;i++) {
+        var target = nodes[i].cloneNode(true);
+        wedding_article.appendChild(target);
+
+        if (target.tagName == 'DIV' && target.classList.contains('photoViewer')) {
+          var prev = target.querySelector('div .prev');
+          if (prev) { prev = prev.parentNode; }
+          var next = target.querySelector('div .next');
+          if (next) { next = next.parentNode; }
+          var img = target.querySelector('img');
+
+          if (img == null) { continue; }
+
+          swipeHandler(target, prev, next);
+          swipeHandler(img, prev, next);
+        }
+      }
+    </script>
+		<script type='text/javascript' language='javascript'>
+		  var oldOnLoad = window.onLoad;
+		  window.onload = function() {
+				var blazy = new Blazy({
+					selector: 'img,iframe'
+				});
+				blazy.revalidate();
+				if (oldOnLoad) { oldOnLoad(); }
+        window.blazy = blazy;
+
+        document.querySelectorAll('input[type="radio"]').forEach(function (label) {
+          label.addEventListener('change', function() {
+            blazy.revalidate();
+          });
+        });
+			};
+		</script>
   </body>
 </html>
