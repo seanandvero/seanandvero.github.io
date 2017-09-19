@@ -291,9 +291,15 @@ input.photoViewer {
 .photoViewer:checked + div.photoViewer img {
   max-height: 100%;
   max-width: 100%;
-  margin: 0 auto;
   display: block;
-  padding: 0;
+  width: auto;
+  height: auto;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
 }
 .photoViewer:checked + div.photoViewer .close {
 	cursor: pointer;

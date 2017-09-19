@@ -4,7 +4,7 @@ OF="gallery_generated.html"
 
 echo "<div class=\"root\">" > $OF
 
-TOTAL=`ls *.JPG|wc -l`
+TOTAL=`cat wedding_images.txt | wc -l`
 SUBPATH="wedding/final"
 SUBPATH_SMALL="wedding/final_thumb"
 let "index=1"
@@ -35,7 +35,7 @@ do
     viewers+=`echo "      <label for=\"photoViewer_wedding_$next\"><div class=\"next\"></div></label>"`
   fi
   viewers+=`echo "      <label for=\"photoViewer_wedding_none\"><div class=\"close\"></div></label>"`
-  viewers+=`echo "      <img src="dashinfinity.svg" $ds=\"$full\" />"`
+  viewers+=`echo "      <img src=\"dashinfinity.svg\" $ds=\"$full\" />"`
   viewers+=`echo "    </div>"`
 
   if ! ((index%6)); then
