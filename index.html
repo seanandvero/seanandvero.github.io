@@ -885,7 +885,9 @@
 
         document.querySelectorAll('input[type="radio"]').forEach(function (label) {
           label.addEventListener('change', function() {
-            blazy.revalidate();
+            setTimeout(function() {
+              blazy.revalidate();
+            });
           });
         });
 			};
