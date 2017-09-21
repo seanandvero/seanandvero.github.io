@@ -38,7 +38,8 @@
             </aside>
           </label>
         </div>
-				<input type="radio" name="article" id="wedding_photos" class="articleState" />
+				<input type="radio" name="article" id="wedding_photos" class="articleState1" />
+				<input type="radio" name="article" id="savethedate" class="articleState2" />
 				<div class="text-box u-1 full-row article blazycontainer">
 					<div><label class="articleClose" for="closeArticle">Close</label></div>
           <div style="clear:both;"></div>
@@ -51,7 +52,6 @@
             
           </div>
         </div>
-				<input type="radio" name="article" id="savethedate" class="articleState" />
 				<div class="text-box u-1 full-row article blazycontainer" id="SaveTheDate">
 					<div><label class="articleClose" for="closeArticle">Close</label></div>
           <div style="clear:both;"></div>
@@ -716,7 +716,7 @@
 							 </aside>
 						</label>
 				</div>
-				<input type="radio" name="article" id="chicago2016" class="articleState" />
+				<input type="radio" name="article" id="chicago2016" class="articleState1" />
 				<div class="text-box u-1 full-row article blazycontainer" id="Chicago2016">
 					<label class="articleClose" for="closeArticle">Close</label>
 					<div class="l-box">
@@ -741,7 +741,7 @@
 							 <span>Sunset</span>
 						 </aside>
 				</div>
-				<input type="radio" name="article" id="closeArticle" class="articleState" style="display:none;" checked="checked" />
+				<input type="radio" name="article" id="closeArticle" class="articleState1" style="display:none;" checked="checked" />
 			</div>
 			<div class="footer">
 				Created by Sean and Veronica With Love - 2017
@@ -770,7 +770,7 @@
 		  ga('require', 'pageVisibilityTracker');
 		  ga('send', 'pageview');
 
-		  var articleStates = document.getElementsByClassName('articleState');
+		  var articleStates = document.querySelectorAll('.articleState1, .articleState2, .articleState3, .articleState4, .articleState5');
           for(var i =0; i < articleStates.length; i++) {
             var articleState = articleStates[i];
 			var handler = (function() { 
@@ -865,9 +865,32 @@
           }
         }
       }
+      window.listenForRadioChanges = function () { 
+        document.querySelectorAll('input[type="radio"]').forEach(function (label) {
+          if (!label.listenForRadio) {
+            label.addEventListener('change', function() {
+              setTimeout(function() {
+                blazy._util.validateT();
+              }, 1);
+            });
+            label.listenForRadio=true;
+          }
+        });
+      };
+      window.observeMutations = function() {
+        window.listenForRadioChanges();
+        var observer = new MutationObserver(function (mutations) {
+          window.listenForRadioChanges();
+        });
+       observer.observe(document.documentElement, {
+          subtree: true,
+          childList: true
+        });
+      };
     </script>
     <script src="webcomponents-hi.js"></script>
 		<script async src="hammer.min.js" onload="window.hammerTime()"></script>
+		<script async src="mutationobserver.min.js" onload="window.observeMutations()"></script>
     <input type="radio" name="photoViewer" id="photoViewer_none" class="photoViewer" checked="checked" />
     <div class="photoViewer" style="display:none;"></div>
     <link rel="import" href="wedding/gallery_generated.html" id="wedding_gallery_generated" onload="window.populateWeddingPhotogallery()" async />
@@ -881,15 +904,7 @@
         window.blazy = blazy;
 				blazy.revalidate();
 				if (oldOnLoad) { oldOnLoad(); }
-        window.blazy = blazy;
-
-        document.querySelectorAll('input[type="radio"]').forEach(function (label) {
-          label.addEventListener('change', function() {
-            setTimeout(function() {
-              blazy.revalidate();
-            });
-          });
-        });
+        window.listenForRadioChanges();
 			};
 		</script>
 		<script type='text/javascript' language='javascript'>
