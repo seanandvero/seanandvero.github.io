@@ -287,7 +287,6 @@ div.photoViewer {
 }
 input.photoViewer {
 	position: relative;
-	bottom: -25em;
 	max-height: 0px;
 	max-width: 0px;
 }

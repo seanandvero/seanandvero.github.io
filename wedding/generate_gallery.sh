@@ -15,6 +15,8 @@ do
   full=`echo $p |sed 's/^\(.*JPG\)\( http.*\)\(http.*\)$/\2/g'`
   thumb=`echo $p |sed 's/^\(.*JPG\)\( http.*\)\(http.*\)$/\3/g'`
 
+  echo working on $p
+
   ds="data-src"
   let "prev=index-1"
   let "next=index+1"
@@ -24,7 +26,7 @@ do
   echo "        <img src=\"dashinfinity.svg\" $ds=\"$thumb\">" >> $OF
   echo "        </img>" >> $OF
   echo "      </label>" >> $OF
-  echo "    </div>" >> $OF
+  echo "    <input type=\"radio\" name=\"photoViewer\" id=\"photoViewer_wedding_close_$index\" class=\"photoViewer\" />" >> $OF
 
   viewers+=`echo "    <input type=\"radio\" name=\"photoViewer\" id=\"photoViewer_wedding_$index\" class=\"photoViewer\" />"`
   viewers+=`echo "    <div class=\"photoViewer\">"`
@@ -34,20 +36,16 @@ do
   if [ $index != "$TOTAL" ]; then
     viewers+=`echo "      <label for=\"photoViewer_wedding_$next\"><div class=\"next\"></div></label>"`
   fi
-  viewers+=`echo "      <label for=\"photoViewer_wedding_none\"><div class=\"close\"></div></label>"`
+  viewers+=`echo "      <label for=\"photoViewer_wedding_close_$index\"><div class=\"close\"></div></label>"`
   viewers+=`echo "      <img src=\"dashinfinity.svg\" $ds=\"$full\" />"`
   viewers+=`echo "    </div>"`
 
-  if ! ((index%6)); then
     echo $viewers >> $OF
     viewers=""
-  fi
+  
+  echo "    </div>" >> $OF
 
   let "index=next"
 done <wedding_images.txt
-
-if [ -n "$viewers" ]; then
-    echo $viewers >> $OF
-fi
 
 echo "  </div>" >> $OF

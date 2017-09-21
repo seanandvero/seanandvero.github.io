@@ -748,6 +748,12 @@
 			</div>
 		</div>
 		<script type='text/javascript' src='blazy.js'></script>
+    <script src="webcomponents-hi.js"></script>
+		<script src="hammer.min.js"></script>
+		<script src="mutationobserver.min.js"></script>
+    <input type="radio" name="photoViewer" id="photoViewer_none" class="photoViewer" checked="checked" />
+    <div class="photoViewer" style="display:none;"></div>
+    <link rel="import" href="wedding/gallery_generated.html" id="wedding_gallery_generated" />
 		<script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -816,16 +822,10 @@
 		</script>
 		<script async src="autotrack.js"></script>
     <script type="text/javascript" language="javascript">
-      window.hammerTime = function() {
-        window.populateWeddingPhotogallery();
-      };
       window.populateWeddingPhotogallery = function() {
-        if (!window.Hammer) { return; }
-        if (!window.isLoaded) { return; }
+        if (window.populatedWeddingPhotos) { return; }
         var wedding_article = document.getElementById('wedding_article');
         var wedding_gallery = document.getElementById('wedding_gallery_generated');
-
-        if (!wedding_gallery) { return; }
 
         var swipeHandler = function(node, prev, next) {
           var hammer = new Hammer(node, {
@@ -864,6 +864,7 @@
             swipeHandler(img, prev, next);
           }
         }
+        window.populatedWeddingPhotos = true;
       }
       window.listenForRadioChanges = function () { 
         document.querySelectorAll('input[type="radio"]').forEach(function (label) {
@@ -888,12 +889,6 @@
         });
       };
     </script>
-    <script src="webcomponents-hi.js"></script>
-		<script async src="hammer.min.js" onload="window.hammerTime()"></script>
-		<script async src="mutationobserver.min.js" onload="window.observeMutations()"></script>
-    <input type="radio" name="photoViewer" id="photoViewer_none" class="photoViewer" checked="checked" />
-    <div class="photoViewer" style="display:none;"></div>
-    <link rel="import" href="wedding/gallery_generated.html" id="wedding_gallery_generated" onload="window.populateWeddingPhotogallery()" async />
 		<script type='text/javascript' language='javascript'>
 		  var oldOnLoad = window.onload;
 		  window.onload = function() {
@@ -904,15 +899,8 @@
         window.blazy = blazy;
 				blazy.revalidate();
 				if (oldOnLoad) { oldOnLoad(); }
+        window.populateWeddingPhotogallery();
         window.listenForRadioChanges();
-			};
-		</script>
-		<script type='text/javascript' language='javascript'>
-		  var oldOnLoad2 = window.onload;
-		  window.onload = function() {
-        oldOnLoad2();
-        window.isLoaded = true;
-        populateWeddingPhotogallery();
 			};
 		</script>
   </body>
