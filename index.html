@@ -851,16 +851,18 @@
           var target = nodes[i].cloneNode(true);
           wedding_article.appendChild(target);
 
-          if (target.tagName == 'DIV' && target.classList.contains('photoViewer')) {
-            var prev = target.querySelector('div .prev');
+          var photoViewerNode = target.querySelectorAll('div.photoViewer');
+          for (j = 0; j < photoViewerNode.length; j++) {
+            var pvnode = photoViewerNode[j];
+            var prev = pvnode.querySelector('div .prev');
             if (prev) { prev = prev.parentNode; }
-            var next = target.querySelector('div .next');
+            var next = pvnode.querySelector('div .next');
             if (next) { next = next.parentNode; }
-            var img = target.querySelector('img');
+            var img = pvnode.querySelector('img');
 
             if (img == null) { continue; }
 
-            swipeHandler(target, prev, next);
+            swipeHandler(pvnode, prev, next);
             swipeHandler(img, prev, next);
           }
         }

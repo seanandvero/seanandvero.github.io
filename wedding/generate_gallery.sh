@@ -22,10 +22,6 @@ do
   let "next=index+1"
 
   echo "    <div class=\"photo-box u-1 u-med-1-3 u-lrg-1-6\">" >> $OF
-  echo "      <label class=\"photoViewer\" onclick=\"\" for=\"photoViewer_wedding_$index\">" >> $OF
-  echo "        <img src=\"dashinfinity.svg\" $ds=\"$thumb\">" >> $OF
-  echo "        </img>" >> $OF
-  echo "      </label>" >> $OF
   echo "    <input type=\"radio\" name=\"photoViewer\" id=\"photoViewer_wedding_close_$index\" class=\"photoViewer\" />" >> $OF
 
   viewers+=`echo "    <input type=\"radio\" name=\"photoViewer\" id=\"photoViewer_wedding_$index\" class=\"photoViewer\" />"`
@@ -43,6 +39,10 @@ do
     echo $viewers >> $OF
     viewers=""
   
+  echo "      <label class=\"photoViewer\" onclick=\"\" for=\"photoViewer_wedding_$index\">" >> $OF
+  echo "        <img src=\"dashinfinity.svg\" $ds=\"$thumb\">" >> $OF
+  echo "        </img>" >> $OF
+  echo "      </label>" >> $OF
   echo "    </div>" >> $OF
 
   let "index=next"
