@@ -679,3 +679,26 @@ div.giftScreenBack {
   -webkit-animation-name: bounceInDown;
   animation-name: bounceInDown;
 }
+
+/* we use a little known feature of iframe to have the browser automatically
+ * render images using exif information, this only seems to work well font-stretch:
+ * images that are vertical... setting appropriate width / heights may help though? */
+div.exifImage {
+  position: relative;
+  width: 100%;
+  height: 1440px;
+}
+div.exifImage iframe {
+  position: absolute;
+  top:0;
+  left:0;
+  width:400%;
+  height:400%;
+  transform:scale(0.25);
+  transform-origin:0 0;
+  border: 0;
+}
+div.photoCollage {
+  max-width: 800px;
+  margin-right: 1em;
+}
