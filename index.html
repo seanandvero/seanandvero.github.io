@@ -4,11 +4,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Homepage of Sean and Veronica">
     <title>SEAN AND VERONICA</title>
-	<link rel="stylesheet" href="pure-min.css" />
-    <link rel="stylesheet" href="grids-responsive-min.css" />
-	<link rel="shortcut icon" href="/favicon.ico" />
+	  <link rel="shortcut icon" href="/favicon.ico" />
+		<script src="imports.js"></script>
   </head>
   <body style="background-color: #069;color:#FAA;">
+    <script type="text/javascript" language="javascript">
+      (function() {
+				var loadCounter = {};
+				var incrementLoadCount = function (ele) {
+					if (!ele) { return; }
+					if (!loadCounter[ele]) { 
+						loadCounter['count'] = (loadCounter['count'] || 0) + 1;
+						loadCounter[ele] = 1;
+					} else {
+						loadCounter[ele] += 1;
+					}
+
+					if (!document.body.className.valueOf().includes('loading')) {
+						document.body.className += ' loading';
+					}
+				};
+				var decrementLoadCount = function (ele) {
+					if (!ele) { return; }
+					if (!loadCounter[ele]) { return; } 
+	
+					loadCounter[ele] -= 1;
+
+					if (loadCounter[ele] <= 0) {
+						delete loadCounter[ele];
+					}
+					if (!loadCounter[ele]) { 
+						loadCounter['count'] -= 1;
+					}
+
+					if (loadCounter['count'] <= 0) {
+						/* 
+						 * this technically leaks a space on the classname element, but doesnt 
+						 * suffer from issues if loading was the first and only class in the field
+						 */
+						document.body.className = document.body.className.replace('loading', '').replace('kf1', '').replace('kf2','');
+					}
+				};
+        var djsOptions = {
+          previewLoading: false,
+          previewFailure: false,
+          loadingHtml: '<div class="pending"></div>',
+          onLoadBegin: function(t) {
+            incrementLoadCount(t);
+            this.onLoadBegin(t);
+          },
+          onLoadComplete: function(t) {
+            decrementLoadCount(t);
+            this.onLoadComplete(t);
+          },
+          onLoadFailure: function(t,ex) {
+            var errorNode = document.createElement('div');
+            errorNode.className='loadError';
+            var url = t.src || t.href || 'unknown';
+            errorNode.title = url + ' (' + ex.message + ')';
+            t.parentNode.replaceChild(errorNode, t);
+          }
+        };
+        window.DemandJSDemanded = new DemandJS(djsOptions);
+      })();
+    </script>
 		<div style="max-width:1280px;margin-left:auto;margin-right:auto;">
 			<div class="header">
 				<div class="pure-menu pure-menu-horizontal">
@@ -55,430 +114,7 @@
 				<div class="text-box u-1 full-row article blazycontainer" id="SaveTheDate">
 					<div><label class="articleClose" for="closeArticle">Close</label></div>
           <div style="clear:both;"></div>
-          <div class="pure-g">
-            <div class="photo-box u-1 u-med-1-3">
-              <img src="dashinfinity.svg" data-src="wedding/thank_you.jpg" alt="Thank you for jo ining us, and your loving support" />
-              <aside class="photo-box-caption">
-                <span>Thank you for joining us, and your loving support</span>
-              </aside>
-            </div>
-            <div class="text-box u-1 u-med-2-3">
-              <div class="l-box">
-                <h1 class="text-box-head">Save the date we were married, on June 24th 2017!</h1>
-                <p class="text-box-subhead">June 24th 2017</p>
-                <p class="text-box-subhead">St. Phillipus Church, 106 W McMicken Ave, Cincinnati, OH 45202</p>
-                <p class="text-box-subhead">Skeleton Root Winery, 38 W McMicken Ave, Cincinnati, OH 45202</p>
-              </div>
-            </div>
-            <div class="text-box u-1 full-row">
-              <div class="l-box">
-                <h1 class="text-box-head">Timeline</h1>
-                <ul>
-                  <li>June 23rd, 4:00PM - Ceremony Rehearsal At Church</li>
-                  <li>June 23rd, 6:00PM - Rehearsal Dinner At Nicholsons</li>
-                  <li>June 24th, 4:00PM - Wedding Ceremony Begins At Church</li>
-                  <li>June 24th, 6:20PM - Dinner Served At Reception</li>
-                  <li>June 24th, 10:00PM - After Party at Mecca Bar OTR</li>
-                </ul>
-              </div>
-            </div>
-            <div class="photo-box u-1">
-                <img src="dashinfinity.svg" data-src="2eda3bad-6ae1-4652-8cc5-a8d4b48de706.jpg" alt="The Place" />
-                 <aside class="photo-box-caption">
-                   <span>The Place</span>
-                 </aside>
-            </div>
-            <div class="text-box u-1 full-row">
-              <div class="l-box">
-                <h1 class="text-box-head">Cincinnati, Ohio</h1>
-                <p>We are really excited to celebrate our big day with you in the historic Over-the-Rhine neighborhood. Our ceremony and venue thankfully are in walking distance with private parking included; however we encourage you to use the street car or uber.</p>
-                <p>The reception is located at 38 W. McMicken Ave, Cincinnati OH 45202</p>
-              </div>
-            </div>
-            <div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-              <img src="dashinfinity.svg" data-src="f827f1b2-0125-4d54-b837-840075b46175.jpg" alt="Museum 21c Hotel" />
-               <aside class="photo-box-caption">
-                 <span>Museum 21c Hotel</span>
-               </aside>
-            </div>
-            <div class="text-box u-1 u-med-2-3 u-lrg-3-4">
-              <div class="l-box">
-                <p class="text-box-head">Where to stay</h1>
-                <p>
-                  We've arranged a block of rooms at the 21c museum hotel, along with a discounted rate. 
-                  They will set you up in a beautiful room, and are centrally located downtown along the street car route.
-                  You can make your reservation <a id="weddingHotelLink" href="https://gc.synxis.com/rez.aspx?Hotel=56599&Chain=7748&arrive=6/23/2017&depart=6/25/2017&adult=1&child=0&group=NHWEDD17">for the Hanna-Nava wedding block here</a>.
-                </p>
-                <p>You might also be able to find some high quality, and more affordable options, <a href="https://www.airbnb.com/s/Cincinnati--OH--United-States?guests=2&adults=2&children=0&infants=0&place_id=ChIJ-SE43rFRQIgRF5PA5It--2k&checkin=06%2F23%2F2017&checkout=06%2F25%2F2017">on AirB&B</a>. Please be sure to look in the Over-The-Rhine, and Downtown areas for the best accessibility.</p>
-              </div>
-            </div>
-            <div class="text-box u-1 full-row">
-              <div class="l-box">
-                <h1 class="text-box-head">1940s Style</h1>
-                <p>We are having a 1940s themed wedding. We love swing dancing and hope you will join us.</p>
-                            <p>In the 1940s, women were very feminine and guys were dapper. They both dressed to the nines whenever they went out, including accessorizing to match their outfits.</p>
-                <img style="float: right;margin-left: 1em;" src="dashinfinity.svg" data-src="1940s_women.png" />
-                <h3>For Women:</h3>
-                <ul>
-                  <li>Women wore flattering dresses with matching hats, gloves, shoes, and purses. A true lady never left the house without a pair of gloves and a hat.</li>
-                  <li>Her make-up was always done, usually with black mascara and red lips. Eyebrows were dark and dramatic. Here is a <a href="https://www.youtube.com/watch?time_continue=2&v=KgQW8hAqDjc">tutorial</a>.</li>
-                  <li>My suggestion for the ladies is to find a vintage 40s dress online (or in a thrift store/estate sale), and then add the accessories to match. Some awesome places to look include <a href="pinupgirlclothing.com">pinupgirlclothing.com</a>, <a href="etsy.com">etsy.com</a>, <a href="mybabjo.com">mybabyjo.com</a>, and <a href="babygirlboutique.com">babygirlboutique.com</a>. <a href="modcloth.com">Modcloth</a> also has some wonderful retro dresses and shoes that are unique and classy.</li>
-                  <li>If you're going for a vintage Hawaiian luau look, find a dress in a red or tropical pattern.</li>
-                  <li>Don't forget to do your hair in this decade's style. You can find hair tutorials on YouTube (I've posted one below as an example).</li>
-                </ul>
-                <div style="clear:both;"></div>
-                <img style="float: right;margin-left: 1em;" src="dashinfinity.svg" data-src="1940s_men.png" />
-                <h3>For Men:</h3>
-                <ul>
-                  <li>You might already have your costume pieces in your closet, depending on what look you want to go for.</li>
-                  <li>If you're going for a tough-guy look, wear a pair of Levi jeans with a white T-shirt and a pair of boots. Easy enough, right?</li>
-                  <li>Or go with a more dressed-up approach and wear a suit with a vintage-style hat. Don't forget the vintage-style tie.</li>
-                </ul>	
-                <div style="clear:both;"></div>
-              </div>
-            </div>
-            <div class="photo-box u-1 u-med-1-3">
-              <img src="dashinfinity.svg" data-src="6df52523-c296-4f42-bfee-6903098643c8.jpg" />
-            </div>
-            <div class="text-box u-1 u-med-2-3" />
-              <div class="l-box">
-                <h1 class="text-box-head">Places To See in Cincinnati</h1>
-                <ul>
-                  <li><a href="http://cincinnatizoo.org">Cincinnati Zoo</a></li>
-                  <li><a href="https://www.contemporaryartscenter.org/">Contemporary Arts Center</a></li>
-                  <li><a href="http://www.findlaymarket.org/">Findlay Market</a></li>
-                  <li><a href="http://www.cincinnatiparks.com/smale-riverfront-park/">Smale Riverfront Park</a></li>
-                  <li><a href="http://washingtonpark.org/">Washington Park</a></li>
-                </ul>
-              </div>
-            </div>
-            <div class="text-box u-1 u-med-2-3" />
-              <div class="l-box">
-                <h1 class="text-box-head">Restaraunts</h1>
-                <ul>
-                  <li><a href="http://abigailstreet.com/">Abigal Street - Mediteranean Tapas</a></li>
-                  <li><a href="http://quanhapa.com/">Quan Hapa - Asian Street Food</a></li>
-                  <li><a href="http://www.qcrbar.com/">Queen City Radio - Burgers and Drinks</a></li>
-                </ul>
-              </div>
-            </div>
-            <div class="photo-box u-1 u-med-1-3">
-              <img src="dashinfinity.svg" data-src="06e7f4cc-67ee-43d7-ba71-d9a9084489b6.jpg" alt="Cincinnati" />
-            </div>
-            <div class="photo-box u-1 u-med-1-3">
-              <img src="dashinfinity.svg" data-src="17494611_1678246759146722_1238645169184571392_n.jpg" alt="Rhinegeist" />
-            </div>
-            <div class="text-box u-1 u-med-2-3">
-              <div class="l-box">
-              <h1 class="text-box-head">Breweries</h1>
-              <ul>
-                <li><a href="http://www.madtreebrewing.com/">Mad Tree Brewery</a></li>
-                <li><a href="http://www.braxtonbrewing.com/">Braxton Brewery</a></li>
-                <li><a href="http://www.rhinegeist.com/">Rhinegeist</a></li>
-              </ul>
-              </div>
-            </div>
-            <div class="text-box u-1 full-row">
-              <div class="l-box">
-                <h1 class="text-box-head">Wedding Registry</h1>
-                <p>We are so thankful having you as part of our wedding- that is a gift we will cherish forever. If you'd like to help us celebrate our Honeymoon, or our first Home Renovation that would be amazing too!</p> 
-              </div>
-              <input type="radio" name="giftScreenState" id="giftScreenStateMain" class="giftScreenState" checked="checked" />
-              <div class="giftScreen"><div class="animated bounceInDown"><div class="pure-g">
-                <div class="u-1-3 grid-list-left">
-                  <label for="giftScreenStateReno" onclick="" class="giftScreen">
-                    <img src="dashinfinity.svg" data-src="4857c73b-e229-47d7-86c2-a20d641c93f9.jpg" alt="Home Rennovation Gift" class="grid-list-image" />
-                  </label>
-                </div>
-                <div class="u-2-3 grid-list-right">
-                  <label for="giftScreenStateReno" onclick="" class="giftScreen">
-                    <p class="text-box-head grid-list-text">Home Rennovations</p>
-                  </label>
-                </div>
-                <div class="u-1-3 grid-list-left">
-                  <label for="giftScreenStateHoney" onclick="" class="giftScreen">
-                    <img src="dashinfinity.svg" data-src="ea80d3e7-fe00-4a88-bf2a-be3462c0a9b2.jpg" alt="Honeymoon Gift" class="grid-list-image" />
-                  </label>
-                </div>
-                <div class="u-2-3 grid-list-right">
-                  <label for="giftScreenStateHoney" onclick="" class="giftScreen">
-                    <p class="text-box-head grid-list-text">Honeymoon</p>
-                  </label>
-                </div>
-                <div class="u-1-3 grid-list-left">
-                  <label for="giftScreenStateOther" onclick="" class="giftScreen">
-                    <img src="dashinfinity.svg" data-src="63a689f2-296e-4d8d-92c9-a2b466d7ed3d.jpg" alt="Other gift" class="grid-list-image" />
-                  </label>
-                </div>
-                <div class="u-2-3 grid-list-right">
-                  <label for="giftScreenStateOther" onclick="" class="giftScreen">
-                    <p class="text-box-head grid-list-text">Other</p>
-                  </label>
-                </div>
-              </div></div></div>
-              <input type="radio" name="giftScreenState" id="giftScreenStateReno" class="giftScreenState" style="top:15em;" />
-              <div class="giftScreen"><div class="animated bounceInDown"><div class="pure-g">
-                <p class="u-1 giftScreenBack2"><label for="giftScreenStateMain" onclick="" class="giftScreen">&lt; Back</label></p>
-                <div class="u-1-3 grid-list-left">
-                  <form id='gift-form-doorsensor' class="gift-form pure-form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-                    <fieldset class="pure-input-1">
-                      <!-- Identify your business so that you can collect the payments. -->
-                      <input type="hidden" name="business" value="clsales.rsndev.01@gmail.com">
-                      <!-- Specify a Buy Now button. -->
-                      <input type="hidden" name="cmd" value="_xclick">
-                      <!-- Specify details about the item that buyers will purchase. -->
-                      <input type="hidden" name="item_name" value="Smarthome Door Sensor">
-                      <input type="hidden" name="amount" value="15.00">
-                      <input type="hidden" name="currency_code" value="USD">
-
-                      <!-- Display the payment button. -->
-                      <button type="submit" name="gift-submit" class="giftSubmit">
-                        <img src="dashinfinity.svg" data-src="85e7b6e4-a9e1-4ee0-aad3-602235f6f3f6.jpg" alt="Smarthome Sensor" class="grid-list-image" />
-                      </button>
-                    </fieldset>
-                  </form>
-                </div>
-                <div class="u-2-3 grid-list-right"><div class="grid-list-text">
-                  <div class="text-box-head">Smarthome Sensor - $15.00</div>
-                  <div >This smarthome sensor can detect things like a door opening and closing.</div>
-                </div></div>
-                <p class="u-1 giftScreenBack2"><label for="giftScreenStateMain" onclick="" class="giftScreen">&lt; Back</label></p>
-              </div></div></div>
-              <input type="radio" name="giftScreenState" id="giftScreenStateHoney" class="giftScreenState" />
-              <div class="giftScreen"><div class="animated bounceInDown"><div class="pure-g">
-                <p class="u-1 giftScreenBack2"><label for="giftScreenStateMain" onclick="" class="giftScreen">&lt; Back</label></p>
-                <div class="u-1-3 grid-list-left">
-                  <form id='gift-form-streetfood' class="gift-form pure-form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-                    <fieldset class="pure-input-1">
-                      <!-- Identify your business so that you can collect the payments. -->
-                      <input type="hidden" name="business" value="clsales.rsndev.01@gmail.com">
-                      <!-- Specify a Buy Now button. -->
-                      <input type="hidden" name="cmd" value="_xclick">
-                      <!-- Specify details about the item that buyers will purchase. -->
-                      <input type="hidden" name="item_name" value="Street Food">
-                      <input type="hidden" name="amount" value="30.00">
-                      <input type="hidden" name="currency_code" value="USD">
-
-                      <!-- Display the payment button. -->
-                      <button type="submit" name="gift-submit" class="giftSubmit">
-                        <img src="dashinfinity.svg" data-src="021e8a40-cef4-4549-9406-10f5311c3f7d.jpg" alt="Street Food Dinner" class="grid-list-image" />
-                      </button>
-                    </fieldset>
-                  </form>
-                </div>
-                <div class="u-2-3 grid-list-right"><div class="grid-list-text">
-                  <div class="text-box-head">Street Food - $30.00</div>
-                  <div>You can treat Sean &amp; Veronica to street food vendors across Singapore, Kuala Lumpur, Thailand and Seoul.</div>
-                </div></div>
-                <div class="u-1-3 grid-list-left">
-                  <form id='gift-form-jetski' class="gift-form pure-form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-                    <fieldset class="pure-input-1">
-                      <!-- Identify your business so that you can collect the payments. -->
-                      <input type="hidden" name="business" value="clsales.rsndev.01@gmail.com">
-                      <!-- Specify a Buy Now button. -->
-                      <input type="hidden" name="cmd" value="_xclick">
-                      <!-- Specify details about the item that buyers will purchase. -->
-                      <input type="hidden" name="item_name" value="Jetski Rental">
-                      <input type="hidden" name="amount" value="50.00">
-                      <input type="hidden" name="currency_code" value="USD">
-
-                      <!-- Display the payment button. -->
-                      <button type="submit" name="gift-submit" class="giftSubmit">
-                        <img src="dashinfinity.svg" data-src="473ad08c-fa7a-41ab-ae91-8ba5e6061534.jpg" alt="Jetski Rental" class="grid-list-image" />
-                      </button>
-                    </fieldset>
-                  </form>
-                </div>
-                <div class="u-2-3 grid-list-right"><div class="grid-list-text">
-                  <div class="text-box-head">Jetski Rental - $50.00</div>
-                  <div>We will be staying on the perhentian islands for 5 days, treat us to a jetski rental for a couple hours.</div>
-                </div></div>
-                <div class="u-1-3 grid-list-left">
-                  <form id='gift-form-hotelroom' class="gift-form pure-form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-                    <fieldset class="pure-input-1">
-                      <!-- Identify your business so that you can collect the payments. -->
-                      <input type="hidden" name="business" value="clsales.rsndev.01@gmail.com">
-                      <!-- Specify a Buy Now button. -->
-                      <input type="hidden" name="cmd" value="_xclick">
-                      <!-- Specify details about the item that buyers will purchase. -->
-                      <input type="hidden" name="item_name" value="Hotel Room">
-                      <input type="hidden" name="amount" value="70.00">
-                      <input type="hidden" name="currency_code" value="USD">
-
-                      <!-- Display the payment button. -->
-                      <button type="submit" name="gift-submit" class="giftSubmit">
-                        <img src="dashinfinity.svg" data-src="6a93cf2f-fc12-4151-ac57-6a3e3a6869e4.jpg" alt="Hotel" class="grid-list-image" />
-                      </button>
-                    </fieldset>
-                  </form>
-                </div>
-                <div class="u-2-3 grid-list-right"><div class="grid-list-text">
-                  <div class="text-box-head">Hotel Stay - $70.00</div>
-                  <div>We will be staying on the perhentian islands for 5 days, cover the cost of our hotel room for one night.</div>
-                </div></div>
-                <div class="u-1-3 grid-list-left">
-                  <form id='gift-form-snorkellingtour' class="gift-form pure-form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-                    <fieldset class="pure-input-1">
-                      <!-- Identify your business so that you can collect the payments. -->
-                      <input type="hidden" name="business" value="clsales.rsndev.01@gmail.com">
-                      <!-- Specify a Buy Now button. -->
-                      <input type="hidden" name="cmd" value="_xclick">
-                      <!-- Specify details about the item that buyers will purchase. -->
-                      <input type="hidden" name="item_name" value="Snorkeling Tour">
-                      <input type="hidden" name="amount" value="100.00">
-                      <input type="hidden" name="currency_code" value="USD">
-
-                      <!-- Display the payment button. -->
-                      <button type="submit" name="gift-submit" class="giftSubmit">
-                        <img src="dashinfinity.svg" data-src="364c1c6c-14d6-489e-b397-7c79ac9f501a.jpg" alt="Snorkelling Tour" class="grid-list-image" />
-                      </button>
-                    </fieldset>
-                  </form>
-                </div>
-                <div class="u-2-3 grid-list-right"><div class="grid-list-text">
-                  <div class="text-box-head">Snorkelling Tour - $100.00</div>
-                  <div>We will be staying on the perhentian islands for 5 days, treat us to a snorkelling tour.</div>
-                </div></div>
-                <p class="u-1 giftScreenBack2"><label for="giftScreenStateMain" onclick="" class="giftScreen">&lt; Back</label></p>
-              </div></div></div>
-              <input type="radio" name="giftScreenState" id="giftScreenStateOther" class="giftScreenState" />
-              <div class="giftScreen"><div class="animated bounceInDown"><div class="pure-g" style="padding-left: 2em;">
-                <p class="u-1 giftScreenBack"><label for="giftScreenStateMain" onclick="" class="giftScreen">&lt; Back</label></p>
-                <p class="u-1">We'd be very thankful for any gifts, even if it's not something we already thought of. You can write a note to us and leave us a gift of your choosing below.</p>
-                <div class="u-1"><form id='gift-form-custom' class="gift-form pure-form" 
-                    action="https://www.paypal.com/cgi-bin/webscr" method="post">
-                  <fieldset class="pure-input-1">
-                    <!-- Identify your business so that you can collect the payments. -->
-                    <input type="hidden" name="business" value="clsales.rsndev.01@gmail.com">
-                    <!-- Specify a Buy Now button. -->
-                    <input type="hidden" name="cmd" value="_xclick">
-
-                    <div class="pure-u-1">
-                      <!-- Specify details about the item that buyers will purchase. -->
-                      <div><input type="text" class="pure-input-rounded" name="item_name" value="Wedding Gift Description" style="width:80%;text-align:left;"></div>
-                      <div style="width:80%;text-align:right;">
-                        <input id="giftAmount" class="pure-input-rounded" type="number" name="amount" min="1" max="10000" pattern="[0-9]{1,5}(.[0-9]{0,1}[0-9]){0,1}" required="required" value="5.00" step="0.01">
-                        <input type="hidden" name="currency_code" value="USD">
-
-                        <!-- Display the payment button. -->
-                        <button type="submit" name="gift-submit" class="pure-button pure-button-primary">Send a Gift</button>
-                        <img alt="" border="0" width="1" height="1" src="dashinfinity.svg" data-src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" >
-                      </div>
-                      <div style="width:80%;text-align:right;">
-                        <img style="margin-right:2em;margin-top:0.5em;" src="dashinfinity.svg" data-src="ccpayments.png"></img>
-                      </div>
-                    </div>
-                  </fieldset>
-                </form></div>
-                <p class="u-1 giftScreenBack"><label for="giftScreenStateMain" onclick="" class="giftScreen">&lt; Back</label></p>
-              </div></div></div>
-            </div>
-            <div class="text-box u-1 u-med-2-3 u-lrg-3-4">
-              <div class="l-box">
-                <p class="text-box-head">Wedding Band</h1>
-                <p>
-                  Daniel Bennet and the Dirty Shirleys will play our reception. 
-                  You can check out their <a href="http://thedirtyshirleys.com/">website here</a>
-                </p>
-              </div>
-            </div>
-            <div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-              <img src="dashinfinity.svg" data-src="wedding_band_2017/4c88fbc6-af07-4505-9a9c-9c3786764b9c.jpg" alt="Daniel Bennet and the Dirty Shirleys" />
-               <aside class="photo-box-caption">
-                 <span>Daniel Bennet and the Dirty Shirleys</span>
-               </aside>
-            </div>
-            <div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-              <img src="dashinfinity.svg" data-src="wedding/save_the_date.jpg" alt="Save The Date" />
-               <aside class="photo-box-caption">
-                 <span>Save The Date</span>
-               </aside>
-            </div>
-            <div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-              <img src="dashinfinity.svg" data-src="wedding/program_front.jpg" alt="Program Front" />
-               <aside class="photo-box-caption">
-                 <span>Program Front</span>
-               </aside>
-            </div>
-            <div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-              <img src="dashinfinity.svg" data-src="wedding/program_back.jpg" alt="Program Back" />
-               <aside class="photo-box-caption">
-                 <span>Program Back</span>
-               </aside>
-            </div>
-            <div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-              <img src="dashinfinity.svg" data-src="wedding/reception_invitation_front.jpg" alt="Reception Invitation Front" />
-               <aside class="photo-box-caption">
-                 <span>Reception Invitation Front</span>
-               </aside>
-            </div>
-            <div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-              <img src="dashinfinity.svg" data-src="wedding/reception_invitation_back.jpg" alt="Reception Invitation Back" />
-               <aside class="photo-box-caption">
-                 <span>Reception Invitation Back</span>
-               </aside>
-            </div>
-            <div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-              <img src="dashinfinity.svg" data-src="wedding/brunch_invitation_front.jpg" alt="Brunch Invitation Front" />
-               <aside class="photo-box-caption">
-                 <span>Brunch Invitation Front</span>
-               </aside>
-            </div>
-            <div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-              <img src="dashinfinity.svg" data-src="wedding/brunch_invitation_back.jpg" alt="Brunch Invitation Back" />
-               <aside class="photo-box-caption">
-                 <span>Brunch Invitation Back</span>
-               </aside>
-            </div>
-            <div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-              <img src="dashinfinity.svg" data-src="wedding/rehearsal_invitation_front.jpg" alt="Rehearsal Invitation Front" />
-               <aside class="photo-box-caption">
-                 <span>Rehearsal Invitation Front</span>
-               </aside>
-            </div>
-            <div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-              <img src="dashinfinity.svg" data-src="wedding/rehearsal_invitation_back.jpg" alt="Rehearsal Invitation Back" />
-               <aside class="photo-box-caption">
-                 <span>Rehearsal Invitation Back</span>
-               </aside>
-            </div>
-            <div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-              <img src="dashinfinity.svg" data-src="wedding/sticker_cup.jpg" alt="Sticker Cup" />
-               <aside class="photo-box-caption">
-                 <span>Sticker Cup</span>
-               </aside>
-            </div>
-            <div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-              <img src="dashinfinity.svg" data-src="wedding/rsvp_rehearsal.jpg" alt="RSVP Rehearsal" />
-               <aside class="photo-box-caption">
-                 <span>RSVP Rehearsal</span>
-               </aside>
-            </div>
-            <div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-              <img src="dashinfinity.svg" data-src="wedding/rsvp_reception.jpg" alt="RSVP Reception" />
-               <aside class="photo-box-caption">
-                 <span>RSVP Reception</span>
-               </aside>
-            </div>
-            <div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-              <img src="dashinfinity.svg" data-src="wedding/rsvp_other.jpg" alt="RSVP Back" />
-               <aside class="photo-box-caption">
-                 <span>RSVP Back</span>
-               </aside>
-            </div>
-            <div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-              <img src="dashinfinity.svg" data-src="wedding/rsvp_brunch.jpg" alt="RSVP Brunch" />
-               <aside class="photo-box-caption">
-                 <span>RSVP Brunch</span>
-               </aside>
-            </div>
-            <div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-              <img src="dashinfinity.svg" data-src="wedding/banner.jpg" alt="Banner" />
-               <aside class="photo-box-caption">
-                 <span>Banner</span>
-               </aside>
-            </div>
-					</div>
+          <link rel="prefetch" class="demand" href="engagement.html" type="text/html" />
 					<div style="clear:both;"></div>
 					<div><label class="articleClose" for="closeArticle">Close</label></div>
           <div style="clear:both;"></div>
@@ -490,7 +126,7 @@
             <div><a href="https://www.dropbox.com/request/PwRypX7IpbWgIgJa0rn7">You can submit all your photos and videos here</a></div>
             <p>We will be posting and sharing all of our wedding media as it comes in and we hope you will come back to see it too!</p> 
             <div style="text-align:center;">
-              <video controls="controls" style="max-width:90%;" data-src="wedding_video_cesar_claire.mp4"></video>
+              <video controls="controls" style="max-width:90%;" src="wedding_video_cesar_claire.mp4"></video>
             </div> 
 
             <p><label class="link" onclick="" for="wedding_photos">You can click here for our wedding photo gallery!</label></p>
@@ -498,7 +134,7 @@
         </div>
 				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
 				  <label class="article" onclick="" for="singapore2017">
-              <img src="dashinfinity.svg" data-src="ead5fbd2-a885-46d2-9fad-e4a78c790a10.jpg" alt="Singapore Hawker Center" />
+              <img src="ead5fbd2-a885-46d2-9fad-e4a78c790a10.jpg" alt="Singapore Hawker Center" />
              <aside class="photo-box-caption">
                <span>Singapore Hawker Center</span>
              </aside>
@@ -506,7 +142,7 @@
 				</div>
 				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
 				  <label class="article" onclick="" for="kualalumpur2017">
-              <img src="dashinfinity.svg" data-src="adf0cf6d-b596-4d76-b904-35783e77416c.jpg" alt="Batu Caves Kuala Lumpur" />
+              <img src="adf0cf6d-b596-4d76-b904-35783e77416c.jpg" alt="Batu Caves Kuala Lumpur" />
              <aside class="photo-box-caption">
                <span>Batu Caves Kuala Lumpur</span>
              </aside>
@@ -514,7 +150,7 @@
 				</div>
 				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
 				  <label class="article" onclick="" for="perhentian2017">
-              <img src="dashinfinity.svg" data-src="0bd55123-b766-47b0-ab72-45af65229c01.jpg" alt="Perhentian Islands" />
+              <img src="0bd55123-b766-47b0-ab72-45af65229c01.jpg" alt="Perhentian Islands" />
              <aside class="photo-box-caption">
                <span>Perhentian Islands</span>
              </aside>
@@ -525,543 +161,238 @@
 				<input type="radio" name="article" id="perhentian2017" class="articleState3" />
 				<div class="text-box u-1 full-row article blazycontainer" id="Singapore2017_article">
 					<label class="articleClose" for="closeArticle">Close</label>
-					<div class="l-box">
-            <h1 class="text-box-head">Singapore</h1>
-            <p class="text-box-subhead">Marina Bay Sands</p>
-            <p>We stayed in the marina bay sands hotel for 2 nights while acclimating to the 12 hour timezone change. The rooftop pool at the marina bay sands was really cool.</p>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/d6gd6j8uvofmtkn/20170428_155808_Burst01.jpg?dl=0" />
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/jiaoj0iduyg0h52/2017-04-27%2015.39.17.jpg?dl=0" frameborder="0"></iframe>
-						</div>
-						<div style="max-width:800px;margin-right: 1em;clip-path:inset(10% 5% 10% 5%);">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/gzb3y8lcfbt6jep/20170427_153514_HDR.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/j1lt0e0l12lxfu5/2017-04-28%2006.57.46.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/wrhx6njrpkpswr5/20170428_065733_HDR.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/lxx2byck62g15uf/20170428_104059.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/k9mh7dr3o1gzis0/2017-04-28%2010.41.09.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/w17qkjwsfilkfc7/20170427_015025.jpg?dl=0" style="transform:rotate(180deg);"/>
-						</div>
-            <p>While we were in singapore we visited 4 different hawker centers and spent a good deal of our time wandering around chinatown.</p>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/hsago1wi894iygp/20170427_183241.jpg?dl=0"></iframe>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/gpa0pp4fuw1hd82/20170428_113449.jpg?dl=0"></iframe>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/fasefawegp87rka/20170428_114458.jpg?dl=0"></iframe>
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/u4gd7v1g51modvi/20170428_124434.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/mjjeod9z4nsxys1/20170429_084446_HDR.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/md2qy8xozbugznw/20170427_191355_HDR.jpg?dl=0" style="transform:rotate(180deg);"/>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/jmnzvof52jg46ss/2017-04-27%2019.04.06.jpg?dl=0"></iframe>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/l4chhi5r033to0g/20170428_123535.jpg?dl=0"></iframe>
-						</div>
-            <p>In singapore i did a crossfit drop-in, and ronnie and I both visited an oxygen bar to get our breathe-on.</p>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/ue5sfib7srpvp1z/20170428_133225.jpg?dl=0" style="transform:rotate(180deg);"/>
-						</div>
-            <p>We spent our last night in a different hotel in Little India and we went swing dancing on the wharf near the marina bay sands.</p>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/coaiz9uihh8at39/20170428_184955_HDR.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/oqhneskqlctm9vc/20170428_210831.jpg?dl=0" />
-						</div>
-					</div>
+					<div style="clear:both;"></div>
+          <link rel="prefetch" class="demand" type="text/html" href="singapore2017.html" />
 					<div style="clear:both;"></div>
 					<label class="articleClose" for="closeArticle">Close</label>
 				</div>
 				<div class="text-box u-1 full-row article blazycontainer" id="KualaLumpur2017_article">
 					<label class="articleClose" for="closeArticle">Close</label>
-					<div class="l-box">
-            <h1 class="text-box-head">KualaLumpur</h1>
-            <p class="text-box-subhead">KL Journal Hotel</p>
-            <p>We stayed in a hotel downtown in a lively neighborhood full of modern skyscrapers and corner shops. This hotel was possibly the most luxurious of our whole trip (though our first hotel in bangkok was also very nice).</p>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/5tr871cbiqa4tk9/20170429_192000_HDR.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/gnfqs1m46oy41hv/20170430_103929.jpg?dl=0" />
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/qxteoa53rigvvl9/20170430_155316.jpg?dl=0"></iframe>
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/yfgh2bh29ayxeyb/20170430_160811_Burst01.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/7bcnk2whif7emyb/20170501_133247_HDR.jpg?dl=0" />
-						</div>
-            <p class="text-box-subhead">Batu Caves</p>
-            <p>For our first day in KL we visited the Batu Caves. We had an uber driver who volunteered to wait at the caves for almost 2 hours while we were inside just so he could give us a ride back. There was a giant statue at the base and we had to climbn 272 stairs to reach the cave entrance. We didn't do the guided walking tour through the restricted parts of the cave, but the public areas were very beautiful and there were monkeys running loose inside.</p>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/r5jkl00snx81o1f/20170430_120720.jpg?dl=0"></iframe>
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/tq288z19he3jgwp/2017-04-30%2012.07.52.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/0v1xhkqkarmvegc/2017-04-30%2012.09.34.jpg?dl=0" style="transform:rotate(180deg);"/>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/vt8i4ohhp71xebi/20170430_121549_HDR.jpg?dl=0"></iframe>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/p3c6qvu67di5tnr/20170430_130142.jpg?dl=0"></iframe>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/x40vrl8fxaorhue/20170430_125841_HDR.jpg?dl=0"></iframe>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/j5kpzp54qddp3ri/20170430_125000_HDR.jpg?dl=0"></iframe>
-						</div>
-            <p class="text-box-subhead">Night Life</p>
-            <p>We spent one evening walking through the downtown area to a rooftop night club to get a nice view of the petronas twin towers. We also ate a lot of really good food (the Roti was a favorite) and we did a dining in the dark experience.</p>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/11vz4uyud7zz4he/20170429_172649.jpg?dl=0"></iframe>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/y39krzt9doei6h4/20170429_172651.jpg?dl=0"></iframe>
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/adknwn8anp9kejv/20170429_224754_HDR.jpg?dl=0" style="transform:rotate(180deg);"/>
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/4oodr2l28kvah87/20170430_195129_HDR.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/nd0137tbqx62dkb/20170430_184325_HDR.jpg?dl=0" />
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/dk8wlhwn4bc0nzd/20170430_215949.jpg?dl=0"></iframe>
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/ff08ec9pjazfe2e/20170430_225045_Pano.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/vskpyike47si7lo/20170501_154710.jpg?dl=0" style="transform:rotate(180deg);"/>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/vasemkvip6twub4/20170501_160347_HDR.jpg?dl=0"></iframe>
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <video controls="controls" style="max-width:90%;" data-src="https://dl.dropboxusercontent.com/s/4700mqd29225fdg/20170501_193725.mp4?dl=0">
-              </video>
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <video controls="controls" style="max-width:90%;" data-src="https://dl.dropboxusercontent.com/s/ykk0u4ks4iuqu0e/20170501_193629.mp4?dl=0">
-              </video>
-						</div>
-          </div>
+					<div style="clear:both;"></div>
+          <link rel="prefetch" class="demand" type="text/html" href="kualalumpur2017.html" />
 					<div style="clear:both;"></div>
 					<label class="articleClose" for="closeArticle">Close</label>
 				</div>
 				<div class="text-box u-1 full-row article blazycontainer" id="Singapore2017_article">
 					<label class="articleClose" for="closeArticle">Close</label>
-					<div class="l-box">
-            <h1 class="text-box-head">Perhentian Islands</h1>
-            <p class="text-box-subhead">Boat Rides</p>
-            <p>The journey to the perhentian islands required a 2 hour flight from kuala lumpur, then an hour long taxi ride from the airport, and finally another 30-60 minute boat ride from the mainland to the island. There are no cars in the perhentian islands and you're only means of transportation is by foot or by boat. There are plenty of little 4-seater motorized longboats to taxi you from different beaches. We also rented a kayak one day and paddled about 1/4 of the way around one island (and got plenty of sun in the process).</p>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/d212xyl5a5iqdr6/20170502_141945_HDR.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/ui9nd4khsy09zme/20170502_142107.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/qvava56y832l6te/2017-05-02%2014.21.18.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/lpjnct4zybr65l0/20170504_131155_HDR.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/gyhlg39gfzxlfs3/20170504_175035.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/k74wzmfvni9yed1/20170504_175203.jpg?dl=0" />
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/o18o39w4txty2hu/20170504_175539_HDR.jpg?dl=0"></iframe>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/e7t3eat15k53xgp/20170505_141242.jpg?dl=0"></iframe>
-						</div>
-            <p class="text-box-subhead">Hotel</p>
-            <p>We spent a week in the perhentian islands and stayed at the Senja Bay Resort. It was a fairly basic wooden hut with limited availability of electricity and hot water but it also made for a nice treasure island kind of vibe.</p>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/ivvxv03mc49l7is/20170502_144605.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/b0jxo7nwjag9f9a/Message_1493868293974.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/wl5c4ezv23yv7cv/20170504_191408_HDR.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/pe5febaq0yaablr/2017-05-06%2007.50.53-6.jpg?dl=0" />
-						</div>
-            <p class="text-box-subhead">Trail Hiking</p>
-            <p>There are three main camps on the island where we stayed. The camp we stayed at was the west side of the island, and referred to as the quiet side by the locals. About a mile hike through the jungle to the eastern shore was the party side of the island. There was also the fishing village, which was about 3-5 miles southeast of both the other two camps.</p>
-            <p>We hiked across the island to the party side almost once a day. On one particular day we also hiked from our hotel through the jungle to the fishing village. The hiking path to the fishing village has fallen into disrepair and was a little overgrown in places but was still passable with a little teancity.</p>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/wzjdaeuk3hw1o3i/20170505_113107.jpg?dl=0"></iframe>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/j83g4qtbabm2cf1/20170505_114012.jpg?dl=0"></iframe>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/71f8if9ie2ruqrs/20170505_114532.jpg?dl=0"></iframe>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/yu8r6dnnchb0fe3/20170505_114946.jpg?dl=0"></iframe>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/324cc9euui1qsqg/20170505_121031.jpg?dl=0"></iframe>
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/rbi5gbtk59ha12w/2017-05-05%2012.10.49.jpg?dl=0" />
-						</div>
-            <p>Making it through the forest we were rewarded to loudspeakers blaring muslim prayer for afternoon worship and some delicious food. We took a water taxi back to the party side for cocktails after having lunch in the fishing village.</p>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/t27fkqc8ntsckgs/20170505_123309_Pano.jpg?dl=0" />
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/td6iu8ypegyrycp/20170505_131955.jpg?dl=0"></iframe>
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/90kvwgmbxegctq4/20170505_132439.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <video controls="controls" style="max-width:90%;" data-src="https://dl.dropboxusercontent.com/s/i6f96c6dksnl9k1/20170505_123034.mp4?dl=0">
-              </video>
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <video controls="controls" style="max-width:90%;" data-src="https://dl.dropboxusercontent.com/s/az4i6bwg3j3fqja/20170505_123938.mp4?dl=0">
-              </video>
-						</div>
-            <p class="text-box-subhead">Beach Time</p>
-            <p>We spent a lot of time eating / drinking / sleeping / playing / relaxing on the beach as well</p>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/6ca67gxg99xox3i/20170504_113342.jpg?dl=0" style="transform:rotate(180deg);"/>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/odlroinmorje21f/Message_1493868410850.jpg?dl=0"></iframe>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/szerk5ktxj3uv6l/20170504_120656_HDR.jpg?dl=0"></iframe>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/38oqulw39lm9gx5/20170504_120700_HDR.jpg?dl=0"></iframe>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/t4zfxriqnoy0zyk/20170504_120752_Burst01.jpg?dl=0"></iframe>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/g2esljp9doshm5w/20170504_120924_HDR.jpg?dl=0"></iframe>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/qxhn5sl94sptulq/20170504_120940_HDR.jpg?dl=0"></iframe>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/mmen2fgbjndxru3/20170504_191530_HDR.jpg?dl=0"></iframe>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/zw3lale2gi2x0lh/20170504_191634.jpg?dl=0"></iframe>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/9w62o9ju1q4bc1g/20170504_191651_HDR.jpg?dl=0"></iframe>
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/s316vph8qk8z61g/20170504_191332_HDR.jpg?dl=0" />
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/vfmw2ugaux2obrk/20170505_144038_Burst03.jpg?dl=0"></iframe>
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/a5mpn3xey3uw0up/20170505_181944.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/5ajzoxd4zq8nd3c/20170505_182400.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/5uhnzfaqkzkgmxs/20170505_183038.jpg?dl=0" />
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/57exorc1jbrnxl4/2017-05-05%2021.59.24.jpg?dl=0" style="transform:rotate(180deg);"/>
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/89gc9tahf1xejjc/20170504_131247.jpg?dl=0" />
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/snyzrerj2247w2f/20170504_132020.jpg?dl=0"></iframe>
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/lzm8xyv7p5z1a62/20170504_132027.jpg?dl=0"/>
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/2s2ppmcxv5npo0m/20170504_133225_HDR.jpg?dl=0"></iframe>
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/26e8aggw1i5fhi2/20170502_191644_HDR.jpg?dl=0" />
-						</div>
-            <p class="text-box-subhead">Beautiful Views</p>
-            <p>The perhentian islands aquamarine water / rocky hillsides and white sand beaches made for some beautiful views too.</p>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/yuxevlbjn88xr20/20170504_131425_Pano.jpg?dl=0" />
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/3542hlsap8iwfxi/20170504_150810.jpg?dl=0"></iframe>
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <img class="pure-img" src="dashinfinity.svg" data-src="https://dl.dropboxusercontent.com/s/ony757ay427nv31/2017-05-04%2017.34.18.jpg?dl=0" />
-						</div>
-						<div class="exifImage photoCollage">
-                <iframe src="dashinfinity.html" data-src="https://dl.dropboxusercontent.com/s/qqgp5uwjo3mmzlw/20170504_173551_HDR.jpg?dl=0"></iframe>
-						</div>
-						<div style="max-width:800px;margin-right: 1em;">
-              <video controls="controls" style="max-width:90%;" data-src="https://dl.dropboxusercontent.com/s/lzckgv1v8i03llu/20170505_141246.mp4?dl=0">
-              </video>
-						</div>
-
-          </div>
+					<div style="clear:both;"></div>
+          <link rel="prefetch" class="demand" type="text/html" href="perhentian2017.html" />
 					<div style="clear:both;"></div>
 					<label class="articleClose" for="closeArticle">Close</label>
 				</div>
 				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-					<img src="dashinfinity.svg" data-src="9a54a031-ad91-45c1-a615-f7386f16385c.jpg" alt="Having some fun in a phone box" />
+					<img src="9a54a031-ad91-45c1-a615-f7386f16385c.jpg" alt="Having some fun in a phone box" />
 					 <aside class="photo-box-caption">
 						 <span>Having some fun in a phone box</span>
 					 </aside>
 				</div>
 				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-					<img src="dashinfinity.svg" data-src="142b9975-93ee-4a2e-b5e6-a487544c933a.jpg" alt="Yard Art" />
+					<img src="142b9975-93ee-4a2e-b5e6-a487544c933a.jpg" alt="Yard Art" />
 					 <aside class="photo-box-caption">
 						 <span>Yard Art</span>
 					 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img class="pure-img" src="dashinfinity.svg" data-src="581791b6-1034-4046-b8b8-4cfe99f91d56.jpg" alt="New Years 2016" />
+						<img class="pure-img" src="581791b6-1034-4046-b8b8-4cfe99f91d56.jpg" alt="New Years 2016" />
 						 <aside class="photo-box-caption">
 							 <span>New Years 2016</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="925c641b-cbe2-45b7-96b5-2522c0e76744.jpg" alt="Colorado Botanical Garden" />
+						<img src="925c641b-cbe2-45b7-96b5-2522c0e76744.jpg" alt="Colorado Botanical Garden" />
 						 <aside class="photo-box-caption">
 							 <span>Colorado Botanical Garden</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="80147071-3434-4d32-8884-7a298993c451.jpg" alt="Flowers for Veronica" />
+						<img src="80147071-3434-4d32-8884-7a298993c451.jpg" alt="Flowers for Veronica" />
 						 <aside class="photo-box-caption">
 							 <span>Flowers</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="46aa9363-a393-4d8d-8036-313752dac243.jpg" alt="4th of July" />
+						<img src="46aa9363-a393-4d8d-8036-313752dac243.jpg" alt="4th of July" />
 						 <aside class="photo-box-caption">
 							 <span>4th of July</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-						<img src="dashinfinity.svg" data-src="f33d89ca-8816-4787-9667-183c0dd14589.jpg" alt="Florence &amp; The Machine Concert" />
+						<img src="f33d89ca-8816-4787-9667-183c0dd14589.jpg" alt="Florence &amp; The Machine Concert" />
 						 <aside class="photo-box-caption">
 							 <span>Florence &amp; The Machine Concert</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="4745ed2a-6ac8-4ea2-ae48-c22b251ee738.jpg" alt="Estes Park" />
+						<img src="4745ed2a-6ac8-4ea2-ae48-c22b251ee738.jpg" alt="Estes Park" />
 						 <aside class="photo-box-caption">
 							 <span>Estes Park</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="fd954a77-c426-4801-903b-b08b8c3380bc.jpg" alt="Home Sweet Home" />
+						<img src="fd954a77-c426-4801-903b-b08b8c3380bc.jpg" alt="Home Sweet Home" />
 						 <aside class="photo-box-caption">
 							 <span>Home Sweet Home</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="4d65e0bb-9dfd-4eff-b747-59beea76a621.jpg" alt="Cabana On The River" />
+						<img src="4d65e0bb-9dfd-4eff-b747-59beea76a621.jpg" alt="Cabana On The River" />
 						 <aside class="photo-box-caption">
 							 <span>Cabana On The River</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="02b6fb43-9a6e-48af-8a94-f2cb5f3bbf12.jpg" alt="Delicious Cake" />
+						<img src="02b6fb43-9a6e-48af-8a94-f2cb5f3bbf12.jpg" alt="Delicious Cake" />
 						 <aside class="photo-box-caption">
 							 <span>Delicious Cake</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-						<img src="dashinfinity.svg" data-src="628eb2f0-19be-4b3c-a45c-19eac989eac8.jpg" alt="Red River Gorge" />
+						<img src="628eb2f0-19be-4b3c-a45c-19eac989eac8.jpg" alt="Red River Gorge" />
 						 <aside class="photo-box-caption">
 							 <span>Red River Gorge</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="52d2804c-677b-4d0c-95e9-a0de8b7d26f2.jpg" alt="Concert" />
+						<img src="52d2804c-677b-4d0c-95e9-a0de8b7d26f2.jpg" alt="Concert" />
 						 <aside class="photo-box-caption">
 							 <span>Concert</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="89245b43-cac4-4ebc-b9c5-a8cd14db6a9c.jpg" alt="Beautiful Day In Mexico" />
+						<img src="89245b43-cac4-4ebc-b9c5-a8cd14db6a9c.jpg" alt="Beautiful Day In Mexico" />
 						 <aside class="photo-box-caption">
 							 <span>Beautiful Day In Mexico</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="6602f7b3-8372-4013-a804-ff28865b1cbf.jpg" alt="Trust Exercise" />
+						<img src="6602f7b3-8372-4013-a804-ff28865b1cbf.jpg" alt="Trust Exercise" />
 						 <aside class="photo-box-caption">
 							 <span>Trust Exercise</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="79e7ccf9-7061-4277-948a-9d99ba22235a.jpg" alt="Day Of The Dead Face Painting" />
+						<img src="79e7ccf9-7061-4277-948a-9d99ba22235a.jpg" alt="Day Of The Dead Face Painting" />
 						 <aside class="photo-box-caption">
 							 <span>Day of the Dead Face Painting</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="5bc5f7a5-e9bb-41d2-af07-5ada7eb13534.jpg" alt="Xochicalco Ruins - Observatory Entrance" />
+						<img src="5bc5f7a5-e9bb-41d2-af07-5ada7eb13534.jpg" alt="Xochicalco Ruins - Observatory Entrance" />
 						 <aside class="photo-box-caption">
 							 <span>Xochicalco Ruins - Observatory Entrance</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="390700e7-32f9-4308-aee5-de383ed0ddd8.jpg" alt="Bunbury Summer 2016" />
+						<img src="390700e7-32f9-4308-aee5-de383ed0ddd8.jpg" alt="Bunbury Summer 2016" />
 						 <aside class="photo-box-caption">
 							 <span>Bunbury Summer 2016</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-						<img src="dashinfinity.svg" data-src="796d4e7a-b9c9-471b-aa55-ffdd8e03179d.jpg" alt="Xochicalco Ruins - Overlook" />
+						<img src="796d4e7a-b9c9-471b-aa55-ffdd8e03179d.jpg" alt="Xochicalco Ruins - Overlook" />
 						 <aside class="photo-box-caption">
 							 <span>Xochicalco Ruins - Overlook</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="981d6d36-d3c6-4f66-b730-46a7ecaad1f9.jpg" alt="Xochicalco Ruins - Copal Tree" />
+						<img src="981d6d36-d3c6-4f66-b730-46a7ecaad1f9.jpg" alt="Xochicalco Ruins - Copal Tree" />
 						 <aside class="photo-box-caption">
 							 <span>Xochicalco Ruins - Copal Tree</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="948ee9fa-1476-467a-a53e-363e541d32a9.jpg" alt="On The Banks" />
+						<img src="948ee9fa-1476-467a-a53e-363e541d32a9.jpg" alt="On The Banks" />
 						 <aside class="photo-box-caption">
 							 <span>On The Banks</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="c3581732-195c-4554-a47e-523ab0c25e64.jpg" alt="Thanksgiving 2016" />
+						<img src="c3581732-195c-4554-a47e-523ab0c25e64.jpg" alt="Thanksgiving 2016" />
 						 <aside class="photo-box-caption">
 							 <span>Thanksgiving 2016</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="d792d7dc-b8bc-44af-afdd-aed5ce73b648.jpg" alt="Festival Of Lights 2015" />
+						<img src="d792d7dc-b8bc-44af-afdd-aed5ce73b648.jpg" alt="Festival Of Lights 2015" />
 						 <aside class="photo-box-caption">
 							 <span>Festival Of Lights 2015</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="c8a9c90e-7860-4f92-9a1c-0426b8a6955b.gif" alt="Cheers From Tulum 2015" />
+						<img src="c8a9c90e-7860-4f92-9a1c-0426b8a6955b.gif" alt="Cheers From Tulum 2015" />
 						 <aside class="photo-box-caption">
 							 <span>Cheers From Tulum 2015</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="6eacb3b7-3483-4a3a-97ee-2e902db612b9.jpg" alt="Our Baby Ruby" />
+						<img src="6eacb3b7-3483-4a3a-97ee-2e902db612b9.jpg" alt="Our Baby Ruby" />
 						 <aside class="photo-box-caption">
 							 <span>Our Baby Ruby</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-					<img src="dashinfinity.svg" data-src="a1aa5bd1-d52c-448d-80b3-dec81c405962.jpg" alt="Listening To Mariachis In Mexico City" />
+					<img src="a1aa5bd1-d52c-448d-80b3-dec81c405962.jpg" alt="Listening To Mariachis In Mexico City" />
 					 <aside class="photo-box-caption">
 						 <span>Listening To Mariachis in Mexico City</span>
 					 </aside>
 				</div>
 				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4" style='background-color:#000;text-align:right;'>
-					<img src="dashinfinity.svg" data-src="e863d44b-5588-4d03-97a4-4df59b3bf8e1.gif" alt="Dancing in Cozumel" />
+					<img src="e863d44b-5588-4d03-97a4-4df59b3bf8e1.gif" alt="Dancing in Cozumel" />
 					 <aside class="photo-box-caption">
 						 <span>Dancing in Cozumel</span>
 					 </aside>
 				</div>
 				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-						<img src="dashinfinity.svg" data-src="c0918cd6-e3d5-4f3c-82e8-429970d06198.jpg" alt="Steamboat 2016" />
+						<img src="c0918cd6-e3d5-4f3c-82e8-429970d06198.jpg" alt="Steamboat 2016" />
 						 <aside class="photo-box-caption">
 							 <span>Steamboat 2016</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-					<img src="dashinfinity.svg" data-src="b8a5b254-8ac2-44f0-927e-017c8d731eab.jpg" alt="Estes Park 2016" />
+					<img src="b8a5b254-8ac2-44f0-927e-017c8d731eab.jpg" alt="Estes Park 2016" />
 					 <aside class="photo-box-caption">
 						 <span>Estes Park 2016</span>
 					 </aside>
 				</div>
 				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-						<img src="dashinfinity.svg" data-src="a345e7cf-543f-47a9-a57d-9def86e78166.jpg" alt="New Orleans 2016" />
+						<img src="a345e7cf-543f-47a9-a57d-9def86e78166.jpg" alt="New Orleans 2016" />
 						 <aside class="photo-box-caption">
 							 <span>New Orleans 2016</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
-						<img src="dashinfinity.svg" data-src="1ea45c9c-b862-4812-abc3-d20a804bb599.jpg" alt="Laser Tag Engagement" />
+						<img src="1ea45c9c-b862-4812-abc3-d20a804bb599.jpg" alt="Laser Tag Engagement" />
 						 <aside class="photo-box-caption">
 							 <span>Laser Tag Engagement</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="6ae14604-0db6-40c2-829b-7078e64359f5.jpg" alt="Ruby In The Garden" />
+						<img src="6ae14604-0db6-40c2-829b-7078e64359f5.jpg" alt="Ruby In The Garden" />
 						 <aside class="photo-box-caption">
 							 <span>Ruby In The Garden</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="e1df4778-2898-4cfb-b8c8-b64fabfc93c9.jpg" alt="Ruby On Mainstrasse" />
+						<img src="e1df4778-2898-4cfb-b8c8-b64fabfc93c9.jpg" alt="Ruby On Mainstrasse" />
 						 <aside class="photo-box-caption">
 							 <span>Ruby On Mainstrasse</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="46d256e6-589c-4e4a-974a-6fcb19a2adcc.gif" alt="Climbing Tepotzlan" />
+						<img src="46d256e6-589c-4e4a-974a-6fcb19a2adcc.gif" alt="Climbing Tepotzlan" />
 						 <aside class="photo-box-caption">
 							 <span>Climbing Tepotzlan</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1-2 u-med-1-6 u-lrg-1-6">
-						<img src="dashinfinity.svg" data-src="4eff8cf9-089b-49c6-a667-22f5272b6323.jpg" alt="Take 'em by the horns" />
+						<img src="4eff8cf9-089b-49c6-a667-22f5272b6323.jpg" alt="Take 'em by the horns" />
 						 <aside class="photo-box-caption">
 							 <span>Take 'em by the horns</span>
 						 </aside>
 				</div>
 				<div class="photo-box u-1 u-med-1-3 u-lrg-1-4">
 						<label class="article" onclick="" for="chicago2016">
-							<img src="dashinfinity.svg" data-src="e2b3b48d-c17b-4af3-ac35-59f862c2f4fb.jpg" alt="Lake Michigan 2016"></img>
+							<img src="e2b3b48d-c17b-4af3-ac35-59f862c2f4fb.jpg" alt="Lake Michigan 2016"></img>
 							 <aside class="photo-box-caption">
 								 <span>Lake Michigan 2016</span>
 							 </aside>
@@ -1070,24 +401,13 @@
 				<input type="radio" name="article" id="chicago2016" class="articleState1" />
 				<div class="text-box u-1 full-row article blazycontainer" id="Chicago2016">
 					<label class="articleClose" for="closeArticle">Close</label>
-					<div class="l-box">
-						<h1 class="text-box-head">Chicago, </h1>
-						<p class="text-box-subhead">Dolores 90th Birthday Celebration</p>
-						<p>We all had a great time celebrating dolores' 90th birthday. Party like your 90!</p>
-						<p class="text-box-subhead">Exercise</p>
-						<p>Sean and ruby got in a good run one day while we were there. Ruby and sean ran out to the aquarium from the hotel, and got to take in some of that lake michigan breeze.</p> 
-						<iframe data-src="http://snippets.mapmycdn.com/routes/view/embedded/1112418654?width=600&height=400&&line_color=E60f0bdb&rgbhex=DB0B0E&distance_markers=1&unit_type=imperial&map_mode=ROADMAP&last_updated=2017-01-21T12:33:29-05:00" height="400px" width="100%" frameborder="0"></iframe>
-						<p class="text-box-subhead">Chicago Parks</p>
-						<div style="max-width:800px;float:left;margin-right: 1em;">
-							<img class="pure-img" src="dashinfinity.svg" data-src="b021f6b7-6d4e-4224-a03e-3f7b0016cef5.jpg" />
-						</div>
-						<p>We visited the marina downtown and visited as much of the beautiful lake-side park system as we could. We grabbed some al's beef and had a picnic beside buckingham fountain before we headed home.</p>
-					</div>
+					<div style="clear:both;"></div>
+          <link rel="prefetch" class="demand" href="chicago2016.html" type="text/html" />
 					<div style="clear:both;"></div>
 					<label class="articleClose" for="closeArticle">Close</label>
 				</div>
 				<div class="photo-box u-1">
-						<img src="dashinfinity.svg" data-src="1453403a-3d2e-433a-aaf8-8dbad41a67cb.jpg" alt="Sunset" />
+						<img src="1453403a-3d2e-433a-aaf8-8dbad41a67cb.jpg" alt="Sunset" />
 						 <aside class="photo-box-caption">
 							 <span>Sunset</span>
 						 </aside>
@@ -1098,10 +418,7 @@
 				Created by Sean and Veronica With Love - 2017
 			</div>
 		</div>
-		<script type='text/javascript' src='blazy.js'></script>
-    <script src="webcomponents-hi.js"></script>
 		<script src="hammer.min.js"></script>
-		<script src="mutationobserver.min.js"></script>
     <input type="radio" name="photoViewer" id="photoViewer_none" class="photoViewer" checked="checked" />
     <div class="photoViewer" style="display:none;"></div>
     <link rel="import" href="wedding/gallery_generated.html" id="wedding_gallery_generated" />
@@ -1219,41 +536,12 @@
         }
         window.populatedWeddingPhotos = true;
       }
-      window.listenForRadioChanges = function () { 
-        document.querySelectorAll('input[type="radio"]').forEach(function (label) {
-          if (!label.listenForRadio) {
-            label.addEventListener('change', function() {
-              setTimeout(function() {
-                blazy._util.validateT();
-              }, 1);
-            });
-            label.listenForRadio=true;
-          }
-        });
-      };
-      window.observeMutations = function() {
-        window.listenForRadioChanges();
-        var observer = new MutationObserver(function (mutations) {
-          window.listenForRadioChanges();
-        });
-       observer.observe(document.documentElement, {
-          subtree: true,
-          childList: true
-        });
-      };
     </script>
 		<script type='text/javascript' language='javascript'>
 		  var oldOnLoad = window.onload;
 		  window.onload = function() {
-				var blazy = new Blazy({
-					selector: 'img,iframe,video',
-          container: '.blazyContainer'
-				});
-        window.blazy = blazy;
-				blazy.revalidate();
 				if (oldOnLoad) { oldOnLoad(); }
         window.populateWeddingPhotogallery();
-        window.listenForRadioChanges();
 			};
 		</script>
   </body>

@@ -17,7 +17,7 @@ do
 
   echo working on $p
 
-  ds="data-src"
+  ds="src"
   let "prev=index-1"
   let "next=index+1"
 
@@ -33,14 +33,14 @@ do
     viewers+=`echo "      <label for=\"photoViewer_wedding_$next\"><div class=\"next\"></div></label>"`
   fi
   viewers+=`echo "      <label for=\"photoViewer_wedding_close_$index\"><div class=\"close\"></div></label>"`
-  viewers+=`echo "      <img src=\"dashinfinity.svg\" $ds=\"$full\" />"`
+  viewers+=`echo "      <img $ds=\"$full\" />"`
   viewers+=`echo "    </div>"`
 
     echo $viewers >> $OF
     viewers=""
   
   echo "      <label class=\"photoViewer\" onclick=\"\" for=\"photoViewer_wedding_$index\">" >> $OF
-  echo "        <img src=\"dashinfinity.svg\" $ds=\"$thumb\">" >> $OF
+  echo "        <img $ds=\"$thumb\">" >> $OF
   echo "        </img>" >> $OF
   echo "      </label>" >> $OF
   echo "    </div>" >> $OF
