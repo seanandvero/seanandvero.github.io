@@ -14,6 +14,7 @@
   _css('pure-min.css');
   _css('grids-responsive-min.css');
   _css('demandjs.css');
+  _css('masonflex.css');
 
   // TODO: decide on way to skip this import when es5 supported...?
   _import('polyfill/es5-shim.min.js');
@@ -40,4 +41,6 @@
 
   _import('hammer.min.js');
   _import('demandjs.min.js');
+  _import('exif.js');
+  _import('masonflex.min.js');
 })();

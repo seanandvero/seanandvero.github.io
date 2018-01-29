@@ -1,0 +1,37 @@
+.masonflex {
+  display: -webkit-box;      /* OLD - iOS 6-, Safari 3.1-6 */
+  display: -moz-box;         /* OLD - Firefox 19- (buggy but mostly works) */
+  display: -ms-flexbox;      /* TWEENER - IE 10 */
+  display: -webkit-flex;     /* NEW - Chrome */
+  display: flex;             /* NEW, Spec - Opera 12.1, Firefox 20+ */
+	-webkit-flex-flow: column wrap;
+	-moz-flex-flow: column wrap;
+	-ms-flex-flow: column wrap;
+	flex-flow: column wrap;
+}
+.masonflex-panel {
+  height: auto;
+  position: relative;
+	-webkit-box-ordinal-group: 1;  
+  -moz-box-ordinal-group: 1;     
+	-ms-flex-order: 1;     
+	-webkit-order: 1;  
+  order: 1;
+}
+.photoCollage {
+  width: 100%;
+}
+.photoCollage video,
+.photoCollage canvas {
+  width: 100%;
+}
+@media screen and (min-width: 30em) {
+  .photoCollage {
+    width: 50%;
+  }
+}
+@media screen and (min-width: 48em) {
+  .photoCollage {
+    width: 33.33333%;
+  }
+}

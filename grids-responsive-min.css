@@ -691,9 +691,6 @@ div.giftScreenBack {
  * images that are vertical... setting appropriate width / heights may help though? */
 div.exifImage {
   position: relative;
-  width: 100%;
-  height: 1440px;
-  border: 1px solid #FFF;
 }
 div.exifImage iframe {
   position: absolute;
@@ -703,9 +700,7 @@ div.exifImage iframe {
   height:400%;
   transform:scale(0.25);
   transform-origin:0 0;
-  border: 0;
 }
-div.photoCollage {
-  max-width: 800px;
-  margin-right: 1em;
+.flip {
+  transform: rotate(180deg);
 }
