@@ -38,46 +38,56 @@
 				return;
 		}
    	var width = img.width,
-        height = img.height,
-        canvas = document.createElement('canvas'),
-        cvs = canvas.getContext("2d");
+        height = img.height;
 
 		fetch(img.src).
 			then(function (blob) {
 				ctx.getExifOrientation(blob, function (srcOrientation) {
-					// set proper canvas dimensions before transform & export
+          // this function is assuming we want to match our parents width as the
+          // driving force behind sizing our image
+          var layoutWidth = img.parentNode.clientWidth;
+          var layoutHeight = img.height;
+          var widthAsr = 0;
+          var exifWidth = width, exifHeight = height;
+
 					if (4 < srcOrientation && srcOrientation < 9) {
-						canvas.width = height;
-						canvas.height = width;
+            widthAsr = layoutWidth / height;
+            img.width = height;
+            img.height = width;
+
+            var tmp = exifHeight;
+            exifHeight = width;
+            exifWidth = tmp;
 					} else {
-						canvas.width = width;
-						canvas.height = height;
-					}
+            widthAsr = layoutWidth / width;
+            img.height = height;
+            img.width = width;
+          }
+          var adjustedWidth = layoutWidth;
+          var adjustedHeight = exifHeight * widthAsr;
+
+          img.style.transformOrigin = '0 0';
+
+          var whratio = adjustedWidth / adjustedHeight;
+          var hwratio = adjustedHeight / adjustedWidth;
 
 					// transform context before drawing image
 					switch (srcOrientation) {
-						case 2: cvs.transform(-1, 0, 0, 1, width, 0); break;
-						case 3: cvs.transform(-1, 0, 0, -1, width, height ); break;
-						case 4: cvs.transform(1, 0, 0, -1, 0, height ); break;
-						case 5: cvs.transform(0, 1, 1, 0, 0, 0); break;
-						case 6: cvs.transform(0, 1, -1, 0, height , 0); break;
-						case 7: cvs.transform(0, -1, -1, 0, height , width); break;
-						case 8: cvs.transform(0, -1, 1, 0, 0, width); break;
+						case 2: img.style.transform = 'matrix(-1, 0, 0, 1, '+adjustedWidth+', 0)'; break;
+						case 3: img.style.transform = 'matrix(-1, 0, 0, -1, '+adjustedWidth+', '+adjustedHeight+' )'; break;
+						case 4: img.style.transform = 'matrix(1, 0, 0, -1, 0, '+adjustedHeight+' )'; break;
+						case 5: img.style.transform = 'matrix(0, '+hwratio+', '+whratio+', 0, 0, 0)'; break;
+						case 6: img.style.transform = 'matrix(0, '+hwratio+', -'+whratio+', 0, '+adjustedWidth+' , 0)'; break;
+						case 7: img.style.transform = 'matrix(0, -'+hwratio+', -'+whratio+', 0, '+adjustedWidth+' , '+adjustedHeight+')'; break;
+						case 8: img.style.transform = 'matrix(0, -'+hwratio+', '+whratio+', 0, 0, '+adjustedHeight+')'; break;
 						default: break;
 					}
 
-					// draw image
-					cvs.drawImage(img, 0, 0);
+          img.style.height = adjustedHeight;
+          img.style.width = adjustedWidth;
 
 					var replaceSrc = true;
-					if (replaceSrc) {
-            img.setAttribute('data-exif', Date.now());
-						img.crossOrigin = 'anonymous';
-						img.src = canvas.toDataURL('image/jpeg'); 
-					} else {
-						img.parentNode.insertBefore(canvas, img);
-						img.parentNode.removeChild(img);
-					}
+          img.setAttribute('data-exif', Date.now());
 				});
 			});
   }

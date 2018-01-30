@@ -242,15 +242,18 @@ input:invalid {
 input:valid {
 	border: 1px solid green;
 }
+input.photoViewer,
 .articleState1,
 .articleState2,
 .articleState3,
 .articleState4,
 .articleState5 {
-	position: relative;
+  position: relative;
 	bottom: -25em;
+  margin-bottom: -25em;
 	max-height: 0px;
 	max-width: 0px;
+  opacity: 0;
 }
 div.article {
     max-height: 0px;
@@ -290,11 +293,6 @@ div.photoViewer {
   position: fixed;
   display: none;
   overflow: hidden;
-}
-input.photoViewer {
-	position: relative;
-	max-height: 0px;
-	max-width: 0px;
 }
 .photoViewer:checked + div.photoViewer {
   background: rgba(11,11,11,0.9);
