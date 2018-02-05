@@ -436,7 +436,7 @@ label.photoViewer:hover:after {
 		-o-transition: max-height 1.5s ease, opacity 1.5s ease;
 		-moz-transition: max-height 1.5s ease, opacity 1.5s ease;
     }
-    .photo-box:hover aside {
+    .photo-box aside {
 		opacity: 1;
 		height: auto;
 		max-height: 200px;
