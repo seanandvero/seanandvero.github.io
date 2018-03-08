@@ -11,6 +11,7 @@
     _csses[src] = src;
     document.write('<link rel="stylesheet" href="' + src + '"/>'); }
 
+
   _css('pure-min.css');
   _css('grids-responsive-min.css');
   _css('demandjs.css');
@@ -18,6 +19,10 @@
 
   // TODO: decide on way to skip this import when es5 supported...?
   _import('polyfill/es5-shim.min.js');
+
+  if (typeof Object.assign != 'function') {
+    _import('polyfill/object_assign.js');
+  }
 
   if (!window.WeakMap) {
     _import('polyfill/weakmap-polyfill.min.js');
