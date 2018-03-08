@@ -26,7 +26,9 @@
   if (typeof Object.assign != 'function') {
     _import('polyfill/object_assign.js');
   }
-
+	if (!Element.prototype.matches) {
+    _import('polyfill/element_matches.js');
+	}
   if (!window.WeakMap) {
     _import('polyfill/weakmap-polyfill.min.js');
   }
