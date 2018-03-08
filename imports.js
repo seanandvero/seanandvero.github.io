@@ -37,6 +37,7 @@
 			!('intersectionRatio' in window.IntersectionObserverEntry.prototype) || 
 			!('isIntersecting' in window.IntersectionObserverEntry.prototype)) {
 			_import('polyfill/intersection-observer.js');
+      IntersectionObserver.prototype.POLL_INTERVAL = 100;
 	}
 
 	if (!window.fetch) { _import('polyfill/fetch.js'); }
