@@ -106,6 +106,9 @@
     .u-med-6-6 {
         width: 100%;
     }
+  .photo-box, .text-box {
+      height: 250px;
+  }
 }
 
 @media screen and (min-width: 48em) {
@@ -399,12 +402,7 @@ label.photoViewer:hover:after {
 .photo-box, .text-box {
     overflow: hidden;
     position: relative;
-    height: 250px;
     text-align: center;
-}
-
-.photo-box-thin {
-    height: 120px;
 }
 
 
@@ -506,16 +504,6 @@ label.photoViewer:hover:after {
 }
 .header {
 	text-align: left;
-}
-
-@media (min-width: 30em) {
-    .photo-box, .text-box {
-        text-align: left;
-    }
-
-    .photo-box-thin {
-        height: 250px;
-    }
 }
 
 .grid-list-left {
