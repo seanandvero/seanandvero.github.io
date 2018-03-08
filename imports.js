@@ -5,6 +5,9 @@
     _imported[src] = src;
     document.write('<script src="' + src + '"></script>');
   }
+  var _exec = function(src) {
+    document.write('<script>' + src + '</script>');
+  }
   var _csses = {};
   var _css = function(src) {
     if (src in _csses) { return; }
@@ -37,7 +40,7 @@
 			!('intersectionRatio' in window.IntersectionObserverEntry.prototype) || 
 			!('isIntersecting' in window.IntersectionObserverEntry.prototype)) {
 			_import('polyfill/intersection-observer.js');
-      window.IntersectionObserver.prototype.POLL_INTERVAL = 100;
+      _exec('window.IntersectionObserver.prototype.POLL_INTERVAL = 100;');
 	}
 
 	if (!window.fetch) { _import('polyfill/fetch.js'); }
