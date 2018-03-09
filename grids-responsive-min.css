@@ -546,6 +546,9 @@ label.photoViewer:hover:after {
 	max-height: 0px;
 	max-width: 0px;
 }
+link {
+  display: none;
+}
 .giftScreenState:checked + div.giftScreen {
 	display: block;
 }

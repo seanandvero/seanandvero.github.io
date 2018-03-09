@@ -23,6 +23,10 @@
   // TODO: decide on way to skip this import when es5 supported...?
   _import('polyfill/es5-shim.min.js');
 
+	if (!Array.prototype.includes) {
+		_import('polyfill/array_includes.js');
+	}
+
   if (typeof Object.assign != 'function') {
     _import('polyfill/object_assign.js');
   }
