@@ -23,6 +23,9 @@
   // TODO: decide on way to skip this import when es5 supported...?
   _import('polyfill/es5-shim.min.js');
 
+  if (!String.prototype.includes) {
+    _import('polyfill/string_includes.js');
+  }
 	if (!Array.prototype.includes) {
 		_import('polyfill/array_includes.js');
 	}
