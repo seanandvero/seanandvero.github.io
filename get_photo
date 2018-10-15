@@ -1,0 +1,3 @@
+#!/bin/bash
+
+INAME=$1 && FNAME=$(uuidgen) && echo $FNAME && wget https://dl.dropboxusercontent.com/s/$INAME -O $FNAME.jpg && convert $FNAME.jpg -resize 1024x1024 $FNAME.jpg && exiv2 -M"set Exif.Image.DocumentName https://dl.dropboxusercontent.com/s/$INAME" $FNAME.jpg
