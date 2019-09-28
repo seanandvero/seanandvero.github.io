@@ -252,11 +252,17 @@ input.photoViewer,
 .articleState4,
 .articleState5 {
   position: relative;
-	bottom: -25em;
-  margin-bottom: -25em;
 	max-height: 0px;
 	max-width: 0px;
   opacity: 0;
+}
+.articleState1,
+.articleState2,
+.articleState3,
+.articleState4,
+.articleState5 {
+	bottom: -25em;
+  margin-bottom: -25em;
 }
 div.article {
     max-height: 0px;
@@ -312,6 +318,18 @@ div.photoViewer {
   z-index: 10000000 !important;
   padding: 2% 2%;
 }
+.photoViewer + div.photoViewer img {
+    display: none;
+    max-width:  0%;
+    max-height: 0%;
+    min-height: 0%;
+    height: 0px;
+    min-width: 0%;
+    width: 0px;
+    min-width: 0%;
+    width: 0px;
+ }
+
 .photoViewer:checked + div.photoViewer img {
   max-height: 100%;
   max-width: 100%;
