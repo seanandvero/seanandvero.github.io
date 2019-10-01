@@ -318,6 +318,12 @@ div.photoViewer {
   z-index: 10000000 !important;
   padding: 2% 2%;
 }
+.masonflex .photoviewer img {
+  width: 100%;
+}
+.photoViewerDialog {
+  height:0;
+}
 .photoViewer + div.photoViewer img {
     display: none;
     max-width:  0%;

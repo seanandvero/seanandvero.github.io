@@ -66,6 +66,144 @@
           }
         };
         window.DemandJSDemanded = new DemandJS(djsOptions);
+
+        // when label is clicked, scroll to it's target
+        window.labelScroll = function (label) {
+          var forattr = label.htmlFor;
+          if (forattr == null) { return true; }
+          var target = document.getElementById(forattr);
+
+          if (!target || !target.getBoundingClientRect) { return true; }
+
+          setTimeout(function() {
+            var wasDisplayNone = false;
+            if (target.style.display === 'none') {
+              target.style.display = 'block';
+              wasDisplayNone = true;
+            }
+            var rect = target.getBoundingClientRect();
+            if (wasDisplayNone) {
+              target.style.display = 'none';
+            }
+            var pos = rect.top + window.pageYOffset - window.innerHeight / 2;
+            window.scroll(window.scrollX, pos);
+          }, 0);
+          return true;
+        }
+
+        // detect labels being created in the DOM and add the 'scroll target into view on click' event handler
+        var labelObs = new MutationObserver(function (mutations) {
+          for (var i = 0; i < mutations.length; i++) {
+            var mutation = mutations[i];
+            if (mutation.type === 'childList') {
+              for (var j = 0; j < mutation.addedNodes.length; j++) {
+                var node = mutation.addedNodes[j];
+                if (node.tagName === 'LABEL' && !node.hasAttribute('labelObs')) {
+                  node.setAttribute('labelObs', 'labelObs');
+                  node.addEventListener('click', function() { return window.labelScroll(this); });
+                }
+                  
+                if (!node.querySelectorAll) { continue; }
+                var children = node.querySelectorAll('label');
+                for (var k = 0; k < children.length; k++) {
+                  var child = children[k];
+                  if (child.hasAttribute('labelObs')) { continue; }
+
+                  child.setAttribute('labelObs', 'labelObs');
+                  child.addEventListener('click', function() { return window.labelScroll(this); });
+                }
+              }
+            }
+          }
+        });
+        labelObs.observe(document.body, { subtree: true, childList: true });
+
+        // check if node is a label needing close rewrite
+        var checkCloseNode = function(node) {
+          return node.tagName === 'LABEL' && !node.hasAttribute('closeArticleObs') && node.classList.contains('articleClose');
+        }
+        var closeNodeId = 0;
+        // rewrite label pointing to the articleClose radio button (which is at bottom of page), and create a new radio 
+        // button that is positioned appropriately for scrolling into view when article is closed
+        // this new radio button must appear before other radio buttons in the same article grouping to avoid issues
+        // with the adjacent sibling selectors being used to show / hide the articles
+        var fixCloseNode = function(node) {
+          var targetArticle = node.parentElement;
+          var placement = node.parentElement;
+          var prevPlacement = placement;
+          var divNodes = [];
+          while (placement.tagName == 'DIV' || placement.nodeType === 3 || placement.nodeType === 8) { 
+            if (placement.tagName == 'DIV' && placement.classList.contains('article')) {
+              divNodes.unshift(placement);
+            }
+            prevPlacement = placement; 
+            placement = placement.previousSibling; 
+            if (placement === null) { placement = prevPlacement; break; }
+          }
+          var foundLabel = false;
+          while (placement.tagName == 'INPUT' || placement.nodeType === 3 || placement.nodeType === 8) { 
+            if (placement.tagName == 'INPUT' && placement.name == 'article') {
+               for (var i = 0; i < placement.classList.length; i++) {
+                  var className = placement.classList[i];
+                  if (className.startsWith('articleState')) {
+                    var downCount = parseInt(className.substring('articleState'.length));
+                    if (divNodes[downCount-1] == targetArticle) {
+                      var labels = document.querySelectorAll('label[for=' + placement.id + ']');
+                      for (var j = 0; j < labels.length; j++) {
+                        prevPlacement = placement;
+                        placement = labels[i].parentElement;
+                        foundLabel = true;
+                        break;
+                      }
+                    }
+
+                    if (foundLabel) { break; }
+                  }
+               }
+            }
+            if (foundLabel) { break; }
+            prevPlacement = placement; 
+            placement = placement.previousSibling; 
+            if (placement === null) { placement = prevPlacement; break; }
+          }
+          var id = 'closeArticle_' + (closeNodeId++);
+				  var newCloseNode = '<input type="radio" name="article" id="' + id + '" style="display:none;" />';
+          if (placement.insertAdjacentHTML) {
+            placement.insertAdjacentHTML('beforebegin', newCloseNode);
+          } else if (placement.parentElement && placement.parentElement.insertAdjacentHTML) {
+            placement.parentElement.insertAdjacentHTML('afterbegin', newCloseNode);
+          } else {
+            throw 'not sure how to proceed for node';
+          }
+          node.setAttribute('for', id);
+          node.setAttribute('closeArticleObs', 'closeArticleObs');
+        }
+
+        // detect new labels being added to the DOM, and if they qualify as the magical 'close' label, rewrite them
+        // as implemented in fixCloseNode() for proper scrolling
+        var closeArticleRewriter = new MutationObserver(function (mutations) {
+          for (var i = 0; i < mutations.length; i++) {
+            var mutation = mutations[i];
+            if (mutation.type === 'childList') {
+              for (var j = 0; j < mutation.addedNodes.length; j++) {
+                var node = mutation.addedNodes[j];
+                if (checkCloseNode(node)) {
+                  fixCloseNode(node);
+                }
+                  
+                if (!node.querySelectorAll) { continue; }
+                var children = node.querySelectorAll('label');
+                for (var k = 0; k < children.length; k++) {
+                  var child = children[k];
+                  if (checkCloseNode(child)) {
+                    fixCloseNode(child);
+                  }
+                }
+              }
+            }
+          }
+        });
+        closeArticleRewriter.observe(document.body, { subtree: true, childList: true });
       })();
     </script>
 		<div style="max-width:1280px;margin-left:auto;margin-right:auto;">
@@ -100,6 +238,67 @@
 						</div>
           </div>
         </div>
+
+				<div class="photo-box u-1 u-med-1-6">
+					<label class="article" onclick="" for="vero_shade_20181122">
+           <img src="https://img1.seanandvero.com/jXdKotnoj0yWoDzQ9lLa/20181122_122522_HDR_640.jpg" alt="Vero Shade - 20181122" />
+           <aside class="photo-box-caption">
+             <span>Vero Shade - 20181122</span>
+           </aside>
+          </label>
+				</div>
+				<div class="photo-box u-1 u-med-1-3">
+           <img src="https://img1.seanandvero.com/5fQ1CDxYN0CAeBinh4BE/20181123_175641_640.jpg" alt="Sean Vero Gazebo - 20181123" />
+           <aside class="photo-box-caption">
+             <span>Sean Vero Gazebo - 20181123</span>
+           </aside>
+				</div>
+				<div class="photo-box u-1 u-med-1-6">
+           <img src="https://img1.seanandvero.com/O27nFxzqJke0sbOmFaFj/20181124_202540_640.jpg" alt="Sean Vero Christmas Tree - 20181124" />
+           <aside class="photo-box-caption">
+             <span>Sean Vero Christmas Tree - 20181124</span>
+           </aside>
+				</div>
+				<div class="photo-box u-1 u-med-1-6">
+           <img src="https://img1.seanandvero.com/1OCEHkIqw0i7Haoz2ZY6/20181122_153639_640.jpg" alt="Turkey Boil - 20181122" />
+           <aside class="photo-box-caption">
+             <span>Turkey Boil - 20181122</span>
+           </aside>
+				</div>
+				<div class="photo-box u-1 u-med-1-6">
+           <img src="https://img1.seanandvero.com/p36qMraUyk6o0JFxvoWk/20181124_142807_640.jpg" alt="Vero Coffee - 20181124" />
+           <aside class="photo-box-caption">
+             <span>Vero Coffee - 20181124</span>
+           </aside>
+				</div>
+
+				<input type="radio" name="article" id="vero_shade_20181122" class="articleState1" />
+				<div class="text-box u-1 full-row article blazycontainer" id="vero_shade_20181122_article">
+					<label class="articleClose" for="closeArticle">Close</label>
+					<div style="clear:both;"></div>
+          <link rel="prefetch" class="demand" type="text/html" href="vero_shade_20181122.html" />
+					<div style="clear:both;"></div>
+					<label class="articleClose" for="closeArticle">Close</label>
+				</div>
+
+				<div class="photo-box u-1 u-med-1-3">
+           <img src="https://img1.seanandvero.com/fpoIzxBhGUOeUfDXvQhl/20181119_231921_640.jpg" alt="Vero Dogs - 20181119" />
+           <aside class="photo-box-caption">
+             <span>Vero Dogs - 20181119</span>
+           </aside>
+				</div>
+				<div class="photo-box u-1 u-med-1-3">
+           <img src="https://img1.seanandvero.com/iStLkj3ImUOcKs6vavQE/20181106_083123_HDR_640.jpg" alt="Deck Fall - 20181106" />
+           <aside class="photo-box-caption">
+             <span>Deck Fall - 20181106</span>
+           </aside>
+				</div>
+				<div class="photo-box u-1 u-med-1-3">
+           <img src="https://img1.seanandvero.com/zdGdKCDJy0GTKlxlaJHy/20181121_203456_640.jpg" alt="Sean Dad Brewery 20181121" />
+           <aside class="photo-box-caption">
+             <span>Sean Dad Brewery 20181121</span>
+           </aside>
+				</div>
 
 				<div class="photo-box u-1 u-med-1-3">
            <img src="https://img1.seanandvero.com/YeThCR2c7kuS9aHfxAqg/20181105_165932_640.jpg" alt="Valentina Ultrasound - 20181105" />
