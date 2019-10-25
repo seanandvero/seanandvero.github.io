@@ -61,4 +61,7 @@
   _import('demandjs.min.js');
   _import('exif.js');
   _import('masonflex.min.js');
+  _import('cryptML.js');
+  _import('access.js');
+  _import('passcodes.js');
 })();

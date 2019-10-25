@@ -261,8 +261,8 @@ input.photoViewer,
 .articleState3,
 .articleState4,
 .articleState5 {
-	bottom: -25em;
-  margin-bottom: -25em;
+	bottom: -5em;
+  margin-bottom: -5em;
 }
 div.article {
     max-height: 0px;
@@ -716,4 +716,16 @@ div.exifImage iframe {
 }
 .flip {
   transform: rotate(180deg);
+}
+.clear {
+  clear: both;
+}
+.center-r {
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  -moz-transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
+  -o-transform: translateY(-50%);
 }
