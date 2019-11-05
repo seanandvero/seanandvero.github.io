@@ -423,6 +423,10 @@ label.photoViewer:hover:after {
 .u-1.full-row  {
 	height: auto;
 }
+.demand-row {
+/* we are intentionally trying to push consecutive demand-rows outside of the main viewing area so that we don't try and load a bunch of demand rows all at once when we expect them to be pushed out of view after the substitution takes place */ 
+  padding: 50% 0 50% 0;
+}
 .photo-box, .text-box {
     overflow: hidden;
     position: relative;
