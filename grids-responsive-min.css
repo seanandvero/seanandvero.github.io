@@ -256,6 +256,11 @@ input.photoViewer,
 	max-width: 0px;
   opacity: 0;
 }
+/* Using multiple article states controls where the browser scroll
+ * position goes to when clicking the label. You must put all the input
+ * boxes above all of the articles on the same line for the scroll
+ * position to be smooth and seamless
+ */
 .articleState1,
 .articleState2,
 .articleState3,

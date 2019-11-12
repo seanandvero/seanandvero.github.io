@@ -148,15 +148,21 @@ function ImageUtils-Generate-Srcsets($files) {
 
 function ImageUtils-Edit-PreprocessForWebsite($files, [switch]$blur) {
   foreach ($file in $files) {
-    if ($file.FullName) {
-      $file = $file.FullName;
+    if (!$file.FullName) {
+      $file = gci $file;
     }
+    $file = $file.FullName;
+
     $filenameOnly = (split-path $file -leaf);
     $foldername = split-path -parent $file;
     $file = join-path $foldername $filenameOnly;
+    $parent = split-path -parent $foldername;
+    $fileNoExt = [System.IO.Path]::GetFileNameWithoutExtension($filenameOnly);
+    $articleFolder = join-path $parent $fileNoExt;
     
     ImageUtils-Edit-ApplyExif $file;
 
+    $articleRoot = $foldername;
     if ($blur) {
       $fnEnc = (ImageUtils-Generate-FolderName) + (ImageUtils-Generate-FolderName) + '_dec';
       $fnEnc = (join-path $foldername $fnEnc);
@@ -170,30 +176,89 @@ function ImageUtils-Edit-PreprocessForWebsite($files, [switch]$blur) {
       # blurred files have no metadata
       ImageUtils-Edit-StripMeta $file;
 
-      $dfn = split-path -leaf $file;
-      $dfn += '.description.txt';
-      $dfn = join-path $foldername $dfn;
+      $dfn = $file + '.description.txt';
       if (test-path $dfn) {
         mv $dfn $fnEnc;
       }
+      $pfn = $file + '.password.txt';
+      if (test-path $pfn) {
+        mv $pfn $fnEnc;
+      }
+
+      $articleRoot = $fnEnc;
+    }
+
+    if (test-path $articleFolder) {
+      $true | out-file (join-path $articleFolder ($filenameOnly + '.hasArticle.txt')) -NoNewline;
+      $ais = gci -path (join-path $articleFolder '*.jpg') -recurse -force;
+      $ams = gci -path (join-path $articleFolder '*.mp4') -recurse -force;
+
+      $nais = @();
+      foreach ($ai in $ais) {
+        # +1 here is for the trailing '/' which is not present on articlefolder var
+        $newPath = $ai.FullName.Substring($articleFolder.Length + 1);
+        $newPath = join-path $articleRoot $newPath;
+
+        $aparent = split-path -parent $newPath;
+        if (!(test-path $aparent)) {
+          new-item $aparent -itemtype directory;
+        }
+
+        cp $ai.FullName $newPath;
+        $nais += (gci $newPath);
+      }
+      
+      $nams = @();
+      foreach ($am in $ams) {
+        # +1 here is for the trailing '/' which is not present on articlefolder var
+        $newPath = $am.FullName.Substring($articleFolder.Length + 1);
+        $newPath = join-path $articleRoot $newPath;
+
+        $aparent = split-path -parent $newPath;
+        if (!(test-path $aparent)) {
+          new-item $aparent -itemtype directory;
+        }
+
+        cp $am.FullName $newPath;
+        $nams += (gci $newPath);
+      }
+
+      ImageUtils-Edit-ApplyExif $nais;
+      ImageUtils-Generate-Srcsets $nais;
     }
 
     ImageUtils-Generate-Srcsets $file;
   }
 }
 
-function ImageUtils-Describe-File($files, $description) {
+function ImageUtils-Assign-Description($files, [Parameter(Mandatory=$true)][string]$description) {
+  ImageUtils-Describe-File -files $files -description $description;
+}
+
+function ImageUtils-Describe-File($files, [Parameter(Mandatory=$true)][string]$description) {
   $files = ImageUtils-Filter-Srcsets $files;
   foreach ($file in $files) {
     if ($file.FullName) { $file = $file.FullName; }
   
-    $folder = split-path -parent $file;
-    $fn = split-path -leaf $file;
-    $fn = $fn + '.description.txt';
-    $fn = join-path $folder $fn;
+    $dfn = $file + '.description.txt';
 
-    $description | out-file $fn -NoNewline;
+    $description | out-file $dfn -NoNewline;
   }
+}
+
+function ImageUtils-Assign-Password($files, [Parameter(Mandatory=$true)][string]$password) {
+  $files = ImageUtils-Filter-Srcsets $files;
+  $result = @();
+  foreach ($file in $files) {
+    if ($file.FullName) { $file = $file.FullName; }
+ 
+    $pfn = $file + '.password.txt'; 
+
+    $password | out-file $pfn -NoNewline;
+
+    $result += @($file, $pfn);
+  }
+  return $result;
 }
 
 function ImageUtils-Partition-IntoFolders($files) {
@@ -204,10 +269,21 @@ function ImageUtils-Partition-IntoFolders($files) {
     }
     $foldername = ImageUtils-Generate-FolderName;
     $foldername = join-path (split-path $file -parent) $foldername;
+
     mkdir $foldername;
     cp $file $foldername;
 
     $results += (join-path $foldername (split-path -leaf $file));
+
+    $dfn = ($file + '.description.txt');
+    if (test-path $dfn) {
+      cp $dfn $foldername;
+    }
+
+    $pfn = ($file + '.password.txt');
+    if (test-path $pfn) {
+      cp $pfn $foldername;
+    }
   }
   return $results;
 }
@@ -295,15 +371,27 @@ function ImageUtils-Generate-GridHtml($files, $description, $password, [switch]$
       $file = $file.FullName;
     }
    
-    if (test-path ($file + '.description.txt')) {
-      $description = [System.IO.File]::ReadAllText($file + '.description.txt');
+    $decFolder = gci (split-path -parent $file) -attributes Directory | where {$_.Name.EndsWith('_dec')};
+    if (($decFolder|measure).Count -eq 1) {
+      $decFile = join-path $decFolder.FullName $filename;
+      $propFile = $decFile;
+    } else {
+      $propFile = $file;
     }
+
+    if (test-path ($propFile + '.description.txt')) {
+      $description = [System.IO.File]::ReadAllText($propFile + '.description.txt');
+    }
+    if (test-path ($propFile + '.password.txt')) {
+      $password = [System.IO.File]::ReadAllText($propFile + '.password.txt');
+    }
+
     if (!$description) {
       $description = 'todo: description';
     }
-    $parentFolder = split-path -leaf (split-path -parent $file);
+    $parentFolder = ImageUtils-Get-SubdirForRoot $file;
     $filename = split-path -leaf $file;
-    $id = 'gh_' + $parentFolder;
+    $id = 'gh_' + (ImageUtils-Get-SubdirNoDecryption $parentFolder);
 
     $size = ImageUtils-Get-Dimensions $file;
     $class = 'u-med-1-3';
@@ -323,18 +411,8 @@ function ImageUtils-Generate-GridHtml($files, $description, $password, [switch]$
     if ($password) {
       $result += ' alt="hidden" ';
 
-
-      $decFolder = gci (split-path -parent $file) -attributes Directory | where {$_.Name.EndsWith('_dec')}
       if (($decFolder|measure).Count -ne 1) {
         throw ('Unable to resolve decrypted image folder for file ' + $file);
-      }
-
-      $decFile = join-path $decFolder.FullName $filename;
-      if (test-path ($decFile + '.description.txt')) {
-        $description = [System.IO.File]::ReadAllText($decFile + '.description.txt');
-      }
-      if (!$description) {
-        $description = 'todo: description';
       }
 
       $attrName = ImageUtils-Generate-EncryptionAttribute $password;
@@ -360,6 +438,68 @@ function ImageUtils-Generate-GridHtml($files, $description, $password, [switch]$
   return $result;
 }
 
+function ImageUtils-Get-EncryptedFile ($files) {
+  $result = @();
+  foreach ($file in $files) {
+    if ($file.FullName) {
+      $file = $file.FullName;
+    }
+    
+    $filename = split-path -leaf $file;
+    $folder = split-path -parent (split-path -parent $file);
+
+    $result += join-path $folder $filename;
+  }
+  return $result;
+}
+
+function ImageUtils-Get-DecryptedFile ($files) {
+  $result = @();
+  foreach ($file in $files) {
+    if ($file.FullName) {
+      $file = $file.FullName;
+    }
+    $parent = split-path -parent $file;
+    $filename = split-path -leaf $file;
+
+    $decFolder = gci $parent -attributes Directory | where {$_.Name.EndsWith('_dec')}
+    if (($decFolder|measure).Count -ne 1) {
+      throw ('Unable to resolve decrypted image folder for file ' + $file);
+    }
+
+    $result += join-path $decFolder.FullName $filename;
+  }
+  return $result;
+}
+
+function ImageUtils-Get-SubdirForRoot ($path) {
+  if ($path.FullName) {
+    $path = $path.FullName;
+  }
+
+  $result = $null;
+  do {
+    $path = split-path -parent $path;
+    $leaf = split-path -leaf $path;
+    if ($result) {
+      $result = join-path $leaf $result;
+    } else {
+      $result = $leaf;
+    }
+  } while ($path.EndsWith('_dec'));
+
+  return $result;
+}
+function ImageUtils-Get-SubdirNoDecryption ($path) {
+  if ($path.FullName) {
+    $path = $path.FullName;
+  }
+  while ($path.EndsWith('_dec')) {
+    $path = split-path -parent $path;
+  }
+  return $path;
+}
+
 function ImageUtils-Generate-ArticleHtml($files, $password, [string]$rootUrl) {
   $files = ImageUtils-Filter-Srcsets $files;
   $rootUrl = ImageUtils-Get-RootUrl $rootUrl;
@@ -372,9 +512,20 @@ function ImageUtils-Generate-ArticleHtml($files, $password, [string]$rootUrl) {
       $file = $file.FullName;
     }
    
-    $parentFolder = split-path -leaf (split-path -parent $file);
+    $parentFolder = ImageUtils-Get-SubdirForRoot $file;
     $filename = split-path -leaf $file;
-    $id = 'gh_' + $parentFolder;
+    $id = 'gh_' + (ImageUtils-Get-SubdirNoDecryption $parentFolder);
+
+    $decFolder = gci $parentFolder -attributes Directory | where {$_.Name.EndsWith('_dec')}
+    if (($decFolder|measure).Count -eq 1) {
+      $propFile = join-path $decFolder $filename;
+    } else {
+      $propFile = $file;
+    }
+
+    if (test-path ($propFile + '.password.txt')) {
+      $password = [System.IO.File]::ReadAllText($propFile + '.password.txt');
+    }
 
     $result += '<input type="radio" name="article" id="' + $id + '" class="articleState1" />';
     $result += '<div class="text-box u-1 full-row article">';
@@ -384,7 +535,6 @@ function ImageUtils-Generate-ArticleHtml($files, $password, [string]$rootUrl) {
     if ($password) {
       $result += 'href="encrypted_placeholder.html" ';
 
-      $decFolder = gci (split-path -parent $file) -attributes Directory | where {$_.Name.EndsWith('_dec')}
       if (($decFolder|measure).Count -ne 1) {
         throw ('Unable to resolve decrypted image folder for file ' + $file);
       }
@@ -407,6 +557,24 @@ function ImageUtils-Generate-ArticleHtml($files, $password, [string]$rootUrl) {
   return $result;
 }
 
+function ImageUtils-Get-GalleryFiles($path) {
+  if (!(test-path $path -PathType Container)) {
+    $path = split-path -parent $path;
+  }
+
+  return (gci (join-path $path '*.jpg')) + (gci (join-path $path '*.mp4'));
+}
+function ImageUtils-Get-GalleryFilename($path, $name) {
+  if (!$name) {
+    $name = 'gallery.html';
+  }
+  if (!(test-path $path -PathType Container)) {
+    $path = split-path -parent $path;
+  }
+
+  return (join-path $path $name);
+}
+
 function ImageUtils-Generate-GalleryHtml($files, [string]$rootUrl) {
   $thumbSuffix = '_640';
   $files = ImageUtils-Filter-Srcsets $files;
@@ -420,36 +588,46 @@ function ImageUtils-Generate-GalleryHtml($files, [string]$rootUrl) {
   $max = ($files | measure).Count;
   foreach ($file in $files) {
     if ($file.FullName) {
-      $file = $file.Name;
+      $file = $file.FullName;
     }
-    $idx += 1;
+    $parentFolder = ImageUtils-Get-SubdirForRoot $file;
+    $filename = split-path -leaf $file;
+    $thumb = [System.IO.Path]::GetFileNameWithoutExtension($filename);
+    $extension = [System.IO.Path]::GetExtension($filename);
+    $thumb += $thumbSuffix + $extension;
+
     $result += '<div class="masonflex-panel photoCollage">';
-    $result += '<div class="photoViewerDialog">';
-    $result += '<input type="radio" name="' + $id_base + '" id="' + $id_base + '_close_' + $idx + '" class="photoViewer" />';
-    $result += '<input type="radio" name="' + $id_base + '" id="' + $id_base + '_view_' + $idx + '" class="photoViewer" />';
-    $result += '<div class="photoViewer">';
-    if ($idx -gt 1) {
-      $result += '<label for="' + $id_base + '_view_' + ($idx-1) + '">';
-      $result += '<div class="prev"></div>';
+
+    if ($extension -eq '.mp4') {
+      $result += '<video controls="controls" crossorigin="anonymous" src="' + $rootUrl + '/' + $parentFolder + '/' + $filename  + '"></video>';
+    } else {
+      $idx += 1;
+      $result += '<div class="photoViewerDialog">';
+      $result += '<input type="radio" name="' + $id_base + '" id="' + $id_base + '_close_' + $idx + '" class="photoViewer" />';
+      $result += '<input type="radio" name="' + $id_base + '" id="' + $id_base + '_view_' + $idx + '" class="photoViewer" />';
+      $result += '<div class="photoViewer">';
+      if ($idx -gt 1) {
+        $result += '<label for="' + $id_base + '_view_' + ($idx-1) + '">';
+        $result += '<div class="prev"></div>';
+        $result += '</label>';
+      }
+      if ($idx -lt $max) {
+        $result += '<label for="' + $id_base + '_view_' + ($idx+1) + '">';
+        $result += '<div class="next"></div>';
+        $result += '</label>';
+      }
+      $result += '<label for="' + $id_base + '_close_' + ($idx) + '">';
+      $result += '<div class="close"></div>';
+      $result += '</label>';
+
+      $result += '<img class="pure-img" src="' + $rootUrl + '/' + $parentFolder + '/' + $filename  + '" />'
+      $result += '</div></div>';
+
+      $result += '<label class="photoViewer" onclick="" for="' + $id_base + '_view_' + $idx + '">';
+      $result += '<img class="pure-img" src="' + $rootUrl + '/' + $parentFolder + '/' + $thumb + '"></img>';
       $result += '</label>';
     }
-    if ($idx -lt $max) {
-      $result += '<label for="' + $id_base + '_view_' + ($idx+1) + '">';
-      $result += '<div class="next"></div>';
-      $result += '</label>';
-    }
-    $result += '<label for="' + $id_base + '_close_' + ($idx) + '">';
-    $result += '<div class="close"></div>';
-    $result += '</label>';
-
-    $result += '<img class="pure-img" src="' + $rootUrl + '/' + $file  + '" />'
-    $result += '</div></div>';
-
-    $result += '<label class="photoViewer" onclick="" for="' + $id_base + '_view_' + $idx + '">';
-    $thumb = [System.IO.Path]::GetFileNameWithoutExtension($file);
-    $thumb += $thumbSuffix + [System.IO.Path]::GetExtension($file);
-    $result += '<img class="pure-img" src="' + $rootUrl + '/' + $thumb + '"></img>';
-    $result += '</label></div>';
+    $result += '</div>';
   }
 
   $result += '</div>';

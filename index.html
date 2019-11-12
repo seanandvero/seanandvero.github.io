@@ -81,7 +81,10 @@
 
           if (!target || !target.getBoundingClientRect) { return true; }
 
-          setTimeout(function() {
+          var checked = document.querySelector('input[name = ' + target.name + ']:checked');
+
+
+          var scrollToTarget = function() {
             var wasDisplayNone = false;
             if (target.style.display === 'none') {
               target.style.display = 'block';
@@ -93,7 +96,21 @@
             }
             var pos = rect.top + window.pageYOffset - window.innerHeight / 2;
             window.scroll(window.scrollX, pos);
-          }, 100);
+          };
+
+          if (checked) {
+            var waitForCheckChange = function () {
+              if (checked.checked || !target.checked) {
+                setTimeout(waitForCheckChange, 20);
+              } else {
+                setTimeout(scrollToTarget, 20);
+              }
+            };
+            setTimeout(waitForCheckChange, 20);
+          } else {
+            setTimeout(scrollToTarget, 1000);
+          }
+
           return true;
         }
 
