@@ -81,9 +81,6 @@
 
           if (!target || !target.getBoundingClientRect) { return true; }
 
-          var checked = document.querySelector('input[name = ' + target.name + ']:checked');
-
-
           var scrollToTarget = function() {
             var wasDisplayNone = false;
             if (target.style.display === 'none') {
@@ -98,18 +95,12 @@
             window.scroll(window.scrollX, pos);
           };
 
-          if (checked) {
-            var waitForCheckChange = function () {
-              if (checked.checked || !target.checked) {
-                setTimeout(waitForCheckChange, 20);
-              } else {
-                setTimeout(scrollToTarget, 20);
-              }
-            };
-            setTimeout(waitForCheckChange, 20);
-          } else {
-            setTimeout(scrollToTarget, 1000);
-          }
+          /* This is set to 600ms because the css transition for articles was
+           * set to 0.5s in the css, and we need to wait until the transition
+           * completes before performing the scroll so 500 + 100ms gives a small margin of
+           * safety.
+           */
+          setTimeout(scrollToTarget, 600);
 
           return true;
         }
