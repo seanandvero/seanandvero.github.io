@@ -7,6 +7,42 @@ function ImageUtils-Generate-FolderName() {
   return $res;
 }
 
+function ImageUtils-Rename-MessageFile($files) {
+  $result = @();
+  foreach ($file in $files) {
+    $file = ImageUtils-Normalize-File $file;
+
+    $fn = [System.IO.Path]::GetFilenameWithoutExtension($file);
+    $parent = split-path -parent $file;
+    $ext = [System.IO.Path]::GetExtension($file);
+    if (!$fn.StartsWith('Message_')) { 
+      $result += $file;
+      continue; 
+    }
+
+    $nn = $fn.Substring('Message_'.Length);
+    write-host 'nn1' $nn;
+    $nn = [DateTimeOffset]::FromUnixTimeMilliseconds($nn).DateTime;
+    write-host 'nn3' $nn;
+    $nn = $nn.ToString('yyyyMMdd_HHmmss');
+    write-host 'nn4' $nn;
+    $suf = $ext;
+    $cnt = 0;
+    write-host 'suf' $suf;
+    while (test-path ($nn + $suf)) {
+      $cnt++;
+      $suf = '' + $cnt + $ext;
+      write-host 'suf' $suf;
+    }
+
+    $nn = $nn + $suf;
+    write-host 'nnf' $nn;
+    mv $file (join-path $parent $nn);
+    $result += $nn;
+  }
+  return $result;
+}
+
 function ImageUtils-Edit-ApplyExif($files) {
   foreach ($file in $files) {
     if ($file.FullName) {
@@ -146,16 +182,22 @@ function ImageUtils-Generate-Srcsets($files) {
   }
 }
 
-function ImageUtils-Edit-PreprocessForWebsite($files, [switch]$blur) {
+function ImageUtils-Edit-PreprocessForWebsite($files, [switch]$pBlur) {
   foreach ($file in $files) {
     if (!$file.FullName) {
       $file = gci $file;
     }
     $file = $file.FullName;
 
+    $pwFile = $file + '.password.txt';
+    if (test-path $pwFile) {
+      $blur = $true;
+    } else {
+      $blur = $pBlur;
+    }
+
     $filenameOnly = (split-path $file -leaf);
     $foldername = split-path -parent $file;
-    $file = join-path $foldername $filenameOnly;
     $parent = split-path -parent $foldername;
     $fileNoExt = [System.IO.Path]::GetFileNameWithoutExtension($filenameOnly);
     $articleFolder = join-path $parent $fileNoExt;
@@ -189,7 +231,17 @@ function ImageUtils-Edit-PreprocessForWebsite($files, [switch]$blur) {
     }
 
     if (test-path $articleFolder) {
-      $true | out-file (join-path $articleFolder ($filenameOnly + '.hasArticle.txt')) -NoNewline;
+      $true | out-file (join-path $articleRoot ($filenameOnly + '.hasArticle.txt')) -NoNewline;
+
+      $zips = (join-path $articleFolder '*.zip');
+      if (test-path $zips) {
+        foreach ($zip in $zips) {
+          $zip = gci $zip;
+          unzip $zip.FullName -d $articleFolder;
+          rm $zip.FullName;
+        }
+      }
+
       $ais = gci -path (join-path $articleFolder '*.jpg') -recurse -force;
       $ams = gci -path (join-path $articleFolder '*.mp4') -recurse -force;
 
@@ -225,9 +277,37 @@ function ImageUtils-Edit-PreprocessForWebsite($files, [switch]$blur) {
 
       ImageUtils-Edit-ApplyExif $nais;
       ImageUtils-Generate-Srcsets $nais;
+
+      $articleGallery = $nais + $nams;
+      $articleGallery += gci (join-path $articleRoot $filenameOnly);
+
+      $articleGallery = $articleGallery | sort-object;
+      $galleryHtml = ImageUtils-Generate-GalleryHtml $articleGallery;
+      $galleryFilename = (ImageUtils-Get-GalleryFilename $articleRoot);
+      $galleryHtml | Out-File $galleryFilename;
+
+      $articleHtml = ImageUtils-Generate-GalleryArticleHtml $galleryFilename; 
+      $articleFilename = (ImageUtils-Get-GalleryFilename $articleRoot -name 'article.html');
+      $articleHtml | out-file $articleFilename;
     }
 
     ImageUtils-Generate-Srcsets $file;
+  }
+}
+
+<# This function is only really useful prior to the imageutils-edit-preprocessForWebsite command runs #>
+function ImageUtils-Assign-ArticleFolder($files) {
+  foreach ($file in $files) {
+    $file = ImageUtils-Normalize-File $file;
+
+    $filenameOnly = (split-path $file -leaf);
+    $foldername = split-path -parent $file;
+    $fileNoExt = [System.IO.Path]::GetFileNameWithoutExtension($filenameOnly);
+    $articleFolder = join-path $foldername $fileNoExt;
+ 
+    if (!(test-path $articleFolder)) {   
+      mkdir $articleFolder;
+    }
   }
 }
 
@@ -285,6 +365,7 @@ function ImageUtils-Partition-IntoFolders($files) {
       cp $pfn $foldername;
     }
   }
+
   return $results;
 }
 
@@ -357,20 +438,102 @@ function ImageUtils-Generate-GridLinkHtml($files, [string]$rootUrl) {
   return $result;
 }
 
+function ImageUtils-Get-GridMultiplier($files) {
+  $result = @();
+  $epsilon = [decimal]0.95;
+  foreach ($file in $files) {
+    $size = ImageUtils-Get-Dimensions $file;
+    $mult = 2;
+    if ($size.height * $epsilon -gt $size.width) {
+      $mult = 1;
+    }
+    $result += $mult;
+  }
+  return $mult;
+}
+
+function ImageUtils-Normalize-File($file) {
+  return (gci $file).FullName;
+}
+
+function ImageUtils-Generate-IndexHtml($files) {
+  $indexHtml = '<!-- Generated On ' + ([DateTime]::Now).ToString() + ' -->';
+  $gridCount = -1;
+  $articles = @();
+
+  $renderCurrentArticles = {
+    param ($articles);
+
+    if (($articles | measure).count -le 0) { return; }
+
+    $indexHtml = '';
+    $controlHtml = '';
+    $contentHtml = '';
+    $articleId = 1;
+    foreach ($article in $articles) {
+      $intermediate = ImageUtils-Generate-ArticleData $article -articleIdInRow ($articleId++);
+      $controlHtml += $intermediate.controlHtml;
+      $contentHtml += $intermediate.contentHtml;
+    }
+    $indexHtml += $controlHtml;
+    $indexHtml += $contentHtml;
+
+    return $indexHtml;
+  };
+
+  foreach ($file in $files) {
+    $file = ImageUtils-Normalize-File $file;
+
+    $gridMult = ImageUtils-Get-GridMultiplier $file;
+    $oldRow = [Math]::Truncate($gridCount / 6);
+    $gridCount += $gridMult;
+    $newRow = [Math]::Truncate($gridCount / 6);
+    if ($oldRow -lt $newRow) {
+      $indexHtml += (& $renderCurrentArticles $articles);
+      $articles = @();
+    }
+
+    $gridData = ImageUtils-Generate-GridData $file
+    $indexHtml += $gridData.gridHtml;
+
+    if ($gridData.hasArticle) {
+      $articles += $file;
+    }
+  }
+  $indexHtml += (& $renderCurrentArticles $articles);
+  $articles = @();
+
+  $indexHtml += '<!-- End Generated On ' + ([DateTime]::Now).ToString() + ' -->';
+
+  return $indexHtml;
+}
+
+<# This is a legacy function which returns grid html data without performing other precedent or subsequent steps
+   involved in generating the state of the art code #>
 function ImageUtils-Generate-GridHtml($files, $description, $password, [switch]$withArticle, [string]$rootUrl) {
+  $results = ImageUtils-Generate-GridData @args;
+  $result = '';
+  foreach ($data in $results) {
+    $result += $data.gridHtml;
+  }
+  return $result;
+}
+
+function ImageUtils-Generate-GridData($files, $pDescription, $pPassword, [switch]$pWithArticle, [string]$rootUrl) {
   $thumbSuffix = '_640';
   $files = ImageUtils-Filter-Srcsets $files;
 
   $rootUrl = ImageUtils-Get-RootUrl $rootUrl;
 
   $epsilon = [decimal]0.95;
-  $result = '';
+  $result = @();
   
   foreach ($file in $files) {
     if ($file.FullName) {
       $file = $file.FullName;
     }
    
+    $filename = split-path -leaf $file;
     $decFolder = gci (split-path -parent $file) -attributes Directory | where {$_.Name.EndsWith('_dec')};
     if (($decFolder|measure).Count -eq 1) {
       $decFile = join-path $decFolder.FullName $filename;
@@ -381,16 +544,24 @@ function ImageUtils-Generate-GridHtml($files, $description, $password, [switch]$
 
     if (test-path ($propFile + '.description.txt')) {
       $description = [System.IO.File]::ReadAllText($propFile + '.description.txt');
+    } else {
+      $description = $pDescription;
     }
     if (test-path ($propFile + '.password.txt')) {
       $password = [System.IO.File]::ReadAllText($propFile + '.password.txt');
+    } else {
+      $password = $pPassword;
+    }
+    if (test-path ($propFile + '.hasArticle.txt')) {
+      $withArticle = $true;
+    } else {
+      $withArticle = $pWithArticle;
     }
 
     if (!$description) {
       $description = 'todo: description';
     }
     $parentFolder = ImageUtils-Get-SubdirForRoot $file;
-    $filename = split-path -leaf $file;
     $id = 'gh_' + (ImageUtils-Get-SubdirNoDecryption $parentFolder);
 
     $size = ImageUtils-Get-Dimensions $file;
@@ -399,40 +570,47 @@ function ImageUtils-Generate-GridHtml($files, $description, $password, [switch]$
       $class = 'u-med-1-6';
     }
 
-    $result += '<div class="photo-box u-1 ' + $class + '">';
+    $gridHtml = '';
+
+    $gridHtml += '<div class="photo-box u-1 ' + $class + '">';
     if ($withArticle) {
-      $result += '<label class="article" onclick="" for="' + $id + '">';
+      $gridHtml += '<label class="article" onclick="" for="' + $id + '">';
     }
 
     $thumb = [System.IO.Path]::GetFileNameWithoutExtension($filename);
     $thumb += $thumbSuffix + [System.IO.Path]::GetExtension($filename);
-    $result += '<img src="' + $rootUrl + '/' + $parentFolder + '/' + $thumb + '"';
+    $gridHtml += '<img src="' + $rootUrl + '/' + $parentFolder + '/' + $thumb + '"';
 
     if ($password) {
-      $result += ' alt="hidden" ';
+      $gridHtml += ' alt="hidden" ';
 
       if (($decFolder|measure).Count -ne 1) {
         throw ('Unable to resolve decrypted image folder for file ' + $file);
       }
 
       $attrName = ImageUtils-Generate-EncryptionAttribute $password;
-      $result += $attrName + '-alt="';
-      $result += ImageUtils-Encrypt-AttributeValue $password $description;
-      $result += '" ';
+      $gridHtml += $attrName + '-alt="';
+      $gridHtml += ImageUtils-Encrypt-AttributeValue $password $description;
+      $gridHtml += '" ';
 
       $decUrl = $rootUrl + '/' + $parentFolder + '/' + $decFolder.Name + '/' + $thumb;
-      $result += $attrName + '-src="';
-      $result += ImageUtils-Encrypt-AttributeValue $password $decUrl;
-      $result += '"';
+      $gridHtml += $attrName + '-src="';
+      $gridHtml += ImageUtils-Encrypt-AttributeValue $password $decUrl;
+      $gridHtml += '"';
     } else {
-      $result += ' alt="' + $description + '"';
+      $gridHtml += ' alt="' + $description + '"';
     }
 
-    $result += '/>';
+    $gridHtml += '/>';
     if ($withArticle) {
-      $result += '</label>';
+      $gridHtml += '</label>';
     }
-    $result += '</div>';
+    $gridHtml += '</div>';
+
+    $result += @{
+      'gridHtml' = $gridHtml;
+      'hasArticle' = $withArticle;
+    };
   }
 
   return $result;
@@ -500,12 +678,27 @@ function ImageUtils-Get-SubdirNoDecryption ($path) {
   return $path;
 }
 
-function ImageUtils-Generate-ArticleHtml($files, $password, [string]$rootUrl) {
+<#
+  This function is a legacy function for generating 'dumb' article html and should be avoided,
+  manual editing would be required here (reordering controls and changing articleState class numbers),
+  to generate 'state-of-the-art' html content
+#>
+function ImageUtils-Generate-ArticleHtml {
+  $intermediate = ImageUtils-Generate-ArticleData @args;
+
+  $resultHtml = '';
+  foreach ($result in $intermediate) {
+    $resultHtml += $result.controlHtml + $result.contentHtml;
+  }
+  return $resultHtml;
+}
+
+function ImageUtils-Generate-ArticleData($files, $password, [string]$rootUrl, [int]$articleIdInRow=1) {
   $files = ImageUtils-Filter-Srcsets $files;
   $rootUrl = ImageUtils-Get-RootUrl $rootUrl;
 
   $epsilon = [decimal]0.95;
-  $result = '';
+  $result = @();
   
   foreach ($file in $files) {
     if ($file.FullName) {
@@ -527,13 +720,16 @@ function ImageUtils-Generate-ArticleHtml($files, $password, [string]$rootUrl) {
       $password = [System.IO.File]::ReadAllText($propFile + '.password.txt');
     }
 
-    $result += '<input type="radio" name="article" id="' + $id + '" class="articleState1" />';
-    $result += '<div class="text-box u-1 full-row article">';
-    $result += '<label class="articleClose" for="closeArticle">Close</label>';
-    $result += '<div class="clear"></div>';
-    $result += '<link rel="prefetch" class="demand" type="text/html" crossorigin="anonymous" ';
+    $controlHtml = '';
+    $contentHtml = '';
+
+    $controlHtml += '<input type="radio" name="article" id="' + $id + '" class="articleState' + $articleIdInRow + '" />';
+    $contentHtml += '<div class="text-box u-1 full-row article">';
+    $contentHtml += '<label class="articleClose" for="closeArticle">Close</label>';
+    $contentHtml += '<div class="clear"></div>';
+    $contentHtml += '<link rel="prefetch" class="demand" type="text/html" crossorigin="anonymous" ';
     if ($password) {
-      $result += 'href="encrypted_placeholder.html" ';
+      $contentHtml += 'href="encrypted_placeholder.html" ';
 
       if (($decFolder|measure).Count -ne 1) {
         throw ('Unable to resolve decrypted image folder for file ' + $file);
@@ -541,17 +737,22 @@ function ImageUtils-Generate-ArticleHtml($files, $password, [string]$rootUrl) {
       $decUrl = $rootUrl + '/' + $parentFolder + '/' + $decFolder.Name + '/article.html';
       
       $attrName = ImageUtils-Generate-EncryptionAttribute $password;
-      $result += $attrName + '-href="';
-      $result += ImageUtils-Encrypt-AttributeValue $password $decUrl;
-      $result += '"';
+      $contentHtml += $attrName + '-href="';
+      $contentHtml += ImageUtils-Encrypt-AttributeValue $password $decUrl;
+      $contentHtml += '"';
     } else {
-      $result += 'href="' + $rootUrl + '/' + $parentFolder + '/' + 'article.html"';
+      $contentHtml += 'href="' + $rootUrl + '/' + $parentFolder + '/' + 'article.html"';
     }
-    $result += '/>';
+    $contentHtml += '/>';
 
-    $result += '<div class="clear"></div>';
-    $result += '<label class="articleClose" for="closeArticle">Close</label>';
-    $result += '</div>';
+    $contentHtml += '<div class="clear"></div>';
+    $contentHtml += '<label class="articleClose" for="closeArticle">Close</label>';
+    $contentHtml += '</div>';
+
+    $result += @{
+      'controlHtml' = $controlHtml;
+      'contentHtml' = $contentHtml;
+    };
   }
 
   return $result;
@@ -641,6 +842,23 @@ function ImageUtils-Generate-GalleryHtml($files, [string]$rootUrl) {
   return $result;
 }
 
+function ImageUtils-Generate-GalleryArticleHtml($files) {
+  $result = '<html><body>';
+  $rootUrl = ImageUtils-Get-RootUrl $rootUrl;
+  foreach ($file in $files) {
+    $file = ImageUtils-Normalize-File $file;
+
+    $parentFolder = split-path -parent $file;
+    $encryptedRoot = split-path -parent (ImageUtils-Get-SubdirNoDecryption $parentFolder);
+    $urlPath = $file.Substring($encryptedRoot.Length + 1);
+    
+    $url = $rootUrl + '/' + $urlPath;
+    $result += '<link rel="prefetch" class="demand" crossorigin="anonymous" type="text/html" href="' + $url + '" />';
+  }
+  $result += '</body></html>';
+  return $result;
+}
+
 function ImageUtils-Encrypt-AttributeValue ($password, $value) {
   $res = ImageUtils-Encrypt-AES256CBC $password $value;
   $res = ImageUtils-Encode-Attr32 $res;
@@ -727,4 +945,18 @@ function ImageUtils-Generate-PasswordMap
   $res = 'cml.registerPassword("' + $account + '", "' + $password + '");';
   
   return $res;
+}
+
+function ImageUtils-Batch-Pipeline
+{
+  param ($files);
+
+  $parts = ImageUtils-Partition-IntoFolders $files;
+  ImageUtils-Edit-PreprocessForWebsite $parts;
+
+  $parts2 = $parts | sort-object { split-path -leaf $_; } -Descending;
+
+  ImageUtils-Generate-IndexHtml $parts2 | out-file 'index.html';
+
+  return $parts2;
 }
