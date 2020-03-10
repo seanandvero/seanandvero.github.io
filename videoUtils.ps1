@@ -21,6 +21,19 @@ function VideoUtils-Edit-Rotate90
   }
 }
 
+function VideoUtils-Concatenate-Videos {
+  param ($filesIn, $fileOut);
+
+  $guidFilename = [Guid]::NewGuid().ToString('N');
+  $filesIn = gci $filesIn;
+
+  $filesIn | foreach-object { 'file ' + $_.FullName; } | out-file $guidFilename;
+
+  ffmpeg -f concat -safe 0 -i $guidFilename -c copy $fileOut;
+
+  rm $guidFilename;
+}
+
 function VideoUtils-Copy-Subsequence {
   param ($fileOut, $startTime, $endTime, $fileIn);
 

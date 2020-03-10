@@ -182,7 +182,11 @@ function ImageUtils-Generate-Srcsets($files) {
   }
 }
 
-function ImageUtils-Edit-PreprocessForWebsite($files, [switch]$pBlur) {
+function ImageUtils-Edit-PreprocessForWebsite($files, [switch]$pBlur) 
+{
+  # throw error if rooturl not defined
+  ImageUtils-Get-RootUrl;
+
   foreach ($file in $files) {
     if (!$file.FullName) {
       $file = gci $file;
@@ -579,7 +583,7 @@ function ImageUtils-Generate-GridData($files, $pDescription, $pPassword, [switch
 
     $thumb = [System.IO.Path]::GetFileNameWithoutExtension($filename);
     $thumb += $thumbSuffix + [System.IO.Path]::GetExtension($filename);
-    $gridHtml += '<img src="' + $rootUrl + '/' + $parentFolder + '/' + $thumb + '"';
+    $gridHtml += '<img src="' + $rootUrl + '/' + $parentFolder + '/' + ([Uri]::EscapeDataString($thumb)) + '"';
 
     if ($password) {
       $gridHtml += ' alt="hidden" ';
@@ -594,6 +598,7 @@ function ImageUtils-Generate-GridData($files, $pDescription, $pPassword, [switch
       $gridHtml += '" ';
 
       $decUrl = $rootUrl + '/' + $parentFolder + '/' + $decFolder.Name + '/' + $thumb;
+      write-host 'Got decurl of ' $decUrl;
       $gridHtml += $attrName + '-src="';
       $gridHtml += ImageUtils-Encrypt-AttributeValue $password $decUrl;
       $gridHtml += '"';
@@ -800,7 +805,7 @@ function ImageUtils-Generate-GalleryHtml($files, [string]$rootUrl) {
     $result += '<div class="masonflex-panel photoCollage">';
 
     if ($extension -eq '.mp4') {
-      $result += '<video controls="controls" crossorigin="anonymous" src="' + $rootUrl + '/' + $parentFolder + '/' + $filename  + '"></video>';
+      $result += '<video controls="controls" crossorigin="anonymous" src="' + $rootUrl + '/' + $parentFolder + '/' + ([Uri]::EscapeDataString($filename))  + '"></video>';
     } else {
       $idx += 1;
       $result += '<div class="photoViewerDialog">';
@@ -821,11 +826,11 @@ function ImageUtils-Generate-GalleryHtml($files, [string]$rootUrl) {
       $result += '<div class="close"></div>';
       $result += '</label>';
 
-      $result += '<img class="pure-img" src="' + $rootUrl + '/' + $parentFolder + '/' + $filename  + '" />'
+      $result += '<img class="pure-img" src="' + $rootUrl + '/' + $parentFolder + '/' + ([Uri]::EscapeDataString($filename))  + '" />'
       $result += '</div></div>';
 
       $result += '<label class="photoViewer" onclick="" for="' + $id_base + '_view_' + $idx + '">';
-      $result += '<img class="pure-img" src="' + $rootUrl + '/' + $parentFolder + '/' + $thumb + '"></img>';
+      $result += '<img class="pure-img" src="' + $rootUrl + '/' + $parentFolder + '/' + ([Uri]::EscapeDataString($thumb)) + '"></img>';
       $result += '</label>';
     }
     $result += '</div>';
@@ -959,4 +964,21 @@ function ImageUtils-Batch-Pipeline
   ImageUtils-Generate-IndexHtml $parts2 | out-file 'index.html';
 
   return $parts2;
+}
+
+function ImageUtils-Copy-Parallel
+{
+  param ($files, $dest, [int]$throttleLimit=5);
+
+  $jobs = $files | % {
+    start-threadjob -throttlelimit $throttleLimit -ArgumentList $_,$dest {
+      param ($path, $dest);
+      
+      write-host 'Copy path ' $path ' to path ' $dest;
+      copy-item -Path $path -recurse -destination $dest;
+      write-host 'Done Copy path ' $path ' to path ' $dest;
+    }
+  };
+
+  $jobs | receive-job -wait -autoremovejob
 }
