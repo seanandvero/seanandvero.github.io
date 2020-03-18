@@ -64,4 +64,7 @@
   _import('cryptML.js');
   _import('access.js');
   _import('passcodes.js');
+  _import('photogallery_swipe.js');
+  _import('long-press-event.min.js');
+  _import('photoalbum_doubletap.js');
 })();

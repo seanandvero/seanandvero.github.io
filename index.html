@@ -466,7 +466,6 @@
 		</div>
 		<script src="hammer.min.js"></script>
     <div class="photoViewer" style="display:none;"></div>
-    <link rel="import" href="wedding/gallery_generated.html" id="wedding_gallery_generated" />
 		<script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -534,60 +533,5 @@
 		}
 		</script>
 		<script async src="autotrack.js"></script>
-    <script type="text/javascript" language="javascript">
-      window.populateWeddingPhotogallery = function() {
-        if (window.populatedWeddingPhotos) { return; }
-        var wedding_article = document.getElementById('wedding_article');
-        var wedding_gallery = document.getElementById('wedding_gallery_generated');
-
-        var swipeHandler = function(node, prev, next) {
-          var hammer = new Hammer(node, {
-            recognizers: [
-              // RecognizerClass, [options], [recognizeWith, ...], [requireFailure, ...]
-              [Hammer.Swipe,{ direction: Hammer.DIRECTION_HORIZONTAL }],
-            ]
-          });
-          if(prev) {
-            hammer.on('swiperight', function() {
-                prev.click();
-            });
-          }
-          if (next) {
-            hammer.on('swipeleft', function() {
-              next.click();
-            });
-          }
-        };
-
-        var nodes = wedding_gallery.import.querySelector('.root').children;
-        for (i=0;i<nodes.length;i++) {
-          var target = nodes[i].cloneNode(true);
-          wedding_article.appendChild(target);
-
-          var photoViewerNode = target.querySelectorAll('div.photoViewer');
-          for (j = 0; j < photoViewerNode.length; j++) {
-            var pvnode = photoViewerNode[j];
-            var prev = pvnode.querySelector('div .prev');
-            if (prev) { prev = prev.parentNode; }
-            var next = pvnode.querySelector('div .next');
-            if (next) { next = next.parentNode; }
-            var img = pvnode.querySelector('img');
-
-            if (img == null) { continue; }
-
-            swipeHandler(pvnode, prev, next);
-            swipeHandler(img, prev, next);
-          }
-        }
-        window.populatedWeddingPhotos = true;
-      }
-    </script>
-		<script type='text/javascript' language='javascript'>
-		  var oldOnLoad = window.onload;
-		  window.onload = function() {
-				if (oldOnLoad) { oldOnLoad(); }
-        window.populateWeddingPhotogallery();
-			};
-		</script>
   </body>
 </html>

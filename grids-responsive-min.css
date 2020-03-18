@@ -52,7 +52,7 @@
     width: 100%;
 }
 
-@media screen and (min-width: 30em) {
+@media screen and (min-width: 479px) {
     .u-med-1,
     .u-med-1-1,
     .u-med-1-2,
@@ -109,9 +109,15 @@
   .photo-box, .text-box {
       height: 250px;
   }
+  .photo-box > label > img,
+  .photo-box > img {
+      width:100% !important;
+      height:100% !important;
+      object-fit:fill;
+  }
 }
 
-@media screen and (min-width: 48em) {
+@media screen and (min-width: 1279px) {
     .u-lrg-1,
     .u-lrg-1-1,
     .u-lrg-1-2,
@@ -165,6 +171,18 @@
     .u-lrg-6-6 {
         width: 100%;
     }
+  .photo-box, .text-box {
+      height: 250px;
+  }
+  .photo-box > label > img,
+  .photo-box > img {
+      width:100% !important;
+      height:100% !important;
+      object-fit:fill;
+  }
+  .photo-box, .text-box {
+      height: 350px;
+  }
 }
 body {
     color: #FAA;
@@ -437,13 +455,14 @@ label.photoViewer:hover:after {
     position: relative;
     text-align: center;
 }
+.photo-box > label > img,
+.photo-box > img {
+    max-width: 100%;
+    height: auto;
+    min-height: 250px;
+}
 
 
-    .photo-box img {
-      width:100%;
-      height:100%;
-      object-fit:fill;
-    }
 
     .photo-box aside {
         position: absolute;
