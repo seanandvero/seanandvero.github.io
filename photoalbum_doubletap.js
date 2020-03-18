@@ -3,8 +3,17 @@
   var tapHandler = function(node, img) {
     var uuid = 'photoAlbumPressViewer_' + uid++;
     var ele = document.createElement('div');
+    var oldImgSrc = img.src;
 
-    node.addEventListener('long-press', function(e) {
+    var eventHandler = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      if (oldImgSrc != img.src) {
+        ele.remove();
+        ele.parentElement = null; // this is done automatically by ele.remove() but just want to be obvious about it
+      }
       if (ele.parentElement == null) {
         ele.classList.add('photoViewerDialog');
         var imgSrc = img.src;
@@ -23,7 +32,11 @@
       }
       var viewButton = ele.querySelector('#' + uuid + '_view');
       viewButton.click();
-    });
+      
+      return false;
+    };
+    node.addEventListener('long-press', eventHandler);
+    node.addEventListener('contextmenu', eventHandler);
   };
 
   var checkPhotoAlbumNode = function(node) {

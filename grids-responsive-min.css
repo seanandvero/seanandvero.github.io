@@ -346,6 +346,7 @@ div.photoViewer {
 }
 .photoViewerDialog {
   height:0;
+  width:0;
 }
 .photoViewer + div.photoViewer img {
     display: none;
