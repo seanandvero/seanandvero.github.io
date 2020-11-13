@@ -45,6 +45,10 @@
 						document.body.className = document.body.className.replace('loading', '').replace('kf1', '').replace('kf2','');
 					}
 				};
+        var djsAlts = [['https://img1.seanandvero.com', 'https://img2.seanandvero.com']];
+        if (window.location.hostname === 'md.rsndev.com') {
+          djsAlts = [['https://img1.seanandvero.com']];
+        }
         var djsOptions = {
           previewLoading: false,
           previewFailure: false,
@@ -67,10 +71,7 @@
             errorNode.title = url + ' (' + ex.message + ')';
             t.parentNode.replaceChild(errorNode, t);
           },
-          alternatives: [
-            //['https://img1.seanandvero.com']
-            ['https://img1.seanandvero.com', 'https://img2.seanandvero.com']
-          ]
+          alternatives: djsAlts
         };
         window.DemandJSDemanded = new DemandJS(djsOptions);
 
@@ -317,6 +318,7 @@
           </div>
         </div>
 
+<link rel="prefetch" class="demand" crossorigin="anonymous" type="text/html" href="grid_2020.html" data-demand="full-row" />
 <link rel="prefetch" class="demand" crossorigin="anonymous" type="text/html" href="grid_2019.html" data-demand="full-row" />
 <link rel="prefetch" class="demand" crossorigin="anonymous" type="text/html" href="grid_2018.html" data-demand="full-row" />
 <link rel="prefetch" class="demand" crossorigin="anonymous" type="text/html" href="grid_2017.html" data-demand="full-row" />

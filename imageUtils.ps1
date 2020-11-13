@@ -7,39 +7,70 @@ function ImageUtils-Generate-FolderName() {
   return $res;
 }
 
+
+function ImageUtils-Get-MessageFileParts($file) {
+  $res = @{
+    'filename' = $file;
+    'isMessageFile' = $false;
+    'timestamp' = $null;
+    'datetime' = $null;
+  };
+
+  $fn = [System.IO.Path]::GetFilenameWithoutExtension($file);
+  if ($fn.StartsWith('Message_')) {
+    $nn = $fn.Substring('Message_'.Length);
+    $res.timestamp = $nn;
+
+    $df = [decimal]0;
+    if ([decimal]::TryParse($nn, [ref]$df)) {
+      if ($df -ge -62135596800000 -and
+          $df -le 253402300799999) {
+        $res.datetime = [DateTimeOffset]::FromUnixTimeMilliseconds($nn).DateTime;
+        $res.isMessageFile = $true;
+      }
+    }
+  }
+  return $res;
+}
+
+function ImageUtils-Test-IsMessageFile($file) {
+  $parts = ImageUtils-Get-MessageFileParts $file;
+  return $parts.isMessageFile;
+}
+
+function ImageUtils-Get-MessageFileTimestamp($file)
+{
+  $parts = ImageUtils-Get-MessageFileParts $file;
+  return $parts.timestamp;
+}
+
 function ImageUtils-Rename-MessageFile($files) {
   $result = @();
   foreach ($file in $files) {
     $file = ImageUtils-Normalize-File $file;
 
-    $fn = [System.IO.Path]::GetFilenameWithoutExtension($file);
     $parent = split-path -parent $file;
     $ext = [System.IO.Path]::GetExtension($file);
-    if (!$fn.StartsWith('Message_')) { 
+
+    $msgFile = ImageUtils-Get-MessageFileParts $file;
+    if (!$msgFile.isMessageFile) {
       $result += $file;
       continue; 
     }
 
-    $nn = $fn.Substring('Message_'.Length);
-    write-host 'nn1' $nn;
-    $nn = [DateTimeOffset]::FromUnixTimeMilliseconds($nn).DateTime;
-    write-host 'nn3' $nn;
-    $nn = $nn.ToString('yyyyMMdd_HHmmss');
-    write-host 'nn4' $nn;
+    $nn = $msgFile.datetime.ToString('yyyyMMdd_HHmmss');
     $suf = $ext;
     $cnt = 0;
-    write-host 'suf' $suf;
-    while (test-path ($nn + $suf)) {
+    while (test-path (join-path $parent ($nn + $suf))) {
       $cnt++;
       $suf = '' + $cnt + $ext;
-      write-host 'suf' $suf;
     }
 
     $nn = $nn + $suf;
-    write-host 'nnf' $nn;
     mv $file (join-path $parent $nn);
     $result += $nn;
   }
+
   return $result;
 }
 
@@ -226,9 +257,17 @@ function ImageUtils-Edit-PreprocessForWebsite($files, [switch]$pBlur)
       if (test-path $dfn) {
         mv $dfn $fnEnc;
       }
+      $tfn = $file + '.extraTags.txt';
+      if (test-path $tfn) {
+        mv $tfn $fnEnc;
+      }
       $pfn = $file + '.password.txt';
       if (test-path $pfn) {
         mv $pfn $fnEnc;
+      }
+      $mfn = $file + '.metadata.json';
+      if (test-path $mfn) {
+        mv $mfn $fnEnc;
       }
 
       $articleRoot = $fnEnc;
@@ -248,6 +287,8 @@ function ImageUtils-Edit-PreprocessForWebsite($files, [switch]$pBlur)
 
       $ais = gci -path (join-path $articleFolder '*.jpg') -recurse -force;
       $ams = gci -path (join-path $articleFolder '*.mp4') -recurse -force;
+      $ajs = gci -path (join-path $articleFolder '*.json') -recurse -force;
+
 
       $nais = @();
       foreach ($ai in $ais) {
@@ -277,6 +318,18 @@ function ImageUtils-Edit-PreprocessForWebsite($files, [switch]$pBlur)
 
         cp $am.FullName $newPath;
         $nams += (gci $newPath);
+      }
+
+      foreach ($aj in $ajs) {
+        $newPath = $aj.FullName.Substring($articleFolder.Length + 1);
+        $newPath = join-path $articleRoot $newPath;
+
+        $aparent = split-path -parent $newPath;
+        if (!(test-path $aparent)) {
+          new-item $aparent -itemtype directory;
+        }
+
+        cp $aj.FullName $newPath;
       }
 
       ImageUtils-Edit-ApplyExif $nais;
@@ -329,6 +382,16 @@ function ImageUtils-Describe-File($files, [Parameter(Mandatory=$true)][string]$d
     $description | out-file $dfn -NoNewline;
   }
 }
+function ImageUtils-Assign-ExtraTags($files, [Parameter(Mandatory=$true)][string]$tags) {
+  $files = ImageUtils-Filter-Srcsets $files;
+  foreach ($file in $files) {
+    if ($file.FullName) { $file = $file.FullName; }
+  
+    $dfn = $file + '.extraTags.txt';
+
+    $tags | out-file $dfn -NoNewline;
+  }
+}
 
 function ImageUtils-Assign-Password($files, [Parameter(Mandatory=$true)][string]$password) {
   $files = ImageUtils-Filter-Srcsets $files;
@@ -362,6 +425,16 @@ function ImageUtils-Partition-IntoFolders($files) {
     $dfn = ($file + '.description.txt');
     if (test-path $dfn) {
       cp $dfn $foldername;
+    }
+
+    $tfn = ($file + '.extraTags.txt');
+    if (test-path $tfn) {
+      cp $tfn $foldername;
+    }
+
+    $mfn = ($file + '.metadata.json');
+    if (test-path $mfn) {
+      cp $mfn $foldername;
     }
 
     $pfn = ($file + '.password.txt');
@@ -551,6 +624,20 @@ function ImageUtils-Generate-GridData($files, $pDescription, $pPassword, [switch
     } else {
       $description = $pDescription;
     }
+    if (test-path ($propFile + '.extraTags.txt')) {
+      $extraTags = [System.IO.File]::ReadAllText($propFile + '.extraTags.txt');
+    } else {
+      $extraTags = '';
+    }
+    if (![string]::IsNullOrWhitespace($description)) {
+      if ($extraTags.Length -gt 0) { $extraTags += ' '; }
+      $extraTags += $description;
+    }
+    if ($extraTags.Length -gt 0) {
+      $ets = $extraTags -split ' ';
+      $ets = $ets | where {$_.length -gt 3};
+      $extraTags = $extraTags -join ' ';
+    } else {$extraTags = $null;}
     if (test-path ($propFile + '.password.txt')) {
       $password = [System.IO.File]::ReadAllText($propFile + '.password.txt');
     } else {
@@ -597,6 +684,12 @@ function ImageUtils-Generate-GridData($files, $pDescription, $pPassword, [switch
       $gridHtml += ImageUtils-Encrypt-AttributeValue $password $description;
       $gridHtml += '" ';
 
+      if ($extraTags) {
+        $gridHtml += $attrName + '-data-tags="';
+        $gridHtml += ImageUtils-Encrypt-AttributeValue $password $extraTags;
+        $gridHtml += '" ';
+      }
+
       $decUrl = $rootUrl + '/' + $parentFolder + '/' + $decFolder.Name + '/' + $thumb;
       write-host 'Got decurl of ' $decUrl;
       $gridHtml += $attrName + '-src="';
@@ -604,6 +697,9 @@ function ImageUtils-Generate-GridData($files, $pDescription, $pPassword, [switch
       $gridHtml += '"';
     } else {
       $gridHtml += ' alt="' + $description + '"';
+      if ($extraTags) {
+        $gridHtml += ' data-tags="' + $extraTags + '"';
+      }
     }
 
     $gridHtml += '/>';
@@ -957,28 +1053,31 @@ function ImageUtils-Batch-Pipeline
   param ($files);
 
   $parts = ImageUtils-Partition-IntoFolders $files;
-  ImageUtils-Edit-PreprocessForWebsite $parts;
+  $null = ImageUtils-Edit-PreprocessForWebsite $parts;
 
   $parts2 = $parts | sort-object { split-path -leaf $_; } -Descending;
 
   ImageUtils-Generate-IndexHtml $parts2 | out-file 'index.html';
 
-  return $parts2;
+  return ($parts | split-path -parent);
 }
 
 function ImageUtils-Copy-Parallel
 {
-  param ($files, $dest, [int]$throttleLimit=5);
+  param ($files, $dests, [int]$throttleLimit=5);
 
-  $jobs = $files | % {
-    start-threadjob -throttlelimit $throttleLimit -ArgumentList $_,$dest {
-      param ($path, $dest);
-      
-      write-host 'Copy path ' $path ' to path ' $dest;
-      copy-item -Path $path -recurse -destination $dest;
-      write-host 'Done Copy path ' $path ' to path ' $dest;
-    }
-  };
+  $jobs=@();
+  foreach ($dest in $dests) {
+    $jobs += $files | % {
+      start-threadjob -throttlelimit $throttleLimit -ArgumentList $_,$dest {
+        param ($path, $dest);
+        
+        write-host 'Copy path ' $path ' to path ' $dest;
+        copy-item -Path $path -recurse -destination $dest;
+        write-host 'Done Copy path ' $path ' to path ' $dest;
+      }
+    };
+  }
 
   $jobs | receive-job -wait -autoremovejob
 }

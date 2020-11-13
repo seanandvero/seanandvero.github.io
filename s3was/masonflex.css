@@ -35,10 +35,3 @@
     width: 33.33333%;
   }
 }
-.oneColumn {
-  width: 100%;
-}
-.oneColumn .photoViewer img {
-  width: auto !important;
-  margin: auto;
-}

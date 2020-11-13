@@ -1,0 +1,640 @@
+<html>
+  <head>
+    <script src="demandjs.min.js"></script>
+    <script src="aws-sdk.min.js"></script>
+    <script src="hotkeys.min.js"></script>
+    <script src="litepicker.min.js"></script>
+    <script src="masonflex.min.js"></script>
+    <script src="s3was.js"></script>
+    <link rel="stylesheet" href="pure-min.css" />
+    <link rel="stylesheet" href="s3was.css" />
+    <link rel="stylesheet" href="masonflex.css" />
+  </head>
+  <body>
+    <div class="instructions">
+      <dl>
+        <dt>F1 Hotkey</dt>
+        <dd>Open / Close Filtering Window</dd>
+        <dt>F2 Hotkey</dt>
+        <dd>Open / Close (seanandvero.com) article generator</dd>
+        <dt>F4 Hotkey</dt>
+        <dd>Open / Close (seanandvero.com) grid generator which depends on articles being added</dd>
+      </dl>
+      <div>
+        <div>Upload your timeline config file to begin loading and processing</div>
+        <form>
+          <input type="file" id="timeline-settings" />
+        </form>
+      </div>
+    </div>
+    <div id="filterScreen" style="display:none;">
+      <form>
+        <h3>Filter</h3>
+        <div class="timeline-datefilter-min">
+          <label for="datefilter-min">Min Date:</label>
+          <input type="text" id="datefilter-min" />
+        </div>
+        <div class="timeline-datefilter-max">
+          <label for="datefilter-max">Max Date:</label>
+          <input type="text" id="datefilter-max" />
+        </div>
+        <div class="timeline-sort-reverse">
+          <label for="timeline-sort-reverse">Reverse Sort:</label>
+          <input type="checkbox" id="timeline-sort-reverse" />
+        </div>
+        <div class="timeline-filter-submit">
+          <a class="pure-button pure-button-primary" href="javascript:void(0);" id="timeline-filter-submit">Apply Filter</a>
+        </div>
+       </form>
+    </div>
+    <div id="snvscreen" style="display:none;">
+      <form>
+        <input type="checkbox" id="snvscreen-confirm-clearselection" />
+        <div class="snvscreen-confirm-clear">
+          <div class="snvscreen-confirm-clearselection-no">
+            <a class="pure-button pure-button-primary" href="javascript:void(0);" id="snvscreen-confirm-clearselection-no">Cancel</a>
+          </div>
+          <div class="snvscreen-confirm-clearselection-yes">
+            <a class="pure-button pure-button-primary" href="javascript:void(0);" id="snvscreen-confirm-clearselection-yes">Yes Clear Selection</a>
+          </div>
+        </div>
+        <div class="snvscreen-main">
+          <div class="snvscreen-password">
+            <label for="snvscreen-password">Password:</label>
+            <input type="text" id="snvscreen-password" />
+          </div>
+          <div class="snvscreen-password-quicklist" id="snvscreen-password-quicklist">
+          </div>
+          <div class="snvscreen-shortdesc">
+            <label for="snvscreen-shortdesc">Short Description:</label>
+            <input type="text" id="snvscreen-shortdesc" />
+          </div>
+          <div class="snvscreen-extratags">
+            <label for="snvscreen-shortdesc">Extra Tags:</label>
+            <input type="text" id="snvscreen-extratags" />
+          </div>
+          <div class="snvscreen-close">
+            <a class="pure-button pure-button-primary" href="javascript:void(0);" id="snvscreen-close">Close</a>
+          </div>
+          <div class="snvscreen-preview">
+            <a class="pure-button pure-button-primary" href="javascript:void(0);" id="snvscreen-preview">Preview</a>
+          </div>
+          <div class="snvscreen-append">
+            <a class="pure-button pure-button-primary" href="javascript:void(0);" id="snvscreen-append">Append To Script</a>
+          </div>
+          <div class="snvscreen-clear-selection">
+            <label class="pure-button pure-button-primary" for="snvscreen-confirm-clearselection">Clear Selections</a>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div id="snvpreview" style="display:none;">
+      <div class="snvpreview-close">
+        <a class="pure-button pure-button-primary" href="javascript:void(0);" id="snvpreview-close-01">Close</a>
+      </div>
+      <div id="snvpreview-container">
+      </div>
+      <div class="snvpreview-close">
+        <a class="pure-button pure-button-primary" href="javascript:void(0);" id="snvpreview-close-02">Close</a>
+      </div>
+    </div>
+    <div id="snvgrid" style="display:none;">
+      <input type="checkbox" id="snvgrid-confirm" />
+      <div class="snvgrid-confirm">
+          <div class="snvgrid-confirm-prompt">Are you sure you want to clear the grid content?</div>
+          <div class="snvgrid-confirm-no">
+            <label class="pure-button pure-button-primary" for="snvgrid-confirm">Cancel</a>
+          </div>
+          <div class="snvgrid-confirm-yes">
+            <a class="pure-button pure-button-primary" href="javascript:void(0);" id="snvgrid-confirm-yes">Yes Clear</a>
+          </div>
+      </div>
+      <div class="snvgrid-main">
+        <div class="snvgrid-close">
+          <a class="pure-button pure-button-primary" href="javascript:void(0);" id="snvgrid-close-01">Close</a>
+        </div>
+        <div id="snvgrid-container" class="pure-g">
+        </div>
+        <div class="snvgrid-close">
+          <a class="pure-button pure-button-primary" href="javascript:void(0);" id="snvgrid-close-02">Close</a>
+        </div>
+        <div class="snvgrid-sortdate">
+          <a class="pure-button pure-button-primary" href="javascript:void(0);" id="snvgrid-sortdate">Sort By Date</a>
+        </div>
+        <div class="snvgrid-download">
+          <a class="pure-button pure-button-primary" href="javascript:void(0);" id="snvgrid-download">Download Script</a>
+        </div>
+        <div class="snvgrid-clear">
+          <label class="pure-button pure-button-primary" for="snvgrid-confirm" id="snvgrid-clear">Clear</label>
+        </div>
+      </div>
+    </div>
+    <div id="contentInfo" style="display:none;">
+      <div class="contentInfo-close">
+        <a id="contentInfo-close2" href="javascript:void(0)" class="pure-button pure-button-primary">Close</a>
+      </div>
+      <span class="contentInfo-filename"></span><br/>
+      <span class="contentInfo-size"></span><br/>
+      <span class="contentInfo-date"></span><br/>
+      <span class="contentInfo-extra"></span><br/>
+      <div class="contentInfo-close">
+        <a id="contentInfo-close" href="javascript:void(0)" class="pure-button pure-button-primary">Close</a>
+      </div>
+    </div>
+    <div id="timelineContainer">
+    </div>
+    <script>
+      window.DemandJSDemand = new DemandJS();
+    </script>
+    <script>
+      var snvPasswordControl = document.getElementById('snvscreen-password');
+      var snvPasswordQuicklist = document.getElementById('snvscreen-password-quicklist');
+      var timelineSettingsButton = document.getElementById('timeline-settings');
+      var contentInfoPanel = document.getElementById('contentInfo');
+      var contentInfoClose = document.getElementById('contentInfo-close');
+      var contentInfoClose2 = document.getElementById('contentInfo-close2');
+      contentInfoClose.addEventListener('click', function() {
+        contentInfoPanel.style.display = 'none';
+      });
+      contentInfoClose2.addEventListener('click', function() {
+        contentInfoPanel.style.display = 'none';
+      });
+      var contentInfoHandler = function(meta) {
+        var idx = 1;
+        contentInfoPanel.children[idx].innerText = meta.filename;
+        contentInfoPanel.children[idx+1].innerText = parseInt(parseInt(meta.size)/1024) + 'kb';
+        contentInfoPanel.children[idx+2].innerText = 'date:' + meta.datetime;
+
+        if (meta.identify) {
+          contentInfoPanel.children[idx+3].innerText = meta.identify;
+        }
+        if (meta.ffprobe) {
+          contentInfoPanel.children[idx+3].innerText = meta.ffprobe;
+        }
+
+        contentInfoPanel.style.display = 'block';
+      };
+      timelineSettingsButton.addEventListener('change', function() {
+        var settingsFile = this.files[0];
+        var reader = new FileReader();
+        reader.onload = (function(settingsContent) {
+          var options = JSON.parse(settingsContent.target.result);
+          window.timelineOptions = options;
+          window.myTimeline = new TimelineTool(options);
+          var storageOptions = {
+            infoHandler: contentInfoHandler
+          };
+          window.timelineStorage = myTimeline.Setup(storageOptions);
+
+          if (options.passwords) {
+            snvPasswordQuicklist.innerHTML = '';
+
+            for (var key in options.passwords) {
+              var password = options.passwords[key];
+
+              var ele = document.createElement('a');
+              ele.setAttribute('class', 'pure-button');
+              ele.setAttribute('href', 'javascript:void(0)');
+              ele.innerText = key;
+              ele.addEventListener('click', (function(name, pw) { 
+                return function() {
+                  snvPasswordControl.value = pw;
+                }; 
+              })(key, password));
+
+              snvPasswordQuicklist.appendChild(ele);
+            }
+          }
+        });
+        reader.readAsText(settingsFile);
+      });
+
+      var minDateControl = document.getElementById('datefilter-min');
+      var maxDateControl = document.getElementById('datefilter-max');
+      var sortReverseControl = document.getElementById('timeline-sort-reverse');
+      var filterControl = document.getElementById('filterScreen');
+      var snvscreen = document.getElementById('snvscreen');
+      var snvgrid = document.getElementById('snvgrid');
+
+      var datePicker = new Litepicker({
+        element: minDateControl,
+        elementEnd: maxDateControl,
+        singleMode: false,
+        format: 'YYYY-MM-DD 01:01:01'
+      });
+      document.getElementById('timeline-filter-submit').addEventListener('click', function() {
+        var minDate = new Date(minDateControl.value);
+        var maxDate = new Date(maxDateControl.value);
+
+        minDate.setHours(0,0,0,0);
+        maxDate.setHours(23, 59, 59, 999);
+
+        minDate = new Date(minDate.getTime() - 1000);
+        maxDate = new Date(maxDate.getTime() + 1000);
+
+        var options = {
+          filter: {
+            minDate: minDate,
+            maxDate: maxDate,
+            reverseOrder: sortReverseControl.checked
+          },
+          infoHandler: contentInfoHandler
+        };
+
+        window.myTimeline.Teardown(window.timelineStorage);
+
+        window.timelineStorage = window.myTimeline.Setup(options);
+
+        filterControl.style.display = 'none';
+      });
+
+      
+      hotkeys.filter = function (event) {
+        return true;
+      }
+      hotkeys('f1,f2,f4', function (event, handler) {
+        switch (handler.key) {
+          case 'f1':
+            if (filterControl.style.display === 'none') {
+              filterControl.style.display = 'block';
+            } else {
+              filterControl.style.display = 'none';
+            }
+            break;
+          case 'f2':
+            if (snvscreen.style.display === 'none') {
+              snvscreen.style.display = 'block';
+            } else {
+              snvscreen.style.display = 'none';
+            }
+            break;
+          case 'f4':
+            if (snvgrid.style.display === 'none') {
+              snvgrid.style.display = 'block';
+              generateGrid();
+            } else {
+              snvgrid.style.display = 'none';
+            }
+            break;
+          case 'f6':
+            if (contentInfoPanel.style.display === 'none') {
+              contentInfoPanel.style.display = 'block';
+            } else {
+              contentInfoPanel.style.display = 'none';
+            }
+            break;
+        }
+        event.preventDefault();
+      });
+
+      var snvFilterClearSelection = document.getElementById('snvscreen-confirm-clearselection');
+      var snvFilterClearSelectionNo = document.getElementById('snvscreen-confirm-clearselection-no');
+      var snvFilterClearSelectionYes = document.getElementById('snvscreen-confirm-clearselection-yes');
+      snvFilterClearSelectionNo.addEventListener('click', function() {
+        snvFilterClearSelection.checked = false;
+      });
+      var gridSortReverse = true;
+      var snvFilterClearSelectionFunc = function() {
+        window.myTimeline.clearSelections(window.timelineStorage);
+        snvFilterClearSelection.checked = false;
+        gridSortReverse = true;
+      }
+      snvFilterClearSelectionYes.addEventListener('click', snvFilterClearSelectionFunc);
+
+      var snvCloseControl01 = document.getElementById('snvpreview-close-01');
+      var snvCloseControl02 = document.getElementById('snvpreview-close-02');
+      var snvShortDescControl = document.getElementById('snvscreen-shortdesc');
+      var snvTagsControl = document.getElementById('snvscreen-extratags');
+      var snvPreviewScreen = document.getElementById('snvpreview');
+      var snvPreviewContainer = document.getElementById('snvpreview-container');
+      var snvPreviewButton = document.getElementById('snvscreen-preview');
+      snvPreviewButton.addEventListener('click', function() {
+        snvscreen.style.display = 'none';
+        snvPreviewScreen.style.display = 'block';
+        generatePreview();
+
+        var handler = null;
+        handler = function (evt) {
+          snvCloseControl01.removeEventListener('click', handler);
+          snvCloseControl02.removeEventListener('click', handler);
+          snvscreen.style.display = 'block';
+          snvPreviewScreen.style.display = 'none';
+          return false;
+        };
+        snvCloseControl01.addEventListener('click', handler);
+        snvCloseControl02.addEventListener('click', handler);
+      });
+
+      var snvCloseControl03 = document.getElementById('snvscreen-close');
+      snvCloseControl03.addEventListener('click', function() {
+        snvscreen.style.display = 'none';
+        return false;
+      });
+
+      var snvGridConfirmControl = document.getElementById('snvgrid-confirm');
+      var snvGridConfirmYesControl = document.getElementById('snvgrid-confirm-yes');
+      snvGridConfirmYesControl.addEventListener('click', function() {
+        snvGridConfirmControl.checked = false;
+        window.snvCollection = [];
+        snvgrid.style.display = 'none';
+      });
+  
+
+      window.snvCollection = [];
+
+      var snvAppendControl = document.getElementById('snvscreen-append');
+      snvAppendControl.addEventListener('click', function() {
+        var selections = window.myTimeline.getSelections(window.timelineStorage);
+        selections.password = snvPasswordControl.value;
+        snvPasswordControl.value = '';
+        selections.shortDesc = snvShortDescControl.value;
+        snvShortDescControl.value = '';
+        selections.extraTags = snvTagsControl.value;
+        snvTagsControl.value = '';
+
+        window.snvCollection.push(selections);
+        snvFilterClearSelectionFunc();
+        snvscreen.style.display = 'none';
+
+      });
+
+
+      var snvCloseControl04 = document.getElementById('snvgrid-close-01');
+      var snvCloseControl05 = document.getElementById('snvgrid-close-02');
+  
+      var gridClose = function () {
+        snvgrid.style.display = 'none';
+      }
+      snvCloseControl04.addEventListener('click', gridClose);
+      snvCloseControl05.addEventListener('click', gridClose);
+
+      var snvGridSort = document.getElementById('snvgrid-sortdate');
+      snvGridSort.addEventListener('click', function() {
+        window.snvCollection.sort(function (a,b) {
+          var ap = parseInt(a.primary.metadata.datetimejavascript);
+          var bp = parseInt(b.primary.metadata.datetimejavascript);
+
+          gridSortReverse = !gridSortReverse;
+          if (gridSortReverse) {
+            return bp-ap;
+          } else {
+            return ap - bp;
+          }
+        });
+        generateGrid();
+      });
+      var downloadGridScript = function () {
+        var result = '';
+
+        var pad = function(str, len) {
+          var res = '0000' + str;
+          return res.substring(res.length - len);
+        }
+        var fname = new Date(Date.now());
+        fname = pad(fname.getFullYear(), 4) + pad((fname.getMonth() + 1), 2) + pad(fname.getDate(),2) + pad(fname.getHours(),2) + pad(fname.getMinutes(),2) + pad(fname.getSeconds(),2);
+        fname = 'snvcontent_' + fname;
+
+        result += ' param(';
+        result += '[Parameter(Mandatory=$true)]$rawPath';
+        result += ',[Parameter(Mandatory=$true)]$metadataPath';
+        result += ',[Parameter(Mandatory=$true)]$destPath';
+        result += ',[Parameter(Mandatory=$true)]$refPath';
+        result += ',[Parameter(Mandatory=$true)]$rootUrl';
+        result += ');';
+        result += '$null = ImageUtils-Set-RootUrl $rootUrl;';
+        result += 'if (!(test-path $rawPath -pathtype container)) {';
+        result += 'throw ("Raw Path does not exist at " + $rawPath);';
+        result += '}';
+        result += 'if (!(get-command "ImageUtils-Batch-Pipeline" -ErrorAction SilentlyContinue)) {';
+        result += 'throw "You must import imageUtils.ps1 to use this script";';
+        result += '}';
+
+        result += 'if (!$destPath.EndsWith("/")) { $destPath += "/"; }'
+        result += 'if (!$rawPath.EndsWith("/")) { $rawPath += "/"; }'
+
+        result += 'if (!(test-path $destPath)) {';
+        result += '$null = New-Item -ItemType Directory -Force -Path $destPath;';
+        result += '}';
+        result += 'if (!(test-path $destPath -PathType Container)) {';
+        result += 'throw ("Dest Path must be a folder - " + $destPath);';
+        result += '}';
+        result += '$null = Push-Location $destPath;';
+        result += '$allFiles = @();';
+        result += '$srcFiles = @();';
+        result += '$refs = @{};';
+
+        for (var i = 0; i < window.snvCollection.length; i++) {
+          var ele = window.snvCollection[i];
+          var primary = ele.primary;
+
+          var tmpFilename = 'content_' + ('' + i).padStart(4, '0');
+
+          result += '$primarySource = (join-path $rawPath \'' + primary.filename + '\');';
+          result += '$primaryMetadataSource = (join-path $metadataPath \'' + primary.filename + '.metadata.json\');';
+          result += '$primaryFile = (join-path $destPath \'' + tmpFilename + primary.metadata.extension + '\');';
+          result += '$allFiles += $primaryFile;';
+          result += '$srcFiles += $primarySource;';
+          result += '$refs[$primarySource] = @();';
+          result += '$null = copy-item $primarySource $primaryFile;'
+          result += '$null = copy-item $primaryMetadataSource ($primaryFile + ".metadata.json");';
+
+          if (ele.shortDesc && ele.shortDesc.length > 0) {
+            var shortDesc = ele.shortDesc;
+            shortDesc = shortDesc.replace('`', '``');
+            shortDesc = shortDesc.replace('"', '`"');
+
+            result += '$null = ImageUtils-Assign-Description $primaryFile \'' + shortDesc + '\';';
+          }
+
+          if (ele.extraTags && ele.extraTags.length > 0) {
+            var extraTags = ele.extraTags;
+            extraTags = extraTags.replace('`', '``');
+            extraTags = extraTags.replace('"', '`"');
+
+            result += '$null = ImageUtils-Assign-ExtraTags $primaryFile \'' + extraTags + '\';';
+          }
+
+          if (ele.password && ele.password.length > 0) {
+            var password = ele.password;
+            password = password.replace('`', '``');
+            password = password.replace('"', '`"');
+            result += '$null = ImageUtils-Assign-Password $primaryFile \'' + password + '\';';
+          }
+
+          if (ele.selected.length > 1) {
+            // This is creating the article folder (see ImageUtils-Assign-ArticleFolder)
+            // we only do this if there is additional content
+            result += '$contentFolder = (join-path $destPath \'' + tmpFilename + '\');';
+            result += '$null = new-item -ItemType Directory -Path $contentFolder;';
+            for (var j = 0; j < ele.selected.length; j++) {
+              var selection = ele.selected[j];
+
+              // we dont need to duplicate the primary
+              if (selection.filename == primary.filename) { continue; }
+
+              result += '$selectionFile = (join-path $rawPath \'' + selection.filename + '\');';
+              result += '$selectionMetadataFile = (join-path $metadataPath \'' + selection.filename + '.metadata.json\');';
+              result += '$null = copy-item $selectionFile $contentFolder;'
+              result += '$null = copy-item $selectionMetadataFile $contentFolder;'
+              result += '$refs[$primarySource] += $selectionFile;'
+            }
+          }
+        }
+
+        result += '$partitions = ImageUtils-Batch-Pipeline $allFiles;';
+        result += 'for ($i = 0; $i -lt $partitions.length;$i++) {';
+        result += '$partition = $partitions[$i];';
+        result += '$partition = $partition.Substring($destPath.Length);';
+        result += '$primarySource = $srcFiles[$i];';
+        result += '$primaryRef = (join-path $refPath $primarySource.Substring($rawPath.Length));';
+        result += '$primaryRefParent = split-path -parent $primaryRef;';
+        result += 'if (!(test-path $primaryRefParent)) { $null = new-item -itemtype directory -force -path $primaryRefParent; }';
+        result += '$partition | out-file -filepath ($primaryRef + ".primary.txt") -append;';
+        result += 'foreach ($ref in $refs[$primarySource]) {';
+        result += '$refRef = (join-path $refPath $ref.Substring($rawPath.Length));';
+        result += '$refRefParent = split-path -parent $refRef;';
+        result += 'if (!(test-path $refRefParent)) { $null = new-item -itemtype directory -force -path $refRefParent; }';
+        result += '$partition | out-file -filepath ($refRef + ".references.txt") -append;';
+        result += '}';
+        result += '}';
+
+        result += '$null = Pop-Location;';
+        result += 'return $partitions;';
+
+         var element = document.createElement('a');
+         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(result));
+         element.setAttribute('download', fname + '.ps1');
+         element.style.display = 'none';
+         document.body.appendChild(element);
+         element.click();
+         element.remove();
+      }
+      var snvDownloadControl = document.getElementById('snvgrid-download');
+      snvDownloadControl.addEventListener('click', downloadGridScript);
+
+      var generateGrid = function () {
+        
+        var container = document.getElementById('snvgrid-container');
+        container.innerHTML = '';
+
+        var thresholdEpsilon = 0.95;
+        for (var i = 0; i <  window.snvCollection.length; i++) {
+          var col = window.snvCollection[i];
+          var primary = col.primary;
+          var width = primary.exifdimensions.width;
+          var height = primary.exifdimensions.height;
+
+          var imageContainer = document.createElement('div');
+          imageContainer.setAttribute('class', 'pure-u-1-3');
+          if (height * thresholdEpsilon > width) {
+            imageContainer.setAttribute('class', 'pure-u-1-6');
+          }
+          container.appendChild(imageContainer);
+
+          var image = document.createElement('img');
+          image.src = primary.signedUrl;
+          image.setAttribute('class', 'pure-img');
+          imageContainer.appendChild(image);
+
+          (function(currentIndex, element) {
+            if (currentIndex > 0) {
+              var moveLeft = document.createElement('a');
+              moveLeft.href = 'javascript:void(0)';
+              moveLeft.setAttribute('class', 'grid-move-left');
+              moveLeft.innerHTML = '&#x21A4';
+              imageContainer.appendChild(moveLeft);
+
+              var moveLeftHandler = function () {
+                if (currentIndex > 0) {
+                  window.snvCollection[currentIndex] = window.snvCollection[currentIndex-1];
+                  window.snvCollection[currentIndex-1] = element;
+                  generateGrid();
+                }
+              }
+              moveLeft.addEventListener('click', moveLeftHandler);
+            }
+
+            if (currentIndex < window.snvCollection.length -1) {
+              var moveRight = document.createElement('a');
+              moveRight.href = 'javascript:void(0)';
+              moveRight.setAttribute('class', 'grid-move-right');
+              moveRight.innerHTML = '&#x21A6';
+              imageContainer.appendChild(moveRight);
+
+              var moveRightHandler = function () {
+                if (currentIndex < (window.snvCollection.length-1)) {
+                  window.snvCollection[currentIndex] = window.snvCollection[currentIndex+1];
+                  window.snvCollection[currentIndex+1] = element;
+                  generateGrid();
+                }
+              }
+              moveRight.addEventListener('click', moveRightHandler);
+            }
+          })(i, col);
+
+          window.myTimeline.sizeImage(primary.metadata, image);
+        }
+      }
+
+      var generatePreview = function () {
+        var target = snvPreviewContainer;
+        target.innerHTML = '';
+
+        var selections = window.myTimeline.getSelections(window.timelineStorage);
+
+        var previewBannerContainer = document.createElement('div');
+        previewBannerContainer.setAttribute('class', 'timeline-preview-banner-container');
+        target.appendChild(previewBannerContainer);
+
+        if (selections.primary) {
+          if (selections.isPrimaryDefault) {
+            var warningText = document.createElement('div');
+            warningText.setAttribute('class', 'timeline-preview-warning');
+            warningText.innerText = '* Banner selection chosen automatically';
+            previewBannerContainer.appendChild(warningText);
+          }
+
+          var primaryImage = selections.primary.container.querySelectorAll('img');
+          previewBannerContainer.appendChild(primaryImage[0].cloneNode());
+
+          var shortDescNode = document.createElement('div');
+          shortDescNode.setAttribute('class', 'timeline-preview-banner-shortdesc');
+          shortDescNode.innerText = snvShortDescControl.value;
+          previewBannerContainer.appendChild(shortDescNode);
+        } else {
+          var warningText = document.createElement('div');
+          warningText.setAttribute('class', 'timeline-preview-error');
+          warningText.innerText = ' * No suitable image found to use for banner!';
+          previewBannerContainer.appendChild(warningText);
+        }
+
+        var mainContainerParent = document.createElement('div');
+        mainContainerParent.setAttribute('class', 'timeline-preview-article-container');
+        target.appendChild(mainContainerParent);
+
+        var mainContainer = document.createElement('div');
+        mainContainer.setAttribute('class', 'masonflex');
+        mainContainerParent.appendChild(mainContainer);
+
+        for (var i = 0; i < selections.selected.length; i++) {
+          var selection = selections.selected[i];
+          var selectionContainer = selection.container;
+          var selectionContent = selectionContainer.querySelectorAll('img,video');
+
+          var container = document.createElement('div');
+          container.setAttribute('class', 'timeline-preview-article-element masonflex-panel photoCollage');
+          
+          for (var j = 0; j < selectionContent.length; j++) {
+            var selectionToClone = selectionContent[j];
+            var selectionClone = selectionToClone.cloneNode();
+            container.appendChild(selectionClone);
+          }
+          mainContainer.appendChild(container);
+        }
+
+        var mf = new MasonFlex(mainContainer, {});
+      }
+      
+    </script>
+  </body>
+</html>

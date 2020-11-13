@@ -21,6 +21,60 @@ function VideoUtils-Edit-Rotate90
   }
 }
 
+function VideoUtils-Concatenate-Merge {
+  param ($filesIn, $fileOut);
+
+  $guidFilename = [Guid]::NewGuid().ToString('N');
+  $nl = [Environment]::NewLine;
+  $outData = '';
+
+  $last_md5 = $null;
+  foreach ($file in $filesIn) {
+    $fname = $file;
+    if ($file.FullName) { $fname = $file.FullName; }
+
+    $output = ffmpeg -nostats -hide_banner -i $fname -an -f framemd5 -c copy - 2>$null
+    
+    $tb_num = 1;
+    $tb_den = 1;
+    $inpoint = [decimal]0;
+    $needsNextMd5 = $false;
+
+    $lines = $output.Split("`n")
+
+    foreach ($line in $lines ) {
+      if ($line.StartsWith('#tb')) {
+        $mt = $line | select-string '(\d+)\/(\d+)';
+        $tb_num = [decimal]$mt.Matches.Groups[1].Value;
+        $tb_den = [decimal]$mt.Matches.Groups[2].Value;
+      }
+      elseif (!$line.StartsWith('#')) {
+        $mt = $line | select-string -Pattern '(?<=[ ]*)([0-9a-z]+)(?=,?)' -AllMatches;
+        $md5 = $mt.Matches[-1].Value;
+        $pts_time = [decimal]$mt.Matches[2].Value * $tb_num / $tb_den;
+
+        if ($last_md5 -and $md5 -eq $last_md5) {
+          $inpoint = $pts_time;
+          $needsNextMd5 = $true;
+        } elseif ($needsNextMd5) {
+          $inpoint = $pts_time;
+          $needsNextMd5 = $false;
+        }
+      }
+    }
+    $last_md5 = $md5;
+
+    $outData += 'file ' + $fname + $nl;
+    $outData += 'inpoint ' + $inpoint + $nl;
+  }
+
+  $outData | out-file $guidFilename;
+
+  ffmpeg -hide_banner -nostats -f concat -safe 0 -i $guidFilename -c copy $fileOut 2>$null;
+
+  rm $guidFilename;
+}
+
 function VideoUtils-Concatenate-Videos {
   param ($filesIn, $fileOut);
 
