@@ -168,7 +168,7 @@
   display:block;
 }
 .timeline-selection, .timeline-primary {
-  position: relative;
+  position: absolute;
   max-width: 0;
   max-height: 0;
   opacity:0;

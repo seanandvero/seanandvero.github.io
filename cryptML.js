@@ -244,6 +244,7 @@
         attr.then(cryptML_decryptAttrFunc('alt', password));
         attr.then(cryptML_decryptAttrFunc('src', password));
         attr.then(cryptML_decryptAttrFunc('href', password));
+        attr.then(cryptML_decryptAttrFunc('data-tags', password));
       }
     });
   }
@@ -252,6 +253,7 @@
 			cml.resolved.set(attr + '-alt', { password: password, rawAttr: 'alt' });
 			cml.resolved.set(attr + '-src', { password: password, rawAttr: 'src' });
 			cml.resolved.set(attr + '-href', { password: password, rawAttr: 'href' });
+			cml.resolved.set(attr + '-data-tags', { password: password, rawAttr: 'data-tags' });
 		}
 	}
 

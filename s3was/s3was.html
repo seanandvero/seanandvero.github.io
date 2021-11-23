@@ -144,7 +144,49 @@
     <div id="timelineContainer">
     </div>
     <script>
-      window.DemandJSDemand = new DemandJS();
+      window.DemandJSDemand = new DemandJS({
+        enableOffloading: true,
+        createLoadingNode: function (tgt, store) {
+          var ele = document.createElement('div');
+          ele.style.position = 'relative';
+          ele.style.top = '50%';
+          ele.style.bottom = '50%';
+          //ele.style.left = '50%';
+          //ele.style.right = '50%';
+          ele.style.zIndex = 100;
+          ele.style.color = '#FFF';
+
+          var mainEle = document.createElement('div');
+          mainEle.innerText = 'Loading in progress';
+
+          if (store.hasDemandWidth && tgt.tagName === 'IMG') {
+            var inner = mainEle;
+            var cvsSize = document.createElement('canvas');
+            cvsSize.width = store.demandWidth;
+            cvsSize.height = store.demandHeight;
+            cvsSize.style.backgroundColor = '#F00';
+
+            mainEle = document.createElement('img');
+            mainEle.src = cvsSize.toDataURL('image/jpeg');
+            mainEle.className = 'nodemand';
+
+            inner.style.position = 'absolute';
+            inner.style.top = '50%';
+            inner.style.bottom = '50%';
+            inner.style.left = '50%';
+            inner.style.right = '50%';
+            inner.style.zIndex = 100;
+            inner.style.color = '#FFF';
+            ele.appendChild(inner);
+          } 
+          if (store.hasDemandWidth && tgt.tagName === 'VIDEO') {
+            ele.style.position = 'absolute';
+          }
+
+          ele.appendChild(mainEle);
+          return [ele];
+        }
+      });
     </script>
     <script>
       var snvPasswordControl = document.getElementById('snvscreen-password');
@@ -394,6 +436,11 @@
         fname = pad(fname.getFullYear(), 4) + pad((fname.getMonth() + 1), 2) + pad(fname.getDate(),2) + pad(fname.getHours(),2) + pad(fname.getMinutes(),2) + pad(fname.getSeconds(),2);
         fname = 'snvcontent_' + fname;
 
+        result += '<# rawPath - root folder where files are retrieved from, should be the bucket used for timeline generator #>';
+        result += '<# metadtaPath - folder inside rawPath where metadata is retrieved from #>';
+        result += '<# destPath - local folder where new content is generated - this will be copied to raw after verification #>';
+        result += '<# refPath - local folder where ref content is generated  - this will be copied to raw / ref after verification#>';
+        result += '<# rootUrl - url prefix applied to all html content / image references for generated content #>';
         result += ' param(';
         result += '[Parameter(Mandatory=$true)]$rawPath';
         result += ',[Parameter(Mandatory=$true)]$metadataPath';

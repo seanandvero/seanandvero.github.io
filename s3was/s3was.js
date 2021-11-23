@@ -125,7 +125,7 @@
       vidcvs.width = maxSize * whratio;
     }
 
-    imgNode.src = vidcvs.toDataURL('image/jpeg');
+    imgNode.src = vidcvs.toDataURL('image/jpeg', 0.001);
   }
   TimelineTool.prototype.exifImageDimensions = function (metadata) {
     var adjustedWidth = metadata.width;
@@ -215,11 +215,13 @@
         case 'BottomRight': element.style.transform = 'matrix(-1, 0, 0, -1, '+adjustedWidth+', '+adjustedHeight+' )'; break;
         case 'BottomLeft': element.style.transform = 'matrix(1, 0, 0, -1, 0, '+adjustedHeight+' )'; break;
         case 'LeftTop': element.style.transform = 'matrix(0, '+hwratio+', '+whratio+', 0, 0, 0)'; break;
-        case 'RightTop': element.style.transform = 'matrix(0, '+hwratio+', -'+whratio+', 0, '+adjustedWidth+' , 0)'; break;
         case 'RightBottom': element.style.transform = 'matrix(0, -'+hwratio+', -'+whratio+', 0, '+adjustedWidth+' , '+adjustedHeight+')'; break;
-        case 'LeftBottom': element.style.transform = 'matrix(0, -'+hwratio+', '+whratio+', 0, 0, '+adjustedHeight+')'; break;
+        case 'RightTop': element.style.transform = 'matrix(0, '+hwratio+', -'+whratio+',0,'+adjustedWidth+',0)';break;
+        case 'LeftBottom': element.style.transform = 'matrix(0,-'+hwratio+','+whratio+',0,0,'+adjustedHeight+')';break;
         default: break;
      }
+    // as of Chrome 81 imageOrientation defaults to from-image and we need this to disable that
+    element.style.imageOrientation = 'none';
   }
 
   TimelineTool.prototype.Teardown = function(resultContainer) {
@@ -534,7 +536,7 @@
 
         case 'video':
           var imgNode = document.createElement('img');
-          imgNode.setAttribute('class', 'timeline-video-placeholder');
+          imgNode.setAttribute('class', 'timeline-video-placeholder nodemand');
           container.appendChild(imgNode);
 
           var vidNode = document.createElement('video');
