@@ -345,6 +345,9 @@
         var executePhotoFilter = function () {
           var filterable = document.querySelectorAll(filterSelectorText);
           var filterText = window.photoFilterText;
+          if (filterText) {
+                                                filterText = filterText.split(' ').map(x=>x ? x.trim() : x).filter(x=>x && x.length > 0);
+          }
           for (var i = 0; i < filterable.length; i++) {
 						var target = filterable[i].parentElement;
             if (target.nodeName === 'LABEL') {
@@ -352,13 +355,25 @@
             }
 						var targetTag = filterable[i].getAttribute('data-tags');
             targetTag = targetTag + ' ' + filterable[i].getAttribute('alt');
-						if (filterText === null || !targetTag || targetTag.toLowerCase().includes(filterText)) {
-							target.style.display = null;
-						} else {
-							target.style.display = 'none';
-						}
-          }
+            var isMatch= true;
+            if (filterText !== null && targetTag) {
+              var targetTagText = targetTag.toLowerCase();
+              for (var j = 0; j < filterText.length;j++) {
+                if (!targetTagText.includes(filterText[j].toLowerCase())) {
+                  isMatch = false;
+                  break;
+                }
+              }
 
+              if (isMatch) {
+                target.style.display = null;
+              } else {
+                target.style.display = 'none';
+              }
+            } else {
+							target.style.display = null;
+            }
+          }
         }
         var applyFilter = function(form) {
 					var tbs = form.querySelectorAll('input[type="text"]');

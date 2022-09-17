@@ -31,6 +31,12 @@
 	}
 
   ctx.exifTransform = function() {
+    if (!false) {
+        // browsers have made a backwards incompatible change to just auto-rotate images
+        // so the default behavior here needs to be to skip any exif transform now.
+        // TODO: Find some way to detect if a browser doesn't perform automatic exif rotations and run the code below if so
+        return;
+    }
 	 	var img = this;
 
 		if (img.getAttribute('data-exif') || false) {
