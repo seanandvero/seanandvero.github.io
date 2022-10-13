@@ -1,0 +1,82 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="lightgallery-bundle.min.css" />
+    <script src="lightgallery.umd.min.js" ></script>
+    <script src="lg-thumbnail.umd.min.js" ></script>
+  </head>
+  <body>
+    <input type="file" id="upload" />
+
+    <div id="frames" style="width:100%;height:90%;"></div>
+
+    <!-- CREDITS
+      https://cwestblog.com/2017/05/03/javascript-snippet-get-video-frame-as-an-image/
+      https://www.lightgalleryjs.com/demos/inline/
+     -->
+    <script>
+      let uploadButton = document.getElementById('upload');
+      let framesDiv = document.getElementById('frames');
+      uploadButton.addEventListener('change', function(event) {
+        framesDiv.innerHtml = '';
+
+        let file = this.files[0];
+        let fileUrl = URL.createObjectURL(file);
+        let video = document.createElement('video');
+        var videoDuration = -1;
+        var currentSeconds = 0.0;
+        var framesPerVideo = 50;
+        var objects = [];
+        video.onloadedmetadata = function() {
+          videoDuration = this.duration;
+          this.currentTime = 0;
+        };
+        video.onseeked = function(e) {
+          var canvas = document.createElement('canvas');
+          canvas.height = video.videoHeight;
+          canvas.width = video.videoWidth;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          objects.push({
+            src: canvas.toDataURL(),
+            thumb: canvas.toDataURL(),
+            subHtml: '<b>Frame ' + currentSeconds + ':</b>'
+          });
+/*
+          var img = new Image();
+          img.src = canvas.toDataURL();
+          img.style.maxWidth = '35%';
+
+          var screenshotViewer = document.createElement('li');
+          screenshotViewer.innerHtml = <br/>';
+          screenshotViewer.appendChild(img);
+          screenshotViewer.style.display = 'inlineBlock';
+          framesDiv.appendChild(screenshotViewer);
+*/
+
+          if (currentSeconds < (videoDuration-1)) {
+            
+            currentSeconds = this.currentTime = currentSeconds + (videoDuration/framesPerVideo);
+          } else {
+            let gallery = lightGallery(framesDiv, {
+              container: framesDiv,
+              dynamic: true,
+              hash: false,
+              closable: false,
+              showMaximizeIcon: true,
+              appendSubHtmlTo: '.lg-item',
+              slideDelay: 400,
+              dynamicEl: objects,
+              plugins: [lgThumbnail]
+            });
+            gallery.openGallery();
+          }
+        };
+        video.onerror = function(e) {
+          callback.call(me, undefined, undefined, e);
+        };
+
+        video.src = fileUrl;
+      });
+    </script>
+  </body>
+</html>
