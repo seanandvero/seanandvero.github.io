@@ -1,3 +1,6 @@
+#. (join-path $PSScriptPath 'imageUtils.ps1')
+
+
 function VideoUtils-Edit-Rotate90
 {
   param ($files);
@@ -161,3 +164,15 @@ function VideoUtils-Edit-ColorsWithDefault {
     VideoUtils-Edit-Colors -brightness '0.16' -saturation 1.45 -contrast '1.4' -al -file $file;
   }
 }
+
+function VideoUtils-Extract-Screenshot {
+  param ($videoIn, $timespan, $frames=1, $quality=2);
+
+  if (($videoIn | measure).Count -gt 1) { throw 'only 1 video at a time please.'; }
+
+  $timespan = [TimeSpan]$timespan;
+
+  $fileout = [Guid]::NewGuid().ToString('N') + '.jpg';
+  ffmpeg -ss $timespan.ToString('c') -i $videoIn -frames:v $frames -q:v $quality $fileout;
+}
+
