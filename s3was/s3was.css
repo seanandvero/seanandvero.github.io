@@ -26,7 +26,12 @@
   width: 20%;
   position: relative;
   text-align: center;
-  margin-bottom: 1em;
+
+  /* prevent labels for filename /d ate overlapping other content like video controls */
+  margin-bottom: 3em;
+  margin-top: 3em;
+  margin-left: 1em;
+  margin-right: 1em;
 }
 .timeline-content > label .timeline-date,
 .timeline-content > label .timeline-filename {
@@ -78,22 +83,26 @@
   height: 1em;
 }
 .timeline-content > label .timeline-date {
-  bottom:0;
+  bottom:-2em;
   left:0;
 }
 .timeline-content > label .timeline-filename {
-  top:0;
+  top:-3em;
   left:0;
 }
 .timeline-content > .timeline-img {
   max-width: 100%;
   max-height: 100%;
 }
+.timeline-content.timeline-isGenerated > .timeline-img {
+  border: 3px dashed #0A3;
+}
 .timeline-content > .timeline-video, 
 .timeline-preview-article-element > .timeline-video {
   max-width: 100%;
   max-height: 100%;
   position: absolute;
+  /* position: absolute; /* something broke in chrome update around 12-14-2022 on debian and this *trick* doesnt make things look right, position relative above looks bad but is at least functional */
   height:100%;
   width:100%;
   top:0;
@@ -215,7 +224,7 @@
   vertical-align: middle;
   overflow: hidden;
 }
-#snvpreview, #snvgrid  {
+#snvpreview, #snvgrid, #frameExtractor  {
   position: fixed;
   top: 0;
   bottom: 0;
@@ -231,6 +240,7 @@
   overflow: scroll;
 }
 .snvscreen-close, .snvscreen-preview, .snvscreen-download, .snvscreen-append, .snvscreen-clear-selection, 
+.frameExtractor-close,
 .snvgrid-confirm-no, .snvgrid-sortdate, .snvgrid-download, .snvgrid-clear, .snvscreen-confirm-clearselection-no 
 {
   float:left; margin-left: 2em; margin-right: 2em;
@@ -290,6 +300,24 @@
 }
 #snvgrid-container div img {
   margin: auto;
+}
+.grid-remove {
+  position: absolute;
+  top: 5%;
+  left: 80%;
+  content: '\8614';
+  color: #DC602E;
+  font-weight: Bold;
+  font-size: 28pt;
+  z-index: 110;
+  background-color:rgba(39,40,56,0.6);
+  border-radius: 5px;
+  vertical-align: middle;
+  text-align: center;
+  line-height: 110%;
+  height: 1em;
+  text-decoration:none;
+  padding: 3px;
 }
 .grid-move-right {
   position: absolute;
@@ -392,7 +420,7 @@ background-repeat:no-repeat;
   -moz-user-select: none;                                                        
   -ms-user-select: none;                                                         
   user-select: none; 
-  background-color: #00000022;
+  background-color: #00000055;
   border-radius: 2px;
   background-size: 19px;
 }
@@ -423,7 +451,38 @@ background-repeat:no-repeat;
   -ms-user-select: none;                                                         
   user-select: none; 
   background-size: 19px;
-  background-color: #00000022;
+  background-color: #00000055;
   border-radius: 2px;
 background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' enable-background='new 0 0 24 24' viewBox='0 0 24 24' fill='black' width='18px' height='18px'%3E%3Crect fill='none' height='24' width='24'/%3E%3Cpolygon fill='%23ecba82ff' points='21,11 21,3 13,3 16.29,6.29 6.29,16.29 3,13 3,21 11,21 7.71,17.71 17.71,7.71'/%3E%3C/svg%3E");
+}
+.timeline-frameExtractor {
+  position: absolute;
+  top: 0;
+  right: 45px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  z-index: 100;
+   -webkit-user-select: none;                                                     
+  -moz-user-select: none;                                                        
+  -ms-user-select: none;                                                         
+  user-select: none; 
+  background-size: 19px;
+  background-color: #00000055;
+  border-radius: 2px;
+background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' fill='%23ecba82' height='800px' width='800px' version='1.1' id='Layer_1' viewBox='0 0 472.615 472.615' xml:space='preserve'%3E %3Cg%3E %3Cg%3E %3Cpath d='M0,0v472.615h472.615V0H0z M86.161,432H39.213v-46.948h46.947V432z M86.161,345.891H39.213v-46.948h46.947V345.891z M86.161,259.782H39.213v-46.948h46.947V259.782z M86.161,173.672H39.213v-46.948h46.947V173.672z M86.161,87.563H39.213V40.615 h46.947V87.563z M348.8,452.923H123.815v-206.77H348.8V452.923z M348.8,226.461H123.815V19.692H348.8V226.461z M433.402,432  h-46.948v-46.948h46.948V432z M433.402,345.891h-46.948v-46.948h46.948V345.891z M433.402,259.782h-46.948v-46.948h46.948V259.782 z M433.402,173.672h-46.948v-46.948h46.948V173.672z M433.402,87.563h-46.948V40.615h46.948V87.563z' stroke='%23ecba82'/%3E %3C/g%3E %3C/g%3E %3C/svg%3E");
+}
+
+.timeline-generatedNote {
+  position:absolute;
+  bottom: 1.5em;
+  left:50%;
+  transform: translateX(-50%);
+  border-radius: 5px;
+  padding: 5px;
+  background-color: #00000099;
+  font-size: 9pt;
+  border: 2px dashed #0A3;
+  color: #ECBA82;
+  user-select: false;
 }

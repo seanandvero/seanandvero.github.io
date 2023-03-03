@@ -6,9 +6,11 @@
     <script src="litepicker.min.js"></script>
     <script src="masonflex.min.js"></script>
     <script src="s3was.js"></script>
+    <script src="framePicker.js"></script>
     <link rel="stylesheet" href="pure-min.css" />
     <link rel="stylesheet" href="s3was.css" />
     <link rel="stylesheet" href="masonflex.css" />
+    <link rel="stylesheet" href="framePicker.css" />
   </head>
   <body>
     <div class="instructions">
@@ -201,7 +203,8 @@
       contentInfoClose2.addEventListener('click', function() {
         contentInfoPanel.style.display = 'none';
       });
-      var contentInfoHandler = function(meta) {
+      var contentInfoHandler = function(elementData) {
+        var meta = elementData.metadata;
         var idx = 1;
         contentInfoPanel.children[idx].innerText = meta.filename;
         contentInfoPanel.children[idx+1].innerText = parseInt(parseInt(meta.size)/1024) + 'kb';
@@ -216,6 +219,56 @@
 
         contentInfoPanel.style.display = 'block';
       };
+
+      var extractMap = new Map();
+      var extractHandler = function (target, extract) {
+        var imageUrl = extract.frame.image;
+
+        var extractDate = new Date(target.metadata.datetime);
+        extractDate = new Date(extractDate.getTime() + extract.frame.currentTime * 1000);
+        extractDate = extractDate.toISOString();
+        var dateString = extractDate.slice(0,19).replaceAll('T','_').replaceAll(':','').replaceAll('-','');
+
+        var metadata = {
+          'filenameNoPath': 'extract_' + target.metadata.filenameNoPath.replace('.', '_') + '_at_' + extract.frame.currentTime.toFixed(2).replace('.', 's_') + 'ds_for_' + dateString + '.png',
+          'extension': '.png', //  we expect a png to be extracted, the content shown on the website is actually still going to be a jpg
+          'datetime': extractDate, 
+          'htmlTag': 'img',
+          'width': extract.frame.width,
+          'height': extract.frame.height,
+          'orientation': null,
+          'isGenerated': true,
+          'generatedText': 'frame extracted from video',
+          'extract': extract,
+          'extractTarget': target
+        };
+        var result = window.myTimeline.renderElement(window.timelineStorage, target.groupElement, null, imageUrl, metadata);
+        extractMap.set(extract, result);
+      }
+      var undoExtractHandler = function (target, extract) {
+        if (!extractMap.has(extract)) {return;}
+
+        window.myTimeline.unregisterElement(window.timelineStorage, extractMap.get(extract));
+        extractMap.delete(extract);
+      }
+      window.FrameExtractorInstance = new FrameExtractorTool({
+        onExtract: extractHandler,
+        onUnExtract: undoExtractHandler
+      });
+      var frameExtractorHandler = function (elementData) {
+        var url = elementData.element.currentSrc;
+        var meta = elementData.metadata;
+        window.FrameExtractorInstance.openHandler (elementData, url, meta);
+      }
+
+      var minDateControl = document.getElementById('datefilter-min');
+      var maxDateControl = document.getElementById('datefilter-max');
+      var datePicker = new Litepicker({
+        element: minDateControl,
+        elementEnd: maxDateControl,
+        singleMode: false,
+        format: 'YYYY-MM-DD 01:01:01'
+      });
       timelineSettingsButton.addEventListener('change', function() {
         var settingsFile = this.files[0];
         var reader = new FileReader();
@@ -224,8 +277,15 @@
           window.timelineOptions = options;
           window.myTimeline = new TimelineTool(options);
           var storageOptions = {
-            infoHandler: contentInfoHandler
+            filter: {
+              minDate: new Date(new Date().getTime() - 24 * 60 * 60 * 1000 * 60),
+              maxDate: new Date(),
+              reverseOrder: false
+            },
+            infoHandler: contentInfoHandler,
+            frameExtractorHandler: frameExtractorHandler
           };
+          datePicker.setDateRange(storageOptions.filter.minDate, storageOptions.filter.maxDate);
           window.timelineStorage = myTimeline.Setup(storageOptions);
 
           if (options.passwords) {
@@ -251,19 +311,11 @@
         reader.readAsText(settingsFile);
       });
 
-      var minDateControl = document.getElementById('datefilter-min');
-      var maxDateControl = document.getElementById('datefilter-max');
       var sortReverseControl = document.getElementById('timeline-sort-reverse');
       var filterControl = document.getElementById('filterScreen');
       var snvscreen = document.getElementById('snvscreen');
       var snvgrid = document.getElementById('snvgrid');
 
-      var datePicker = new Litepicker({
-        element: minDateControl,
-        elementEnd: maxDateControl,
-        singleMode: false,
-        format: 'YYYY-MM-DD 01:01:01'
-      });
       document.getElementById('timeline-filter-submit').addEventListener('click', function() {
         var minDate = new Date(minDateControl.value);
         var maxDate = new Date(maxDateControl.value);
@@ -280,7 +332,8 @@
             maxDate: maxDate,
             reverseOrder: sortReverseControl.checked
           },
-          infoHandler: contentInfoHandler
+          infoHandler: contentInfoHandler,
+          frameExtractorHandler: frameExtractorHandler
         };
 
         window.myTimeline.Teardown(window.timelineStorage);
@@ -455,6 +508,12 @@
         result += 'if (!(get-command "ImageUtils-Batch-Pipeline" -ErrorAction SilentlyContinue)) {';
         result += 'throw "You must import imageUtils.ps1 to use this script";';
         result += '}';
+        result += 'if (!(get-command "VideoUtils-Extract-Screenshot" -ErrorAction SilentlyContinue)) {';
+        result += 'throw "You must import videoUtils.ps1 to use this script";';
+        result += '}';
+        result += 'if (!(get-command "TimelineUtils-Attach-MetadataToFile" -ErrorAction SilentlyContinue)) {';
+        result += 'throw "You must import timelineUtils.ps1 to use this script";';
+        result += '}';
 
         result += 'if (!$destPath.EndsWith("/")) { $destPath += "/"; }'
         result += 'if (!$rawPath.EndsWith("/")) { $rawPath += "/"; }'
@@ -469,6 +528,8 @@
         result += '$allFiles = @();';
         result += '$srcFiles = @();';
         result += '$refs = @{};';
+        result += '$extractFolder = (join-path $destPath \'' + 'extracts' + '\');';
+        result += '$null = new-item -ItemType Directory -Path $extractFolder;';
 
         for (var i = 0; i < window.snvCollection.length; i++) {
           var ele = window.snvCollection[i];
@@ -476,14 +537,33 @@
 
           var tmpFilename = 'content_' + ('' + i).padStart(4, '0');
 
-          result += '$primarySource = (join-path $rawPath \'' + primary.filename + '\');';
-          result += '$primaryMetadataSource = (join-path $metadataPath \'' + primary.filename + '.metadata.json\');';
           result += '$primaryFile = (join-path $destPath \'' + tmpFilename + primary.metadata.extension + '\');';
-          result += '$allFiles += $primaryFile;';
-          result += '$srcFiles += $primarySource;';
-          result += '$refs[$primarySource] = @();';
-          result += '$null = copy-item $primarySource $primaryFile;'
-          result += '$null = copy-item $primaryMetadataSource ($primaryFile + ".metadata.json");';
+          // deal with extracting from video
+          if (primary.metadata.isGenerated && primary.metadata.extract) {
+            result += '$extractSource = (join-path $rawPath \'' + primary.metadata.extractTarget.filename + '\');';
+            result += '$extractSourceLocal = (join-path $extractFolder \'' + primary.metadata.extractTarget.metadata.filenameNoPath + '.extractSource' + primary.metadata.extractTarget.metadata.extension + '\');';
+            result += 'if (!(test-path $extractSourceLocal)) {';
+            result += '$null = copy-item $extractSource $extractSourceLocal;';
+            result += '}';
+            result += '$outFile = VideoUtils-Extract-Screenshot $extractSourceLocal ([TimeSpan]::FromSeconds(\'' + primary.metadata.extract.frame.currentTime.toFixed(2) + '\')) -frames 1;';
+            result += '$null = move-item $outFile $primaryFile;';
+            result += 'if (!$refs.ContainsKey($extractSource)) {$refs[$extractSource] = @();}';
+            result += 'write-host (\'attach metadata to primary \' + $primaryFile);';
+            result += '$metadata = TimelineUtils-Attach-MetadataToFile $primaryFile;';
+            result += '$null = TimelineUtils-Generate-MetadataFilesForFile $metadata;';
+            result += '$primarySource = $extractSource;';
+          } else {
+            if (!primary.filename) {
+              throw 'unable to generate script due to invalid primary';
+            }
+            result += '$primarySource = (join-path $rawPath \'' + primary.filename + '\');';
+            result += '$primaryMetadataSource = (join-path $metadataPath \'' + primary.filename + '.metadata.json\');';
+            result += '$allFiles += $primaryFile;';
+            result += '$srcFiles += $primarySource;';
+            result += 'if (!$refs.ContainsKey($primarySource)) {$refs[$primarySource] = @();}';
+            result += '$null = copy-item $primarySource $primaryFile;'
+            result += '$null = copy-item $primaryMetadataSource ($primaryFile + ".metadata.json");';
+          }
 
           if (ele.shortDesc && ele.shortDesc.length > 0) {
             var shortDesc = ele.shortDesc;
@@ -517,13 +597,33 @@
               var selection = ele.selected[j];
 
               // we dont need to duplicate the primary
-              if (selection.filename == primary.filename) { continue; }
+              if (selection.filename && selection.filename == primary.filename) { continue; }
 
-              result += '$selectionFile = (join-path $rawPath \'' + selection.filename + '\');';
-              result += '$selectionMetadataFile = (join-path $metadataPath \'' + selection.filename + '.metadata.json\');';
-              result += '$null = copy-item $selectionFile $contentFolder;'
-              result += '$null = copy-item $selectionMetadataFile $contentFolder;'
-              result += '$refs[$primarySource] += $selectionFile;'
+              if (selection.metadata.isGenerated && selection.metadata.extract) {
+                result += '$extractSource = (join-path $rawPath \'' + selection.metadata.extractTarget.filename + '\');';
+                result += '$extractSourceLocal = (join-path $extractFolder \'' + selection.metadata.extractTarget.metadata.filenameNoPath + '.extractSource' + selection.metadata.extractTarget.metadata.extension + '\');';
+                result += '$extractDest = (join-path $contentFolder \'' + selection.metadata.filenameNoPath + '\');';
+
+                result += 'if (!(test-path $extractSourceLocal)) {';
+                result += '$null = copy-item $extractSource $extractSourceLocal;';
+                result += '}';
+                result += '$outFile = VideoUtils-Extract-Screenshot $extractSourceLocal ([TimeSpan]::FromSeconds(\'' + selection.metadata.extract.frame.currentTime.toFixed(2) + '\')) -frames 1;';
+                result += '$null = move-item $outFile $extractDest;';
+                result += '$refs[$primarySource] += $extractSource;'
+                result += 'write-host (\'attach metadata to selection \' + $extractDest);';
+                result += '$metadata = TimelineUtils-Attach-MetadataToFile $extractDest;';
+                result += '$null = TimelineUtils-Generate-MetadataFilesForFile $metadata;';
+              } else {
+                if (!selection.filename) {
+                  throw 'unable to generate script due to invalid selection';
+                }
+
+                result += '$selectionFile = (join-path $rawPath \'' + selection.filename + '\');';
+                result += '$selectionMetadataFile = (join-path $metadataPath \'' + selection.filename + '.metadata.json\');';
+                result += '$null = copy-item $selectionFile $contentFolder;'
+                result += '$null = copy-item $selectionMetadataFile $contentFolder;'
+                result += '$refs[$primarySource] += $selectionFile;'
+              }
             }
           }
         }
@@ -589,6 +689,7 @@
               moveLeft.href = 'javascript:void(0)';
               moveLeft.setAttribute('class', 'grid-move-left');
               moveLeft.innerHTML = '&#x21A4';
+              moveLeft.title = 'move left';
               imageContainer.appendChild(moveLeft);
 
               var moveLeftHandler = function () {
@@ -606,6 +707,7 @@
               moveRight.href = 'javascript:void(0)';
               moveRight.setAttribute('class', 'grid-move-right');
               moveRight.innerHTML = '&#x21A6';
+              moveRight.title = 'move right';
               imageContainer.appendChild(moveRight);
 
               var moveRightHandler = function () {
@@ -617,6 +719,19 @@
               }
               moveRight.addEventListener('click', moveRightHandler);
             }
+
+            var remove = document.createElement('a');
+            remove.href = 'javascript:void(0)';
+            remove.setAttribute('class', 'grid-remove');
+            remove.innerHTML = '&#8998';
+            remove.title = 'remove';
+            imageContainer.appendChild(remove);
+
+            var removeHandler = function() {
+              window.snvCollection.splice(currentIndex, 1);
+              generateGrid();
+            }
+            remove.addEventListener('click', removeHandler);
           })(i, col);
 
           window.myTimeline.sizeImage(primary.metadata, image);

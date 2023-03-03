@@ -5,14 +5,18 @@
     this.elementId = 0;
     this.elements = [];
     this.cancel = false;
-    this.infoHandler = function(){};
-    this.maximizeHandler = function(){};
+    this.infoHandler = function(elementData){};
+    this.maximizeHandler = function(elementData){};
+    this.frameExtractorHandler = function(elementData){};
 
     if (options && options.hasOwnProperty('infoHandler')) {
       this.infoHandler = options.infoHandler;
     }
     if (options && options.hasOwnProperty('maximizeHandler')) {
       this.maximizeHandler = options.maximizeHandler;
+    }
+    if (options && options.hasOwnProperty('frameExtractorHandler')) {
+      this.frameExtractorHandler = options.frameExtractorHandler;
     }
 
     if (options && options.hasOwnProperty('filter')) {
@@ -106,8 +110,16 @@
     var maxSize = videoNode.parentNode.clientWidth;
 
     var vidcvs = document.createElement('canvas');
-    vidcvs.width = metadata.width * 4;
-    vidcvs.height = metadata.height * 4;
+    if (metadata.width) {
+      vidcvs.width = metadata.width * 4;
+    } else if (metadata.exifTool && metadata.exifTool.ImageWidth) {
+      vidcvs.width = metadata.exifTool.ImageWidth * 4;
+    }
+    if (metadata.height) {
+      vidcvs.height = metadata.height * 4;
+    } else if (metadata.exifTool && metadata.exifTool.ImageHeight) {
+      vidcvs.height = metadata.exifTool.ImageHeight * 4;
+    }
 
     if (rotation == parseFloat('-90.0') || rotation == parseFloat('90.0')) {
       var tmp = vidcvs.width;
@@ -128,8 +140,18 @@
     imgNode.src = vidcvs.toDataURL('image/jpeg', 0.001);
   }
   TimelineTool.prototype.exifImageDimensions = function (metadata) {
-    var adjustedWidth = metadata.width;
-    var adjustedHeight = metadata.height;
+    var adjustedWidth = 0;
+    var adjustedHeight = 0;
+    if (metadata.width) {
+      adjustedWidth = metadata.width;
+    } else if (metadata.exifTool && metadata.exifTool.ImageWidth) {
+      adjustedWidth = metadata.exifTool.ImageWidth;
+    }
+    if (metadata.height) {
+      adjustedHeight = metadata.height;
+    } else if (metadata.exifTool && metadata.exifTool.ImageHeight) {
+      adjustedHeight = metadata.exifTool.ImageHeight;
+    }
 
     var hwratio = adjustedHeight/adjustedWidth;
     var whratio = adjustedWidth / adjustedHeight;
@@ -165,13 +187,22 @@
     var maxHeight = element.parentNode.clientHeight;
 
     // rough copy from exif.js
-    var adjustedWidth = metadata.width;
-    var adjustedHeight = metadata.height;
+    var adjustedWidth = 0;
+    var adjustedHeight = 0;
+    if (metadata.width) {
+      adjustedWidth = metadata.width;
+    } else if (metadata.exifTool && metadata.exifTool.ImageWidth) {
+      adjustedWidth = metadata.exifTool.ImageWidth;
+    }
+    if (metadata.height) {
+      adjustedHeight = metadata.height;
+    } else if (metadata.exifTool && metadata.exifTool.ImageHeight) {
+      adjustedHeight = metadata.exifTool.ImageHeight;
+    }
 
     var hwratio = adjustedHeight/adjustedWidth;
     var whratio = adjustedWidth / adjustedHeight;
 
-    element.style.transformOrigin = '0 0';
 
     var srcOrientation = metadata.orientation;
 
@@ -205,10 +236,12 @@
       element.style.width = adjustedWidth;
     }
 
-    /*var hwratio = 1;
-    var whratio = 1;
-    adjustedWidth = 1;
-    adjustedHeight = 1;*/
+    /*
+    //var hwratio = 1;
+    //var whratio = 1;
+    //adjustedWidth = 1;
+    //adjustedHeight = 1;
+    element.style.transformOrigin = '0 0';
 
      switch (srcOrientation) {                                              
         case 'TopRight': element.style.transform = 'matrix(-1, 0, 0, 1, '+adjustedWidth+', 0)'; break;
@@ -222,6 +255,7 @@
      }
     // as of Chrome 81 imageOrientation defaults to from-image and we need this to disable that
     element.style.imageOrientation = 'none';
+    */
   }
 
   TimelineTool.prototype.Teardown = function(resultContainer) {
@@ -371,6 +405,10 @@
 
     data['container'].setAttribute('data-timeline-element-id', data['id']);
   }
+  TimelineTool.prototype.unregisterElement = function (resultContainer, data) {
+    resultContainer.elements = resultContainer.elements.filter(e=>e !== data);
+    data.container.remove();
+  }
 
   TimelineTool.prototype.isFiltered = function (resultContainer, group) {
     if (!resultContainer.filter) {
@@ -444,139 +482,18 @@
 
       var content = new TextDecoder().decode(timelineData.Body);
       var imageMetadata = JSON.parse(content);
+      if (Array.isArray(imageMetadata.width)) {
+        imageMetadata.width = imageMetadata.width[0];
+      }
+      if (Array.isArray(imageMetadata.height)) {
+        imageMetadata.height = imageMetadata.height[0];
+      }
 
       var mySelectorId = selectorId++;
 
       var cgc = self.GetCurrentGroupElement(resultContainer);
-      var container = document.createElement('div');
-      container.setAttribute('class', 'timeline-content');
-      container.setAttribute('id', 'timeline-container-' + mySelectorId);
-      cgc.appendChild(container);
 
-
-      var checkbox = document.createElement('input');
-      checkbox.setAttribute('type', 'checkbox');
-      checkbox.setAttribute('class', 'timeline-selection');
-      checkbox.setAttribute('name', 'timeline-selections');
-      checkbox.setAttribute('id', 'timeline-selector-' + mySelectorId);
-      checkbox.setAttribute('data-timeline-container-id', container.getAttribute('id'));
-      container.appendChild(checkbox);
-
-      // css rules depend on this element existing even if it's not allowed to be selected
-      var primaryRadio = document.createElement('input');
-      primaryRadio.setAttribute('type', 'radio');
-      primaryRadio.setAttribute('class', 'timeline-primary');
-      primaryRadio.setAttribute('name', 'timeline-primary');
-      primaryRadio.setAttribute('id', 'timeline-primary-' + mySelectorId);
-      primaryRadio.setAttribute('data-timeline-container-id', container.getAttribute('id'));
-      container.appendChild(primaryRadio);
-
-      var label01 = document.createElement('label');
-      label01.setAttribute('for', checkbox.id);
-      label01.setAttribute('class', 'timeline-select');
-      container.appendChild(label01);
-
-      var filenameNode = document.createElement('div');
-      filenameNode.innerText = imageMetadata.filenameNoPath;
-      filenameNode.setAttribute('class', 'timeline-filename');
-      label01.appendChild(filenameNode);
-
-      var label02 = document.createElement('label');
-      label02.setAttribute('for', checkbox.id);
-      label02.setAttribute('class', 'timeline-select');
-      container.appendChild(label02);
-
-      var dateNode = document.createElement('div');
-      dateNode.innerText = imageMetadata.datetime;
-      dateNode.setAttribute('class', 'timeline-date');
-      label02.appendChild(dateNode);
-
-      var infoNode = document.createElement('div');
-      infoNode.innerHTML = '&nbsp;';
-      infoNode.setAttribute('class', 'timeline-info');
-      infoNode.addEventListener('click', (function() { resultContainer.infoHandler(imageMetadata); }));
-      container.appendChild(infoNode);
-
-
-      switch (imageMetadata.htmlTag) {
-        case 'img':
-          var maximizeNode = document.createElement('div');
-          maximizeNode.innerHTML = '&nbsp;';
-          maximizeNode.setAttribute('class', 'timeline-maximize');
-          maximizeNode.addEventListener('click', (function() { resultContainer.maximizeHandler(imageMetadata); }));
-          container.appendChild(maximizeNode);
-
-          var currentImage = document.createElement('img');
-          currentImage.src = signedUrl;
-          currentImage.crossOrigin = 'anonymous';
-          currentImage.setAttribute('class', 'timeline-img');
-          container.appendChild(currentImage);
-
-          self.sizeImage(imageMetadata, currentImage);
-
-          self.registerElement(resultContainer, {
-            'signedUrl': signedUrl,
-            'filename': currentFile,
-            'container': container,
-            'element':  currentImage,
-            'metadata': imageMetadata,
-            'type': 'image',
-            'exifdimensions': self.exifImageDimensions(imageMetadata)
-          });
-
-          // so far only images are allowed to be primary
-          var primaryEvtListener = function (ev) {
-            ev.preventDefault();
-            primaryRadio.click();
-            return false;
-          };
-          label01.addEventListener('contextmenu', primaryEvtListener);
-          label02.addEventListener('contextmenu', primaryEvtListener);
-          break;
-
-        case 'video':
-          var imgNode = document.createElement('img');
-          imgNode.setAttribute('class', 'timeline-video-placeholder nodemand');
-          container.appendChild(imgNode);
-
-          var vidNode = document.createElement('video');
-          vidNode.controls = 'controls';
-          vidNode.src = signedUrl;
-          vidNode.setAttribute('class', 'timeline-video');
-          container.appendChild(vidNode);
-
-          self.sizeVideo(imageMetadata, vidNode, imgNode);
-
-          self.registerElement(resultContainer, {
-            'signedUrl': signedUrl,
-            'filename': currentFile,
-            'container': container,
-            'element':  vidNode,
-            'metadata': imageMetadata,
-            'placeholder': imgNode,
-            'type': 'video'
-          });
-          break;
-          
-        default:
-          var maxSize = container.clientWidth;
-
-          var contentNode = document.createElement('div');
-          contentNode.setAttribute('class', 'unknown-file');
-          contentNode.setAttribute('title', 'unknown file type');
-          contentNode.setAttribute('alt', 'unknown file type');
-          contentNode.style.width = maxSize;
-          contentNode.style.height = maxSize;
-          contentNode.style.backgroundSize = parseInt(maxSize * 0.75) + 'px';
-          contentNode.innerHTML = '&nbsp;';
-          container.appendChild(contentNode);
-
-          checkbox.remove();
-          primaryRadio.remove();
-
-
-          break;
-      }
+      self.renderElement(resultContainer, cgc, currentFile, signedUrl, imageMetadata);
       
       resultContainer.currentGroupFileIdx++;
 
@@ -585,6 +502,201 @@
       self.LoadCurrentGroup(resultContainer);
     });
   }
+
+
+  // image metadata requirements
+  // {
+  //   'filenameNoPath': 'filename to be displayed',
+  //   'datetime': 'date time to be displayed',
+  //   'htmlTag': 'video' or 'img',
+  //   'width': size in px,
+  //   'height': size in px,
+  //   'orientation': 'TopLeft', 'TopRight', etc... to apply exif orientations on images -- this is currently disabled though
+  // }
+  TimelineTool.prototype.renderElement = function (resultContainer, groupElement, currentFile, url, metadata) {
+    var mySelectorId = selectorId++;
+    var self = this;
+
+    var cgc = groupElement;
+
+    var elementData = {
+      'signedUrl': url,
+      'filename': currentFile,
+      'metadata': metadata,
+      'groupElement': groupElement,
+    };
+
+    var container = document.createElement('div');
+    container.setAttribute('class', 'timeline-content');
+    container.setAttribute('id', 'timeline-container-' + mySelectorId);
+    cgc.appendChild(container);
+    elementData.container = container;
+
+    if (metadata.isGenerated) {
+      container.classList.add('timeline-isGenerated');
+    }
+
+    var checkbox = document.createElement('input');
+    checkbox.setAttribute('type', 'checkbox');
+    checkbox.setAttribute('class', 'timeline-selection');
+    checkbox.setAttribute('name', 'timeline-selections');
+    checkbox.setAttribute('id', 'timeline-selector-' + mySelectorId);
+    checkbox.setAttribute('data-timeline-container-id', container.getAttribute('id'));
+    container.appendChild(checkbox);
+
+    // css rules depend on this element existing even if it's not allowed to be selected
+    var primaryRadio = document.createElement('input');
+    primaryRadio.setAttribute('type', 'radio');
+    primaryRadio.setAttribute('class', 'timeline-primary');
+    primaryRadio.setAttribute('name', 'timeline-primary');
+    primaryRadio.setAttribute('id', 'timeline-primary-' + mySelectorId);
+    primaryRadio.setAttribute('data-timeline-container-id', container.getAttribute('id'));
+    container.appendChild(primaryRadio);
+
+    var label01 = document.createElement('label');
+    label01.setAttribute('for', checkbox.id);
+    label01.setAttribute('class', 'timeline-select');
+    container.appendChild(label01);
+
+    var filenameNode = document.createElement('div');
+    filenameNode.innerText = metadata.filenameNoPath;
+    filenameNode.setAttribute('class', 'timeline-filename');
+    label01.appendChild(filenameNode);
+
+    var label02 = document.createElement('label');
+    label02.setAttribute('for', checkbox.id);
+    label02.setAttribute('class', 'timeline-select');
+    container.appendChild(label02);
+
+    var dateNode = document.createElement('div');
+    dateNode.innerText = metadata.datetime;
+    dateNode.setAttribute('class', 'timeline-date');
+    label02.appendChild(dateNode);
+
+    var infoNode = document.createElement('div');
+    infoNode.innerHTML = '&nbsp;';
+    infoNode.setAttribute('class', 'timeline-info');
+    infoNode.addEventListener('click', (async function() { await resultContainer.infoHandler(elementData); }));
+    container.appendChild(infoNode);
+
+    if (metadata.isGenerated) {
+      var generatedNode = document.createElement('div');
+      generatedNode.innerText = metadata.generatedText;
+      generatedNode.setAttribute('class', 'timeline-generatedNote');
+      container.appendChild(generatedNode);
+    }
+
+    switch (metadata.htmlTag) {
+      case 'img':
+        var maximizeNode = document.createElement('div');
+        maximizeNode.innerHTML = '&nbsp;';
+        maximizeNode.setAttribute('class', 'timeline-maximize');
+        maximizeNode.addEventListener('click', (async function() { await resultContainer.maximizeHandler(elementData); }));
+        container.appendChild(maximizeNode);
+
+        var currentImage = document.createElement('img');
+        currentImage.src = url;
+        currentImage.crossOrigin = 'anonymous';
+        currentImage.setAttribute('class', 'timeline-img');
+        container.appendChild(currentImage);
+
+        self.sizeImage(metadata, currentImage);
+
+        elementData.element = currentImage;
+        elementData.type = 'image';
+        elementData.exifdimensions = self.exifImageDimensions(metadata);
+
+
+        // so far only images are allowed to be primary
+        var primaryEvtListener = function (ev) {
+          ev.preventDefault();
+          primaryRadio.click();
+          return false;
+        };
+        label01.addEventListener('contextmenu', primaryEvtListener);
+        label02.addEventListener('contextmenu', primaryEvtListener);
+        break;
+
+      case 'video':
+        var imgNode = document.createElement('img');
+        imgNode.setAttribute('class', 'timeline-video-placeholder nodemand');
+        container.appendChild(imgNode);
+
+        var frameExtractorNode = document.createElement('div');
+        frameExtractorNode.innerHTML = '&nbsp;';
+        frameExtractorNode.setAttribute('class', 'timeline-frameExtractor');
+        frameExtractorNode.addEventListener('click', (async function() { await resultContainer.frameExtractorHandler(elementData); }));
+        container.appendChild(frameExtractorNode);
+
+        var vidNode = document.createElement('video');
+        vidNode.controls = 'controls';
+        vidNode.setAttribute('class', 'timeline-video');
+        container.appendChild(vidNode);
+
+        if (metadata.videoPreviews) {
+          if (metadata.videoPreviews.mp4Preview) {
+            var mp4Node = document.createElement('source');
+            var mp4SignedUrl = self.s3.getSignedUrl('getObject', {
+              Key: metadata.videoPreviews.mp4Preview,
+              Bucket:self.Bucket,
+              Expires:self.ExpireDuration,
+              ResponseContentType: 'application/octet-stream'
+            });
+            mp4Node.src = mp4SignedUrl;
+            mp4Node.type = 'video/mp4';
+            vidNode.appendChild(mp4Node);
+          }
+          if (metadata.videoPreviews.webmPreview) {
+            var webmNode = document.createElement('source');
+            var webmSignedUrl = self.s3.getSignedUrl('getObject', {
+              Key: metadata.videoPreviews.webmPreview,
+              Bucket:self.Bucket,
+              Expires:self.ExpireDuration,
+              ResponseContentType: 'application/octet-stream'
+            });
+            webmNode.src = webmSignedUrl;
+            webmNode.type = 'video/webm';
+            vidNode.appendChild(webmNode);
+          }
+        }
+        var originalSource = document.createElement('source');
+        originalSource.src = url;
+        //vidNode.appendChild(originalSource);
+
+        self.sizeVideo(metadata, vidNode, imgNode);
+
+        elementData.element = vidNode;
+        elementData.placeholder = imgNode;
+        elementData.type = 'video';
+
+        break;
+        
+      default:
+        var maxSize = container.clientWidth;
+
+        var contentNode = document.createElement('div');
+        contentNode.setAttribute('class', 'unknown-file');
+        contentNode.setAttribute('title', 'unknown file type');
+        contentNode.setAttribute('alt', 'unknown file type');
+        contentNode.style.width = maxSize;
+        contentNode.style.height = maxSize;
+        contentNode.style.backgroundSize = parseInt(maxSize * 0.75) + 'px';
+        contentNode.innerHTML = '&nbsp;';
+        container.appendChild(contentNode);
+
+        checkbox.remove();
+        primaryRadio.remove();
+
+        elementData.element = contentNode;
+        elementData.type = 'unknown';
+
+        break;
+    }
+
+    self.registerElement(resultContainer, elementData);
+
+    return elementData;
+  };
 
   TimelineTool.prototype.getElementById = function (resultContainer, elementId) {
     var element = null;

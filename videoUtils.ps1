@@ -166,13 +166,85 @@ function VideoUtils-Edit-ColorsWithDefault {
 }
 
 function VideoUtils-Extract-Screenshot {
-  param ($videoIn, $timespan, $frames=1, $quality=2);
+  param ($videoIn, $timespan, $frames=1);
 
   if (($videoIn | measure).Count -gt 1) { throw 'only 1 video at a time please.'; }
 
   $timespan = [TimeSpan]$timespan;
 
-  $fileout = [Guid]::NewGuid().ToString('N') + '.jpg';
-  ffmpeg -ss $timespan.ToString('c') -i $videoIn -frames:v $frames -q:v $quality $fileout;
+  $fileoutPrefix = [Guid]::NewGuid().ToString('N') + '_';
+  $fileout = $fileoutPrefix + '%05d.png';
+  $null = ffmpeg -hide_banner -loglevel error -ss $timespan.ToString('c') -i $videoIn -frames:v $frames $fileout;
+
+  $result = (gci ($fileoutPrefix + '*.png'));
+  return $result;
 }
 
+<# The idea here is to generate a low res video suitable for a video editing proxy, but we need to preserve some special things like frame rate and aspect ratio so the original raw media can be a drop-in replacement later on #>
+function VideoUtils-Generate-Proxy {
+  param ($videoIn, $outPath=$null, $inPrefix=$null);
+
+  $filenameNoExt = [System.IO.Path]::GetFileNameWithoutExtension($videoIn);
+  $fileExt = [System.IO.Path]::GetExtension($videoIn);
+  $path = split-path -parent ([System.IO.Path]::GetFullPath($videoIn));
+
+  if (!$outPath) {
+    $outPath = $path;
+  }
+
+  if ($inPrefix -and $path.StartsWith($inPrefix)) {
+    $outPath = join-path $outPath ($path.Substring($inPrefix.Length));
+  }
+
+  $mp4Output = join-path $outPath ($filenameNoExt + '_proxy.mp4');
+ 
+  $ffprobeJson = (& ffprobe $videoIn -hide_banner -print_format json -show_streams -show_format | convertfrom-json);
+
+  $scaleArg = 'scale=''min(640,iw):-1''';
+  $filterArg = @($scaleArg)-join', ';
+
+  ffmpeg -hide_banner -loglevel error -i $videoIn -copy_unknown -map_metadata 0 -vf $filterArg -crf 30 -c:v libx264 -c:a aac $mp4Output
+
+  $result = @{
+    'mp4Proxy' = $mp4Output;
+    'original' = $videoIn;
+  };
+  return $result;
+}
+
+<# The idea here is to generate a low res video suitable for basic viewing on all web browser platforms #>
+function VideoUtils-Generate-WebPreviews {
+  param ($videoIn, $outPath=$null, $inPrefix=$null);
+
+  $filenameNoExt = [System.IO.Path]::GetFileNameWithoutExtension($videoIn);
+  $fileExt = [System.IO.Path]::GetExtension($videoIn);
+  $path = split-path -parent ([System.IO.Path]::GetFullPath($videoIn));
+
+  if (!$outPath) {
+    $outPath = $path;
+  }
+
+  if ($inPrefix -and $path.StartsWith($inPrefix)) {
+    $outPath = join-path $outPath ($path.Substring($inPrefix.Length));
+  }
+
+  $webmOutput = join-path $outPath ($filenameNoExt + '_preview.webm');
+  $mp4Output = join-path $outPath ($filenameNoExt + '_preview.mp4');
+ 
+  $scaleArg = 'scale=''min(640,iw):-1''';
+  $fpsArg = 'fps=fps=24';
+  $filterArg = @($scaleArg,$fpsArg)-join', ';
+
+  $audioBitRate = '96k';
+  $videoBitRate = '2M';
+
+  ffmpeg -hide_banner -loglevel error -i $videoIn -copy_unknown -map_metadata 0 -vf $filterArg -b:v $videoBitRate -b:a $audioBitRate -c:v libx264 -c:a aac $mp4Output
+  ffmpeg -hide_banner -loglevel error -i $videoIn -copy_unknown -map_metadata 0 -vf $filterArg -b:v $videoBitRate -b:a $audioBitRate -c:v libvpx-vp9 -c:a libopus $webmOutput
+
+  $result = @{
+    'webmPreview' = $webmOutput;
+    'mp4Preview' = $mp4Output;
+    'original' = $videoIn;
+  };
+  return $result;
+}

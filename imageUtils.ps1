@@ -2,6 +2,7 @@ function ImageUtils-Generate-FolderName() {
   $res = $null;
   do {
     $guid = [Guid]::NewGuid().ToByteArray();
+    $guid = ImageUtils-Hash-SHA256 $guid;
     $res = [Convert]::ToBase64String($guid, 0, 15);
   } while ($res.Contains('@') -or $res.Contains('+') -or $res.Contains('/'));
   return $res;
@@ -91,8 +92,9 @@ function ImageUtils-Edit-StripMeta($files) {
   }
 }
 function ImageUtils-Edit-ApplyBlur($files) {
-  $tmpFilename = [Guid]::NewGuid().ToString('N') + '.jpg';
   foreach ($file in $files) {
+    $extension = [System.IO.Path]::GetExtension($file);
+    $tmpFilename = [Guid]::NewGuid().ToString('N') + $extension;
     if ($file.FullName) {
       $file = $file.FullName;
     }
@@ -194,15 +196,16 @@ function ImageUtils-Generate-Srcsets($files) {
     }
 
     $ne = join-path (split-path $file -parent) ([System.IO.Path]::GetFileNameWithoutExtension( (split-path $file -leaf) ));
+    $extension = [System.IO.Path]::GetExtension((split-path $file -leaf));
 
     $srcSets = @(
-      @{ p=($ne+'_2048.jpg');r='2048x2048';}, 
-      @{ p=($ne+'_1024.jpg');r='1024x1024';}, 
-      @{ p=($ne+'_640.jpg');r='640x640';}, 
-      @{ p=($ne+'_320.jpg');r='320x320';}, 
-      @{ p=($ne+'_240.jpg');r='240x240';}, 
-      @{ p=($ne+'_160.jpg');r='160x160';}, 
-      @{ p=($ne+'_80.jpg');r='80x80';}
+      @{ p=($ne+'_2048'+$extension);r='2048x2048';}, 
+      @{ p=($ne+'_1024'+$extension);r='1024x1024';}, 
+      @{ p=($ne+'_640'+$extension);r='640x640';}, 
+      @{ p=($ne+'_320'+$extension);r='320x320';}, 
+      @{ p=($ne+'_240'+$extension);r='240x240';}, 
+      @{ p=($ne+'_160'+$extension);r='160x160';}, 
+      @{ p=($ne+'_80'+$extension);r='80x80';}
     );
 
     foreach ($srcset in $srcSets) {
@@ -285,10 +288,36 @@ function ImageUtils-Edit-PreprocessForWebsite($files, [switch]$pBlur)
         }
       }
 
-      $ais = gci -path (join-path $articleFolder '*.jpg') -recurse -force;
-      $ams = gci -path (join-path $articleFolder '*.mp4') -recurse -force;
-      $ajs = gci -path (join-path $articleFolder '*.json') -recurse -force;
+      $ais = @();
+      $ams = @();
+      $ajs = @();
 
+      $afs = gci -path (join-path $articleFolder) -recurse -force;
+      foreach ($af in $afs) {
+        $ext = [System.IO.Path]::GetExtension($af);
+
+        if ($ext -eq '.txt') {
+          continue;
+        }
+        if ($ext -eq '.json') {
+          $ajs += $af;
+          continue;
+        }
+
+        $isImage = [bool](& mediainfo --Inform="Image;%Format%" $file);
+        if ($isImage) {
+          $ais += $af;
+          continue;
+        }
+
+        $isVideo = [bool](& mediainfo --Inform="Video;%Format%" $file);
+        if ($isVideo) {
+          $ams += $af;
+          continue;
+        }
+
+        write-warning ('content skipped for article processing ' + $af);
+      } 
 
       $nais = @();
       foreach ($ai in $ais) {
@@ -864,7 +893,7 @@ function ImageUtils-Get-GalleryFiles($path) {
     $path = split-path -parent $path;
   }
 
-  return (gci (join-path $path '*.jpg')) + (gci (join-path $path '*.mp4'));
+  return (gci (join-path $path '*.jpg')) + (gci (join-path $path '*.mp4')) + (gci (join-path $path '*.png'));
 }
 function ImageUtils-Get-GalleryFilename($path, $name) {
   if (!$name) {
@@ -1080,4 +1109,97 @@ function ImageUtils-Copy-Parallel
   }
 
   $jobs | receive-job -wait -autoremovejob
+}
+
+function ImageUtils-Delete-Parallel
+{
+  param ($files, $dests, [int]$throttleLimit=5, [switch]$confirmDelete=$false);
+
+  if (!$confirmDelete) {
+    throw 'You must specify the confirmDelete flag to proceed with this operation.';
+  }
+
+  foreach ($file in $files) {
+    $parentPath = split-path $file -parent;
+    if ($parentPath -ne '.') {
+      throw ('This operation only works when specified with folders rooted at . and only a single level deep but found ' + $file);
+    }
+  }
+
+  $jobs=@();
+  foreach ($dest in $dests) {
+    $jobs += $files | % {
+      start-threadjob -throttlelimit $throttleLimit -ArgumentList $_,$dest {
+        param ($path, $dest);
+        
+        $deleteDest = split-path $path -leaf;
+        $deleteDest = join-path $dest $deleteDest;
+        write-host 'Delete path ' $path ' at location ' $deleteDest;
+        remove-item -recurse -force $deleteDest;
+        write-host 'Done Delete path ' $path ' at location ' $deleteDest;
+      }
+    };
+  }
+
+  $jobs | receive-job -wait -autoremovejob
+}
+
+# Given a folder, all of the partitions underneath it would generally be named in a specific way that this function identifies,
+# it's not bulletproof but works as long as working in a sandbox
+function ImageUtils-Select-PartitionsFromPath
+{
+  param ($path);
+  if ($path) {
+    $files = gci -path $path -Attributes Directory;
+  }else {
+    $files = gci -Attributes Directory;
+  }
+  $files = $files | where {$_.Name -match '[A-Za-z0-9]{16}'};
+  return $files;
+}
+
+# using a s3was timeline generator script as a baseline, this will identify the correct root file (the main thumbnail) for an article
+# it wont work if you arent naming your root files as content_###.jpg though, definitley not bulletproof
+function ImageUtils-Select-FilesFromPartitions
+{
+  param ($paths);
+
+  $x4 = @(); 
+  foreach ($path in $paths) { 
+    $x4 += (gci $path | where { $_.Name -match 'content_[0-9]+.jpg'} | select -first 1); 
+    $x4 += (gci $path | where { $_.Name -match 'content_[0-9]+.png'} | select -first 1); 
+  } 
+  $x4 = $x4 | sort-object { $_.name } | select -expandproperty fullname ;
+  return $x4;
+}
+
+function ImageUtils-Change-ImageDate
+{
+  param ($images, [DateTime]$date);
+
+  $dateStr = $date.ToString('yyyy:MM:dd HH:mm:ss');
+  foreach ($image in $images) {
+      exiftool "-CreateDate=$dateStr" "-DateTimeOriginal=$dateStr" "-ModifyDate=$dateStr" $image;
+  }
+}
+
+function ImageUtils-Convert-ToJpeg
+{
+  param ($inFile);
+
+  if ( ($inFile | measure).Count -gt 1) {
+    throw 'please pass one file at a time';
+  }
+
+  if ( [System.IO.Path]::GetFileExtension($inFile) -eq '.jpg') {
+    write-warning ('file ' + $inFile + ' is already a jpg and was not modified during ImageUtils-Convert-ToJpeg');
+    return $inFile;
+  }
+
+  $outFile = split-path -parent $inFile;
+  $outFile = join-path ($outFile) ([System.IO.Path]::GetFileNameWithoutExtension($inFile) + '.jpg');
+
+  convert $inFile -strip -interlace Plane -gaussian-blur 0.05 -quality 85% $outFile;
+
+  return $outFile;
 }
