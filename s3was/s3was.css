@@ -20,6 +20,12 @@
 --cardinal: rgba(173, 52, 62, 1);
  */
 
+#is_signedin {
+  position: relative;
+  max-height: 0px;
+  max-width: 0px;
+  opacity: 0;
+}
 
 .timeline-content {
   height:20%;

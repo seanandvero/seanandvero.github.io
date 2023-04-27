@@ -1,7 +1,10 @@
 <html>
   <head>
+    <script src="auth0-spa-js.production.js"></script>
+    <script src="auth0.min.js"></script>
     <script src="demandjs.min.js"></script>
     <script src="aws-sdk.min.js"></script>
+    <script src="frontend_auth.js"></script>
     <script src="hotkeys.min.js"></script>
     <script src="litepicker.min.js"></script>
     <script src="masonflex.min.js"></script>
@@ -13,6 +16,7 @@
     <link rel="stylesheet" href="framePicker.css" />
   </head>
   <body>
+    <input type="checkbox" name="is_signedin" id="is_signedin" />
     <div class="instructions">
       <dl>
         <dt>F1 Hotkey</dt>
@@ -27,6 +31,11 @@
         <form>
           <input type="file" id="timeline-settings" />
         </form>
+      </div>
+      <div style="display:none;">
+        <div>TODO: This is not implemented yet</div>
+        <div>Sign-in through global authentication provider:</div>
+        <a class="pure-button pure-button-primary" href="javascript:FrontendAuth.signin();">Sign In With Auth0</a> 
       </div>
     </div>
     <div id="filterScreen" style="display:none;">
@@ -549,9 +558,12 @@
             result += '$null = move-item $outFile $primaryFile;';
             result += 'if (!$refs.ContainsKey($extractSource)) {$refs[$extractSource] = @();}';
             result += 'write-host (\'attach metadata to primary \' + $primaryFile);';
+            result += '$null = TimelineUtils-Configure-PathPrefix $destPath;';
             result += '$metadata = TimelineUtils-Attach-MetadataToFile $primaryFile;';
             result += '$null = TimelineUtils-Generate-MetadataFilesForFile $metadata;';
             result += '$primarySource = $extractSource;';
+            result += '$allFiles += $primaryFile;';
+            result += '$srcFiles += $primarySource;';
           } else {
             if (!primary.filename) {
               throw 'unable to generate script due to invalid primary';
@@ -611,6 +623,7 @@
                 result += '$null = move-item $outFile $extractDest;';
                 result += '$refs[$primarySource] += $extractSource;'
                 result += 'write-host (\'attach metadata to selection \' + $extractDest);';
+                result += '$null = TimelineUtils-Configure-PathPrefix $contentFolder;';
                 result += '$metadata = TimelineUtils-Attach-MetadataToFile $extractDest;';
                 result += '$null = TimelineUtils-Generate-MetadataFilesForFile $metadata;';
               } else {

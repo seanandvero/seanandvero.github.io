@@ -248,3 +248,35 @@ function VideoUtils-Generate-WebPreviews {
   };
   return $result;
 }
+
+function VideoUtils-Generate-WebFormats {
+  param ($videoIn, $outPath=$null, $inPrefix=$null);
+
+  $filenameNoExt = [System.IO.Path]::GetFileNameWithoutExtension($videoIn);
+  $fileExt = [System.IO.Path]::GetExtension($videoIn);
+  $path = split-path -parent ([System.IO.Path]::GetFullPath($videoIn));
+
+  if (!$outPath) {
+    $outPath = $path;
+  }
+
+  if ($inPrefix -and $path.StartsWith($inPrefix)) {
+    $outPath = join-path $outPath ($path.Substring($inPrefix.Length));
+  }
+
+  $webmOutput = join-path $outPath ($filenameNoExt + '_webFormat.webm');
+  $mp4Output = join-path $outPath ($filenameNoExt + '_webFormat.mp4');
+ 
+  $scaleArg = 'scale=''min(1920,iw):-1''';
+  $filterArg = @($scaleArg)-join', ';
+
+  ffmpeg -hide_banner -loglevel error -i $videoIn -copy_unknown -map_metadata 0 -vf $filterArg -c:v libx264 -c:a aac $mp4Output
+  ffmpeg -hide_banner -loglevel error -i $videoIn -copy_unknown -map_metadata 0 -vf $filterArg -c:v libvpx-vp9 -c:a libopus $webmOutput
+
+  $result = @{
+    'webmPreview' = $webmOutput;
+    'mp4Preview' = $mp4Output;
+    'original' = $videoIn;
+  };
+  return $result;
+}

@@ -559,7 +559,7 @@
     this.clearContent();
 
     var fps = null;
-    if (!fps && metadata.exifTool.VideoFrameRate) {
+    if (!fps && metadata.exifTool && metadata.exifTool.VideoFrameRate) {
       fps = parseInt(metadata.exifTool.VideoFrameRate);
     }
     if (!fps && metadata.ffprobe) {
@@ -574,7 +574,7 @@
     }
 
     var endTime;
-    if (!endTime && metadata.exifTool.Duration) {
+    if (!endTime && metadata.exifTool && metadata.exifTool.Duration) {
       endTime = parseFloat(metadata.exifTool.Duration);
     }
     if (!endTime && metadata.ffprobe) {

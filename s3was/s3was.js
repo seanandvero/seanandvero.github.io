@@ -310,7 +310,8 @@
   TimelineTool.prototype.GetNextTimelineGroup = function(resultContainer) {
     if (resultContainer.cancel) { return; }
     var self = this;
-    if (resultContainer.currentGroupSet > resultContainer.maxGroup) {
+    if (resultContainer.currentGroupSet > resultContainer.maxGroup ||
+        resultContainer.currentGroupSet <= 0) {
       throw 'there are no remaining timeline group sets to read';
     }
 
@@ -322,7 +323,7 @@
     }, function(err,timelineData) {
       if (err) { 
         console.log(err, err.stack); // an error occurred
-        throw 'failed loading timeline groups';
+        throw ('failed loading timeline groups file '+ fname);
       }
 
       var content = new TextDecoder().decode(timelineData.Body);
@@ -661,7 +662,7 @@
         }
         var originalSource = document.createElement('source');
         originalSource.src = url;
-        //vidNode.appendChild(originalSource);
+        vidNode.appendChild(originalSource);
 
         self.sizeVideo(metadata, vidNode, imgNode);
 

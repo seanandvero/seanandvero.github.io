@@ -227,6 +227,8 @@ function ImageUtils-Edit-PreprocessForWebsite($files, [switch]$pBlur)
     }
     $file = $file.FullName;
 
+    write-host ('preprocess file ' + $file);
+
     $pwFile = $file + '.password.txt';
     if (test-path $pwFile) {
       $blur = $true;
@@ -240,6 +242,7 @@ function ImageUtils-Edit-PreprocessForWebsite($files, [switch]$pBlur)
     $fileNoExt = [System.IO.Path]::GetFileNameWithoutExtension($filenameOnly);
     $articleFolder = join-path $parent $fileNoExt;
     
+    write-host ('apply exif ' + $file);
     ImageUtils-Edit-ApplyExif $file;
 
     $articleRoot = $foldername;
@@ -279,6 +282,7 @@ function ImageUtils-Edit-PreprocessForWebsite($files, [switch]$pBlur)
     if (test-path $articleFolder) {
       $true | out-file (join-path $articleRoot ($filenameOnly + '.hasArticle.txt')) -NoNewline;
 
+      write-host 'process zip';
       $zips = (join-path $articleFolder '*.zip');
       if (test-path $zips) {
         foreach ($zip in $zips) {
@@ -292,8 +296,9 @@ function ImageUtils-Edit-PreprocessForWebsite($files, [switch]$pBlur)
       $ams = @();
       $ajs = @();
 
-      $afs = gci -path (join-path $articleFolder) -recurse -force;
+      $afs = gci -path $articleFolder -recurse -force;
       foreach ($af in $afs) {
+        write-host ('process af ' + $af);
         $ext = [System.IO.Path]::GetExtension($af);
 
         if ($ext -eq '.txt') {
@@ -304,13 +309,13 @@ function ImageUtils-Edit-PreprocessForWebsite($files, [switch]$pBlur)
           continue;
         }
 
-        $isImage = [bool](& mediainfo --Inform="Image;%Format%" $file);
+        $isImage = [bool](& mediainfo --Inform="Image;%Format%" $af);
         if ($isImage) {
           $ais += $af;
           continue;
         }
 
-        $isVideo = [bool](& mediainfo --Inform="Video;%Format%" $file);
+        $isVideo = [bool](& mediainfo --Inform="Video;%Format%" $af);
         if ($isVideo) {
           $ams += $af;
           continue;
@@ -321,6 +326,7 @@ function ImageUtils-Edit-PreprocessForWebsite($files, [switch]$pBlur)
 
       $nais = @();
       foreach ($ai in $ais) {
+        write-host ('process ai ' + $ai);
         # +1 here is for the trailing '/' which is not present on articlefolder var
         $newPath = $ai.FullName.Substring($articleFolder.Length + 1);
         $newPath = join-path $articleRoot $newPath;
@@ -336,6 +342,8 @@ function ImageUtils-Edit-PreprocessForWebsite($files, [switch]$pBlur)
       
       $nams = @();
       foreach ($am in $ams) {
+        write-host ('process am ' + $am);
+
         # +1 here is for the trailing '/' which is not present on articlefolder var
         $newPath = $am.FullName.Substring($articleFolder.Length + 1);
         $newPath = join-path $articleRoot $newPath;
@@ -350,6 +358,7 @@ function ImageUtils-Edit-PreprocessForWebsite($files, [switch]$pBlur)
       }
 
       foreach ($aj in $ajs) {
+        write-host ('process aj ' + $aj);
         $newPath = $aj.FullName.Substring($articleFolder.Length + 1);
         $newPath = join-path $articleRoot $newPath;
 
@@ -361,7 +370,9 @@ function ImageUtils-Edit-PreprocessForWebsite($files, [switch]$pBlur)
         cp $aj.FullName $newPath;
       }
 
+      write-host 'apply exif';
       ImageUtils-Edit-ApplyExif $nais;
+      write-host 'apply srcsets';
       ImageUtils-Generate-Srcsets $nais;
 
       $articleGallery = $nais + $nams;
@@ -1086,6 +1097,7 @@ function ImageUtils-Batch-Pipeline
 
   $parts2 = $parts | sort-object { split-path -leaf $_; } -Descending;
 
+  write-host 'generate index html';
   ImageUtils-Generate-IndexHtml $parts2 | out-file 'index.html';
 
   return ($parts | split-path -parent);
