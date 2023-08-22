@@ -7,6 +7,7 @@
     this.cancel = false;
     this.infoHandler = function(elementData){};
     this.maximizeHandler = function(elementData){};
+    this.reloadHandler = function(currentImage, elementData) {};
     this.frameExtractorHandler = function(elementData){};
 
     if (options && options.hasOwnProperty('infoHandler')) {
@@ -14,6 +15,9 @@
     }
     if (options && options.hasOwnProperty('maximizeHandler')) {
       this.maximizeHandler = options.maximizeHandler;
+    }
+    if (options && options.hasOwnProperty('reloadHandler')) {
+      this.reloadHandler = options.reloadHandler;
     }
     if (options && options.hasOwnProperty('frameExtractorHandler')) {
       this.frameExtractorHandler = options.frameExtractorHandler;
@@ -107,6 +111,8 @@
       }
     }
 
+    // TODO: What should we do here if element is not in documeniz
+    if (videoNode.parentNode === null) { return; }
     var maxSize = videoNode.parentNode.clientWidth;
 
     var vidcvs = document.createElement('canvas');
@@ -595,11 +601,17 @@
         maximizeNode.addEventListener('click', (async function() { await resultContainer.maximizeHandler(elementData); }));
         container.appendChild(maximizeNode);
 
+        var reloadNode = document.createElement('div');
+        reloadNode.innerHTML = '&nbsp;';
+        reloadNode.setAttribute('class', 'timeline-reload');
+        container.appendChild(reloadNode);
+
         var currentImage = document.createElement('img');
         currentImage.src = url;
         currentImage.crossOrigin = 'anonymous';
         currentImage.setAttribute('class', 'timeline-img');
         container.appendChild(currentImage);
+        reloadNode.addEventListener('click', (async function() { await resultContainer.reloadHandler(currentImage, elementData); }));
 
         self.sizeImage(metadata, currentImage);
 

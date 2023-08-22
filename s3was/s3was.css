@@ -444,6 +444,23 @@ background-repeat:no-repeat;
   max-height:50%;
   overflow:scroll;
 }
+.timeline-reload {
+  position: absolute;
+  top: 0;
+  right: 70px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  z-index: 100;
+   -webkit-user-select: none;                                                     
+  -moz-user-select: none;                                                        
+  -ms-user-select: none;                                                         
+  user-select: none; 
+  background-size: 19px;
+  background-color: #00000055;
+  border-radius: 2px;
+background-image: url("data:image/svg+xml,%3Csvg fill='%23ecba82ff' height='800px' width='800px' version='1.1' id='Capa_1' xmlns='http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg' xmlns%3Axlink='http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink'%0A   viewBox='0 0 489.533 489.533' xml%3Aspace='preserve'%3E%0A%3Cg%3E%0A  %3Cpath d='M268.175%2C488.161c98.2-11%2C176.9-89.5%2C188.1-187.7c14.7-128.4-85.1-237.7-210.2-239.1v-57.6c0-3.2-4-4.9-6.7-2.9%0A    l-118.6%2C87.1c-2%2C1.5-2%2C4.4%2C0%2C5.9l118.6%2C87.1c2.7%2C2%2C6.7%2C0.2%2C6.7-2.9v-57.5c87.9%2C1.4%2C158.3%2C76.2%2C152.3%2C165.6%0A    c-5.1%2C76.9-67.8%2C139.3-144.7%2C144.2c-81.5%2C5.2-150.8-53-163.2-130c-2.3-14.3-14.8-24.7-29.2-24.7c-17.9%2C0-31.9%2C15.9-29.1%2C33.6%0A    C49.575%2C418.961%2C150.875%2C501.261%2C268.175%2C488.161z'%2F%3E%0A%3C%2Fg%3E%0A%3C%2Fsvg%3E");
+}
 .timeline-maximize {
   position: absolute;
   top: 0;

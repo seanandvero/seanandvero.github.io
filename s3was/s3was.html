@@ -212,6 +212,9 @@
       contentInfoClose2.addEventListener('click', function() {
         contentInfoPanel.style.display = 'none';
       });
+      var contentReloadHandler = function (currentImage, elementData) {
+        window.DemandJSDemand.reloadTarget(currentImage);
+      }
       var contentInfoHandler = function(elementData) {
         var meta = elementData.metadata;
         var idx = 1;
@@ -292,6 +295,7 @@
               reverseOrder: false
             },
             infoHandler: contentInfoHandler,
+            reloadHandler: contentReloadHandler,
             frameExtractorHandler: frameExtractorHandler
           };
           datePicker.setDateRange(storageOptions.filter.minDate, storageOptions.filter.maxDate);
@@ -342,6 +346,7 @@
             reverseOrder: sortReverseControl.checked
           },
           infoHandler: contentInfoHandler,
+          reloadHandler: contentReloadHandler,
           frameExtractorHandler: frameExtractorHandler
         };
 
