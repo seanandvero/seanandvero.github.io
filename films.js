@@ -1,14 +1,31 @@
 (function(module) {
   var hashList = {};
   var oldHash = null;
+  var forcingRefresh = false;
   var onHashChange = function () {
+    var shouldRefresh = false;
     if (oldHash && window.location.hash !== oldHash) {
       onCloseFilm(oldHash);
     }
     if (hashList.hasOwnProperty(window.location.hash)) {
       initializePlayer(hashList[window.location.hash]);
+      shouldRefresh = !forcingRefresh;
     }
     oldHash = window.location.hash;
+
+    if (shouldRefresh) {
+      var finalHash = oldHash;
+      forcingRefresh = true;
+      setTimeout(function() {
+        window.location.hash = '';
+        setTimeout(function() {
+          window.location.hash = finalHash;
+          setTimeout(function() {
+            forcingRefresh = false;
+          }, 0);
+        }, 0);
+      }, 0);
+    }
   }
 
   addEventListener('hashchange', event=> {
