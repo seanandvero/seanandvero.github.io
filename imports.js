@@ -67,4 +67,9 @@
   _import('photogallery_swipe.js');
   _import('long-press-event.min.js');
   _import('photoalbum_doubletap.js');
+  _import('films.js');
+
+  _import('dashjs/dash.all.min.js');
+  _import('dashjs/controlbar.js');
+  _css('dashjs/controlbar.css');
 })();
