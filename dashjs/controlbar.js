@@ -72,7 +72,7 @@ var ControlBar = function (dashjsMediaPlayer, displayUTCTimeCodes) {
         thumbnailContainer,
         thumbnailElem,
         thumbnailTimeLabel,
-        idSuffix,
+        idPrefix,
         seekbarBufferInterval;
 
     //************************************************************************************
@@ -85,8 +85,8 @@ var ControlBar = function (dashjsMediaPlayer, displayUTCTimeCodes) {
     // Maximum scale so small thumbs are not scaled too high
     var maximumScale = 2;
 
-    var initControls = function (suffix) {
-        idSuffix = suffix;
+    var initControls = function (prefix) {
+        idPrefix = prefix;
         videoController = document.getElementById(getControlId('videoController'));
         playPauseBtn = document.getElementById(getControlId('playPauseBtn'));
         bitrateListBtn = document.getElementById(getControlId('bitrateListBtn'));
@@ -128,7 +128,7 @@ var ControlBar = function (dashjsMediaPlayer, displayUTCTimeCodes) {
     };
 
     var getControlId = function (id) {
-        return id + (idSuffix ? idSuffix : '');
+        return (idPrefix ? idPrefix : '') + id;
     };
 
     var setPlayer = function (player) {
@@ -963,7 +963,7 @@ var ControlBar = function (dashjsMediaPlayer, displayUTCTimeCodes) {
         setPlayer: setPlayer,
         removeMenu: removeMenu,
 
-        initialize: function (suffix) {
+        initialize: function (prefix) {
 
             if (!player) {
                 throw new Error('Please pass an instance of MediaPlayer.js when instantiating the ControlBar Object');
@@ -975,7 +975,7 @@ var ControlBar = function (dashjsMediaPlayer, displayUTCTimeCodes) {
 
             displayUTCTimeCodes = displayUTCTimeCodes === undefined ? false : displayUTCTimeCodes;
 
-            initControls(suffix);
+            initControls(prefix);
             video.controls = false;
             videoContainer = video.parentNode;
             captionBtn.classList.add('hide');
