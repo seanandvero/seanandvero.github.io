@@ -37,7 +37,9 @@
     if (content.initialized) { return; }
     if (!content.video) { throw 'video not assigned on content'; }
 
-    if (content.filmUrlHls && content.video.canPlayType('application/vnd.apple.mpegurl')) {
+    var isAndroid = /(android)/i.test(navigator.userAgent);
+
+    if (!isAndroid && content.filmUrlHls && content.video.canPlayType('application/vnd.apple.mpegurl')) {
       content.video.src = content.filmUrlHls;
       content.contentRoot.querySelector('.video-controller').style.display = 'none';
     } else {
