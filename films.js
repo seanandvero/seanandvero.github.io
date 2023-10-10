@@ -1,6 +1,6 @@
-(function(module) {
-  var hashList = {};
-  var oldHash = null;
+(function(module) { 
+  var hashList = {}; 
+  var oldHash = null; 
   var forcingRefresh = false;
   var onHashChange = function () {
     var shouldRefresh = false;
@@ -51,15 +51,14 @@
           'logLevel': dashjs.Debug.LOG_LEVEL_NONE
         }
       });
-      /* //FASTSWITCH was braeking android chrome, may adversely affect other browsers, so disabled for now, possibly look into enabling for known compatible browsers only?
+      //FASTSWITCH was braeking android chrome, may adversely affect other browsers, so disabled for now, possibly look into enabling for known compatible browsers only?
       player.updateSettings({
         'streaming': {
           'buffer': {
-            'fastSwitchEnabled': true
+            'fastSwitchEnabled': false
           }
         }
       });
-      */
       player.setAutoPlay(false);
       var controlbar = new ControlBar(player);
       controlbar.initialize(content.filmIdPrefix);
