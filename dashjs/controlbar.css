@@ -81,9 +81,13 @@
 }
 
 .video-controller {
+    position: absolute;
     min-height:35px;
     z-index: 2147483646;
     overflow:hidden;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }
 
 .video-controller-fullscreen {
@@ -204,6 +208,10 @@
     overflow: auto;
     overflow-y: hidden;
     overflow-x: hidden;
+}
+.seekContainer * { 
+  flex-grow: 2;
+  min-width: 4em;
 }
 
 input[type="range"] {

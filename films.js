@@ -96,7 +96,7 @@
     }
     hashList[content.key] = content;
 
-    document.write("<div class=\"photo-box u-1\" id=\"" + content.thumbId + "\"><a class=\"article\" href=\"#dunes_2023_film\">");
+    document.write("<div class=\"photo-box u-1\" id=\"" + content.thumbId + "\"><a class=\"article\" href=\"#" + content.filmId + "\">");
     document.write("  <img crossorigin=\"anonymous\" src=\"" + thumbUrl + "\" alt=\"" + thumbAlt + "\">");
     document.write("<\/a><\/div>");
     document.write("<div class=\"text-box u-1 full-row article\" id=\"" + content.filmId + "\">");

@@ -344,6 +344,7 @@
         captionObs.observe(document.body, { subtree: true, childList: true, attributeFilter: ['alt'], attributes: true });
 
         var filterSelectorText = 'body > div > div.pure-g > .photo-box > label > img' + ',' + 
+                                 'body > div > div.pure-g > .photo-box > a > img' + ',' + 
                                  'body > div > div.pure-g > .photo-box > img';
 
         var executePhotoFilter = function () {
@@ -354,7 +355,7 @@
           }
           for (var i = 0; i < filterable.length; i++) {
 						var target = filterable[i].parentElement;
-            if (target.nodeName === 'LABEL') {
+            if (target.nodeName === 'LABEL' || target.nodeName == 'A') {
                target = target.parentElement;
             }
 						var targetTag = filterable[i].getAttribute('data-tags');
@@ -486,7 +487,15 @@
           </div>
         </div>
 
-<link rel="prefetch" class="demand demandautoload" crossorigin="anonymous" type="text/html" href="dunes_2023.html" data-demand="full-row" />
+        <link rel="prefetch" class="demand demandautoload" crossorigin="anonymous" type="text/html" href="dunes_2023.html" data-demand="full-row" />
+<link rel="prefetch" class="demand demandautoload" crossorigin="anonymous" type="text/html" href="https://share01.rsndev.com/valentina_ski_202304/valentina_ski_202304.html" data-demand="full-row" />
+<link rel="prefetch" class="demand demandautoload" crossorigin="anonymous" type="text/html" href="https://share01.rsndev.com/grandslam_2023_crossfit/grandslam_2023_crossfit.html" data-demand="full-row" />
+<link rel="prefetch" class="demand demandautoload" crossorigin="anonymous" type="text/html" href="https://share01.rsndev.com/valentina_parkour_2022/valentina_parkour_2022.html" data-demand="full-row" />
+<link rel="prefetch" class="demand demandautoload" crossorigin="anonymous" type="text/html" href="https://share01.rsndev.com/sean_parkour_202209/sean_parkour_202209.html" data-demand="full-row" />
+<link rel="prefetch" class="demand demandautoload" crossorigin="anonymous" type="text/html" href="https://share01.rsndev.com/sean_parkour_202208/sean_parkour_202208.html" data-demand="full-row" />
+<link rel="prefetch" class="demand demandautoload" crossorigin="anonymous" type="text/html" href="https://share01.rsndev.com/sean_parkour_202207/sean_parkour_202207.html" data-demand="full-row" />
+<link rel="prefetch" class="demand demandautoload" crossorigin="anonymous" type="text/html" href="https://share01.rsndev.com/sean_parkour_202206/sean_parkour_202206.html" data-demand="full-row" />
+<link rel="prefetch" class="demand demandautoload" crossorigin="anonymous" type="text/html" href="valentina_parkour_2021.html" data-demand="full-row" />
 
 <link rel="prefetch" class="demand" crossorigin="anonymous" type="text/html" href="grid_2021.html" data-demand="full-row" />
 <link rel="prefetch" class="demand" crossorigin="anonymous" type="text/html" href="grid_2020.html" data-demand="full-row" />

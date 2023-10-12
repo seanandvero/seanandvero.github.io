@@ -110,6 +110,7 @@
       height: 250px;
   }
   .photo-box > label > img,
+  .photo-box > a > img,
   .photo-box > img {
       width:100% !important;
       height:100% !important;
@@ -175,6 +176,7 @@
       height: 250px;
   }
   .photo-box > label > img,
+  .photo-box > a > img,
   .photo-box > img {
       width:100% !important;
       height:100% !important;
@@ -485,6 +487,7 @@ label.photoViewer:hover:after {
     text-align: center;
 }
 .photo-box > label > img,
+.photo-box > a > img,
 .photo-box > img {
     max-width: 100%;
     height: auto;
@@ -807,14 +810,34 @@ div.exifImage iframe {
 }
 
 .filmContainer {
+  position: relative;
   width: 75%;
   max-height:100%;
   clear: both;
   margin-left: auto;
   margin-right: auto;
+  top: -4em;
 }
 .filmContainer video {
   position: relative;
   width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.filmContainer video:fullscreen {
+  height: auto;
 }
 
+.film-downloads {
+  overflow: hidden;
+}
+.film-downloads ul {
+  display: inline;
+  list-style-type: none;
+  margin-top: 5px;
+}
+.film-downloads ul li {
+  float: left;
+  margin-left: 2em;
+  margin-top: 5px;
+}
