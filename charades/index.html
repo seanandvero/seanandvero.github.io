@@ -1,0 +1,321 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sean And Vero - Charades</title>
+    <link rel="stylesheet" href="fonts.css" />
+    <style type="text/css">
+      #categorySelector {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        align-content: space-around;
+      }
+      #categorySelector .category {
+        flex-basis: 15%;
+        width: 15%;
+        height: 15%;
+        overflow:hidden;
+      }
+      #categorySelector .category img {
+        width: 100%;
+        height: 100%;
+      }
+      .actionPanel {
+        display: flex;
+        justify-content: space-around;
+        align-content: space-around;
+        column-gap: 20%;
+      }
+      .actionPanel .action {
+        display: inline-block;
+        overflow:hidden;
+        margin-top: 1em;
+        max-height: 25vh;
+      }
+      .actionPanel .action img {
+        width: 100%;
+        height: 100%;
+      }
+      body, input {
+        font-family: 'Joystix Monospace';
+      }
+      input {
+        border: none;
+      }
+      #charadeImagePanel {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display:flex;
+        flex-direction: column;
+        z-index: 100;
+        background: white;
+      }
+      #charadeImagePanel #charadeImageDescription {
+        margin-left: 3em; margin-right: 3em;
+        margin-top: 1em;
+        margin-bottom: 1em;
+        font-size: 14pt;
+      }
+      #charadeImagePanel #charadeRoundsLabel {
+        display: inline-block;
+        margin-left: auto; margin-right: auto;
+        margin-top: 1em;
+        margin-bottom: 1em;
+        font-size: 12pt;
+      }
+      #charadeImagePanel #charadeImageLabel {
+        display: inline-block;
+        margin-left: auto; margin-right: auto;
+        margin-top: 1em;
+        margin-bottom: 1em;
+        font-size: 18pt;
+      }
+      #charadeImagePanel #charadeImage {
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 50%;
+        max-height: 50%;
+      }
+      input.visibility_input:checked + * {
+        display: none !important;
+      }
+      .hidden {
+        visibility:hidden;
+        width: 1px;
+        height: 1px;
+        position: absolute:
+        top: -1;
+        left: -1;
+      }
+      #charadeScorePanel {
+        display: flex;
+        overflow: hidden;
+        width: 100%;
+        flex-direction: column;
+        row-gap: 0.5em;
+      }
+      #charadeScorePanel .roundText{
+        margin-bottom: 0.25em;
+      }
+      #charadeScorePanel .outcomes{
+        margin-left: 2em;
+        flex-grow: 1;
+        display: flex;
+        flex-basis: 65%;
+        overflow: hidden;
+        column-gap: 1.5em;
+        height: 3em;
+      }
+      #charadeScorePanel .outcomes .correct, 
+      #charadeScorePanel .outcomes .incorrect,
+      #charadeScorePanel .outcomes .cancelled {
+        border-radius: 1em;
+        flex-shrink:1;
+      }
+      #charadeScorePanel .outcomes .correct img, 
+      #charadeScorePanel .outcomes .incorrect img,
+      #charadeScorePanel .outcomes .cancelled img {
+        width: 100%;
+        height: 100%;
+      }
+      #charadeScorePanel .outcomes .correct {
+        border: 4px solid #0F0;
+      }
+      #charadeScorePanel .outcomes .incorrect {
+        border: 4px solid #F00;
+      }
+      #charadeScorePanel .outcomes .cancelled {
+        border: 4px solid #00F;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Sean And Vero Charades!</h1>
+    <h4>Select a category below. Act out each theme for your audience while they try to guess it.</h4>
+
+    <input class="hidden visibility_input" type="checkbox" name="categorySelectorPanel_visibility" id="categorySelectorPanel_visibility" />
+    <div id="categorySelectorPanel">
+      <div class="input" id="charadeRounds" style="margin-left: 2em;margin-bottom:2em;">
+        <input type="number" name="numRounds" id="numRounds" value="10" style="width: 3em;"></input><label for="numRounds">Rounds</label>
+      </div>
+      <div id="categorySelector">
+      </div>
+    </div>
+
+    <input class="hidden visibility_input" type="checkbox" name="charadeImagePanel_visibility" id="charadeImagePanel_visibility" checked />
+    <div id="charadeImagePanel">
+      <div id="charadeImageLabel"></div>
+      <img id="charadeImage" />
+      <div id="charadeRoundsLabel"></div>
+      <div id="charadeImageDescription"></div>
+      <div class="actionPanel">
+        <div class="action"><a href="javascript:void(0);" class="incorrect"><img src="https://share01.rsndev.com/charades/next_incorrect.png" alt="Incorrect Next"/></a></div>
+        <div class="action"><a href="javascript:void(0);" class="cancel"><img src="https://share01.rsndev.com/charades/cancel.png" alt="Cancel"/></a></div>
+        <div class="action"><a href="javascript:void(0);" class="correct"><img src="https://share01.rsndev.com/charades/next_correct.png" alt="Correct Next"/></a></div>
+      </div>
+    </div>
+
+    <input class="hidden visibility_input" type="checkbox" name="charadeScorePanel_visibility" id="charadeScorePanel_visibility" checked />
+    <div id="charadeScorePanel">
+    </div>
+
+    <script>
+      function formatAMPM(date) {
+          var hours = date.getHours();
+          var minutes = date.getMinutes();
+          var ampm = hours >= 12 ? 'pm' : 'am';
+          hours = hours % 12;
+          hours = hours ? hours : 12; // the hour '0' should be '12'
+          minutes = minutes < 10 ? '0'+minutes : minutes;
+          var strTime = hours + ':' + minutes + ' ' + ampm;
+          return strTime;
+      }
+
+      let gameState = {};
+      const categories = {};
+      const categorySelector = document.getElementById('categorySelector');
+
+      function nextGameAction() {
+        gameState.total++;
+
+        var targetActions = gameState.targetActions;
+        var nextAction = parseInt(Math.random() * targetActions.length);
+        var action = targetActions[nextAction];
+
+        gameState.currentAction = action;
+
+        document.getElementById('charadeImage').src = 'https://share01.rsndev.com/charades/' + action.imagePath.toLowerCase();
+        document.getElementById('charadeImageLabel').innerText = action["action name"];
+        document.getElementById('charadeImageDescription').innerText = action.description;
+        document.getElementById('charadeRoundsLabel').innerText = gameState.total + '/' + gameState.rounds;
+
+      }
+      function startGame(category) {
+        var targetActions = category.actions;
+        gameState.targetActions = targetActions;
+        gameState.correct = 0;
+        gameState.incorrect = 0;
+        gameState.total = 0;
+        gameState.rounds = parseInt(document.getElementById('numRounds').value);
+        gameState.outcomes = [];
+        gameState.startTime = new Date;
+
+      document.getElementById('charadeImagePanel_visibility').checked = false;
+      document.getElementById('categorySelectorPanel_visibility').checked = true;
+
+      nextGameAction();
+    }
+    function finishGame() {
+      document.getElementById('categorySelectorPanel_visibility').checked = false;
+        document.getElementById('charadeImagePanel_visibility').checked = true;
+        document.getElementById('charadeScorePanel_visibility').checked = false;
+
+        const scoreData  = document.createElement('div');
+        scoreData.className = 'game';
+        const roundText = document.createElement('div');
+        roundText.className = 'roundText';
+        roundText.innerText = formatAMPM(gameState.startTime) + ' - ' + gameState.correct + '/'+  gameState.total + ' correct.';
+        scoreData.appendChild(roundText);
+
+        const roundImages = document.createElement('div');
+        roundImages.className = 'outcomes';
+        for (const outcome of gameState.outcomes) {
+          const outcomeImage = document.createElement('img');
+          const action = outcome.action;
+          outcomeImage.src = 'https://share01.rsndev.com/charades/' + action.imagePath.toLowerCase();
+          const outcomeContainer = document.createElement('div');
+          if (outcome.correct) {
+              outcomeContainer.className = 'correct';
+          } else if (outcome.incorrect) {
+            outcomeContainer.className = 'incorrect';
+          } else {
+            outcomeContainer.className = 'cancelled';
+          }
+          outcomeContainer.appendChild(outcomeImage);
+          roundImages.appendChild(outcomeContainer);
+        }
+        scoreData.appendChild(roundImages);
+
+        document.getElementById('charadeScorePanel').appendChild(scoreData);
+      }
+
+      function cancelGame() {
+        let outcome = {
+          action: gameState.currentAction,
+          correct: false,
+          incorrect: false,
+          cancelled: true
+        };
+        gameState.outcomes.push(outcome);
+        finishGame();
+      }
+      document.querySelector('#charadeImagePanel .cancel').addEventListener('click', ()=>cancelGame());
+      function nextCorrect() {
+        gameState.correct++;
+
+        let outcome = {
+          action: gameState.currentAction,
+          correct: true,
+          incorrect: false,
+          cancelled: false
+        };
+        gameState.outcomes.push(outcome);
+
+        if (gameState.total >= gameState.rounds) {
+          finishGame();
+        } else {
+          nextGameAction();
+        }
+      }
+      document.querySelector('#charadeImagePanel .correct').addEventListener('click', ()=>nextCorrect());
+      function nextIncorrect() {
+        gameState.incorrect++;
+        let outcome = {
+          action: gameState.currentAction,
+          correct: false,
+          incorrect: true,
+          cancelled: false
+        };
+        gameState.outcomes.push(outcome);
+
+        if (gameState.total >= gameState.rounds) {
+          finishGame();
+        } else {
+          nextGameAction();
+        }
+      }
+      document.querySelector('#charadeImagePanel .incorrect').addEventListener('click', ()=>nextIncorrect());
+
+
+      function addCategory(category) {
+        let container1 = document.createElement('div');
+        container1.className = "category";
+
+        let label = document.createElement('p');
+        label.innerText = category.category;
+        let content = document.createElement('img');
+        content.src = 'https://share01.rsndev.com/charades/' + category.imagePath;
+        content.alt = "An icon representin the category " + category.category;
+        container1.appendChild(content);
+        container1.appendChild(label);
+        categorySelector.appendChild(container1);
+              
+        container1.addEventListener('click', ()=>startGame(category));
+      }
+
+      fetch('https://share01.rsndev.com/charades/animals.json').then(response=>response.json()).then(json=>{
+              categories.animals = json;
+              addCategory(json);
+      });
+      fetch('https://share01.rsndev.com/charades/everyday_activities.json').then(response=>response.json()).then(json=>{
+              categories.everyday_activities = json;
+              addCategory(json);
+      });
+
+    </script>
+  </body>
+</html>
