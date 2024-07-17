@@ -5,21 +5,32 @@
     <title>Sean And Vero - Charades</title>
     <link rel="stylesheet" href="fonts.css" />
     <style type="text/css">
+      #audio_control {
+        position: fixed;
+        top: 1vw;
+        right: 1vw;
+        width: 15vw;
+        max-width: 120px;
+      }
+      #audio_control img {
+        width: 100%;
+        height: 100%;
+      }
       #categorySelector {
         display: flex;
         flex-wrap: wrap;
-        justify-content: space-around;
+        justify-content: center;
         align-content: space-around;
       }
       #categorySelector .category {
-        flex-basis: 15%;
-        width: 15%;
-        height: 15%;
+        flex-basis: 300px;
+        width: 300px;
+        height: 300px;
         overflow:hidden;
       }
       #categorySelector .category img {
-        width: 100%;
-        height: 100%;
+        width: 65%;
+        height: 65%;
       }
       .actionPanel {
         display: flex;
@@ -83,11 +94,23 @@
       input.visibility_input:checked + * {
         display: none !important;
       }
+      input.visibility_toggle ~ *:nth-of-type(1) {
+        display: block !important;
+      }
+      input.visibility_toggle:checked ~ *:nth-of-type(1) {
+        display: none !important;
+      }
+      input.visibility_toggle ~ *:nth-of-type(2) {
+        display: none !important;
+      }
+      input.visibility_toggle:checked ~ *:nth-of-type(2) {
+        display: block !important;
+      }
       .hidden {
         visibility:hidden;
         width: 1px;
         height: 1px;
-        position: absolute:
+        position: absolute;
         top: -1;
         left: -1;
       }
@@ -134,7 +157,7 @@
     </style>
   </head>
   <body>
-    <h1>Sean And Vero Charades!</h1>
+    <h1>Charades Arcade!</h1>
     <h4>Select a category below. Act out each theme for your audience while they try to guess it.</h4>
 
     <input class="hidden visibility_input" type="checkbox" name="categorySelectorPanel_visibility" id="categorySelectorPanel_visibility" />
@@ -163,6 +186,18 @@
     <div id="charadeScorePanel">
     </div>
 
+    <div id="audio_control">
+      <input class="hidden visibility_toggle" type="checkbox" name="audioControl_visibility" id="audioControl_visibility" />
+      <label for="audioControl_visibility"><img src="https://share01.rsndev.com/charades/volume_off_final.png" /></label>
+      <label for="audioControl_visibility"><img src="https://share01.rsndev.com/charades/volume_on_final.png" /></label>
+    </div>
+
+    <audio hidden loop id="menu_music" >
+      <source src="https://share01.rsndev.com/charades/menu_music_01.mp3" type="audio/mpeg" />
+      <source src="https://share01.rsndev.com/charades/menu_music_01.ogg" type="audio/ogg" />
+      <p><i>(8-bit music playing in background ... not supported)</i></p>
+    </audio>
+
     <script>
       function formatAMPM(date) {
           var hours = date.getHours();
@@ -178,6 +213,7 @@
       let gameState = {};
       const categories = {};
       const categorySelector = document.getElementById('categorySelector');
+      var menu_music = document.getElementById('menu_music');
 
       function nextGameAction() {
         gameState.total++;
@@ -203,119 +239,141 @@
         gameState.rounds = parseInt(document.getElementById('numRounds').value);
         gameState.outcomes = [];
         gameState.startTime = new Date;
+        menu_music.pause();
 
-      document.getElementById('charadeImagePanel_visibility').checked = false;
-      document.getElementById('categorySelectorPanel_visibility').checked = true;
+        document.getElementById('charadeImagePanel_visibility').checked = false;
+        document.getElementById('categorySelectorPanel_visibility').checked = true;
 
-      nextGameAction();
-    }
-    function finishGame() {
-      document.getElementById('categorySelectorPanel_visibility').checked = false;
-        document.getElementById('charadeImagePanel_visibility').checked = true;
-        document.getElementById('charadeScorePanel_visibility').checked = false;
+        nextGameAction();
+      }
+      function finishGame() {
+        document.getElementById('categorySelectorPanel_visibility').checked = false;
+          document.getElementById('charadeImagePanel_visibility').checked = true;
+          document.getElementById('charadeScorePanel_visibility').checked = false;
 
-        const scoreData  = document.createElement('div');
-        scoreData.className = 'game';
-        const roundText = document.createElement('div');
-        roundText.className = 'roundText';
-        roundText.innerText = formatAMPM(gameState.startTime) + ' - ' + gameState.correct + '/'+  gameState.total + ' correct.';
-        scoreData.appendChild(roundText);
+          const scoreData  = document.createElement('div');
+          scoreData.className = 'game';
+          const roundText = document.createElement('div');
+          roundText.className = 'roundText';
+          roundText.innerText = formatAMPM(gameState.startTime) + ' - ' + gameState.correct + '/'+  gameState.total + ' correct.';
+          scoreData.appendChild(roundText);
 
-        const roundImages = document.createElement('div');
-        roundImages.className = 'outcomes';
-        for (const outcome of gameState.outcomes) {
-          const outcomeImage = document.createElement('img');
-          const action = outcome.action;
-          outcomeImage.src = 'https://share01.rsndev.com/charades/' + action.imagePath.toLowerCase();
-          const outcomeContainer = document.createElement('div');
-          if (outcome.correct) {
-              outcomeContainer.className = 'correct';
-          } else if (outcome.incorrect) {
-            outcomeContainer.className = 'incorrect';
-          } else {
-            outcomeContainer.className = 'cancelled';
+          const roundImages = document.createElement('div');
+          roundImages.className = 'outcomes';
+          for (const outcome of gameState.outcomes) {
+            const outcomeImage = document.createElement('img');
+            const action = outcome.action;
+            outcomeImage.src = 'https://share01.rsndev.com/charades/' + action.imagePath.toLowerCase();
+            const outcomeContainer = document.createElement('div');
+            if (outcome.correct) {
+                outcomeContainer.className = 'correct';
+            } else if (outcome.incorrect) {
+              outcomeContainer.className = 'incorrect';
+            } else {
+              outcomeContainer.className = 'cancelled';
+            }
+            outcomeContainer.appendChild(outcomeImage);
+            roundImages.appendChild(outcomeContainer);
           }
-          outcomeContainer.appendChild(outcomeImage);
-          roundImages.appendChild(outcomeContainer);
+          scoreData.appendChild(roundImages);
+
+          document.getElementById('charadeScorePanel').appendChild(scoreData);
+
+          if (window.first_game || audio_controls.checked) {
+            menu_music.play();
+          }
+
+          window.first_game = false;
         }
-        scoreData.appendChild(roundImages);
 
-        document.getElementById('charadeScorePanel').appendChild(scoreData);
-      }
-
-      function cancelGame() {
-        let outcome = {
-          action: gameState.currentAction,
-          correct: false,
-          incorrect: false,
-          cancelled: true
-        };
-        gameState.outcomes.push(outcome);
-        finishGame();
-      }
-      document.querySelector('#charadeImagePanel .cancel').addEventListener('click', ()=>cancelGame());
-      function nextCorrect() {
-        gameState.correct++;
-
-        let outcome = {
-          action: gameState.currentAction,
-          correct: true,
-          incorrect: false,
-          cancelled: false
-        };
-        gameState.outcomes.push(outcome);
-
-        if (gameState.total >= gameState.rounds) {
+        function cancelGame() {
+          let outcome = {
+            action: gameState.currentAction,
+            correct: false,
+            incorrect: false,
+            cancelled: true
+          };
+          gameState.outcomes.push(outcome);
           finishGame();
-        } else {
-          nextGameAction();
         }
-      }
-      document.querySelector('#charadeImagePanel .correct').addEventListener('click', ()=>nextCorrect());
-      function nextIncorrect() {
-        gameState.incorrect++;
-        let outcome = {
-          action: gameState.currentAction,
-          correct: false,
-          incorrect: true,
-          cancelled: false
-        };
-        gameState.outcomes.push(outcome);
+        document.querySelector('#charadeImagePanel .cancel').addEventListener('click', ()=>cancelGame());
+        function nextCorrect() {
+          gameState.correct++;
 
-        if (gameState.total >= gameState.rounds) {
-          finishGame();
-        } else {
-          nextGameAction();
+          let outcome = {
+            action: gameState.currentAction,
+            correct: true,
+            incorrect: false,
+            cancelled: false
+          };
+          gameState.outcomes.push(outcome);
+
+          if (gameState.total >= gameState.rounds) {
+            finishGame();
+          } else {
+            nextGameAction();
+          }
         }
-      }
-      document.querySelector('#charadeImagePanel .incorrect').addEventListener('click', ()=>nextIncorrect());
+        document.querySelector('#charadeImagePanel .correct').addEventListener('click', ()=>nextCorrect());
+        function nextIncorrect() {
+          gameState.incorrect++;
+          let outcome = {
+            action: gameState.currentAction,
+            correct: false,
+            incorrect: true,
+            cancelled: false
+          };
+          gameState.outcomes.push(outcome);
+
+          if (gameState.total >= gameState.rounds) {
+            finishGame();
+          } else {
+            nextGameAction();
+          }
+        }
+        document.querySelector('#charadeImagePanel .incorrect').addEventListener('click', ()=>nextIncorrect());
 
 
-      function addCategory(category) {
-        let container1 = document.createElement('div');
-        container1.className = "category";
+        function addCategory(category) {
+          let container1 = document.createElement('div');
+          container1.className = "category";
 
-        let label = document.createElement('p');
-        label.innerText = category.category;
-        let content = document.createElement('img');
-        content.src = 'https://share01.rsndev.com/charades/' + category.imagePath;
-        content.alt = "An icon representin the category " + category.category;
-        container1.appendChild(content);
-        container1.appendChild(label);
-        categorySelector.appendChild(container1);
-              
-        container1.addEventListener('click', ()=>startGame(category));
-      }
+          let label = document.createElement('p');
+          label.innerText = category.category;
+          let content = document.createElement('img');
+          content.src = 'https://share01.rsndev.com/charades/' + category.imagePath;
+          content.alt = "An icon representin the category " + category.category;
+          container1.appendChild(content);
+          container1.appendChild(label);
+          categorySelector.appendChild(container1);
+                
+          container1.addEventListener('click', ()=>startGame(category));
+        }
 
-      fetch('https://share01.rsndev.com/charades/animals.json').then(response=>response.json()).then(json=>{
-              categories.animals = json;
-              addCategory(json);
-      });
-      fetch('https://share01.rsndev.com/charades/everyday_activities.json').then(response=>response.json()).then(json=>{
-              categories.everyday_activities = json;
-              addCategory(json);
-      });
+        fetch('https://share01.rsndev.com/charades/animals.json').then(response=>response.json()).then(json=>{
+                categories.animals = json;
+                addCategory(json);
+        });
+        fetch('https://share01.rsndev.com/charades/everyday_activities.json').then(response=>response.json()).then(json=>{
+                categories.everyday_activities = json;
+                addCategory(json);
+        });
+        fetch('https://share01.rsndev.com/charades/jobs.json').then(response=>response.json()).then(json=>{
+                categories.jobs = json;
+                addCategory(json);
+        });
 
+        menu_music.volume = 0.2;
+        var audio_controls = document.getElementById('audioControl_visibility');
+        audio_controls.addEventListener('change', ()=> {
+          if (audio_controls.checked) {
+            menu_music.play();
+          } else {
+            menu_music.pause();
+          }
+        });
+        menu_music.addEventListener('play', ()=>{audio_controls.checked = true;});
+        window.first_game = true;
     </script>
   </body>
 </html>
