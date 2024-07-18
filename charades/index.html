@@ -166,6 +166,81 @@
       #charadeScorePanel .outcomes .cancelled {
         border: 4px solid #00F;
       }
+      .progressbar {
+				width: 15%;
+				height: 15%;
+				position: relative;
+				top: 0;
+				left: 0;
+				overflow: hidden;
+      }
+      .progressbar .pb_container {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				object-fit: scale-down;
+      }
+      .progressbar .pb_status{
+					position: absolute;
+					top: 0;
+					left: 0;
+					object-fit: scale-down;
+					width: 100%;
+					height: 100%;
+					/*clip-path: inset(0% 55% 0% 0%);*/
+					animation: 2s progressbar_loop;
+					animation-iteration-count: infinite;
+      }
+		@keyframes progressbar_loop {
+			0% { 
+					clip-path: inset(0% 65% 0% 0%);
+			}
+			50% { 
+					clip-path: inset(0% 35% 0% 0%);
+			}
+			100% { 
+					clip-path: inset(0% 65% 0% 0%);
+			}
+		}
+		#charadeSuspense_Visibility:not(:checked) ~ #charadeImageLabel,
+		#charadeSuspense_Visibility:not(:checked) ~ #charadeRoundsLabel,
+		#charadeSuspense_Visibility:not(:checked) ~ #charadeImageDescription {
+			display:none;
+		}
+		#charadeSuspense_Visibility:not(:checked) ~ #charadeImage {
+			visibility:hidden;
+			position: absolute;
+			top: -1;
+			left: -1;
+		}
+		#charadeSuspense_Visibility:not(:checked) ~ .actionPanel {
+			justify-content: center !important;
+		}
+		#charadeSuspense_Visibility:not(:checked) ~ .actionPanel .correct, 
+		#charadeSuspense_Visibility:not(:checked) ~ .actionPanel .incorrect {
+			display: none;
+		}
+		#charadeSuspense {
+			margin-left: auto;
+			margin-right: auto;
+			width: 50%;
+			height: 50%;
+			margin-bottom: 2em;
+			margin-top: 2em;
+			display: flex;
+			justify-content: center;
+			flex-direction: column;
+		}
+		#charadeSuspense .counter {
+			font-size: 8vh;
+			text-align: center;
+		}
+		#charadeSuspense .progressbar {
+			width: 50vw;
+			height: 38vh;
+		}
     </style>
   </head>
   <body>
@@ -183,6 +258,14 @@
 
     <input class="hidden visibility_input" type="checkbox" name="charadeImagePanel_visibility" id="charadeImagePanel_visibility" checked />
     <div id="charadeImagePanel">
+			<input class="hidden visibility_input" type="checkbox" name="charadeSuspense_visibility" id="charadeSuspense_visibility" checked />
+			<div id="charadeSuspense">
+				<div class="counter">...thinking...</div>
+				<div class="progressbar">
+					<img class="pb_container" src="https://share01.rsndev.com/charades/progress_bar_loading_container.png" />
+					<img class="pb_status" src="https://share01.rsndev.com/charades/progress_bar_loading_status.png" />
+				</div>
+			</div>
       <div id="charadeImageLabel"></div>
       <img id="charadeImage" />
       <div id="charadeRoundsLabel"></div>
@@ -210,40 +293,109 @@
       <p><i>(8-bit music playing in background ... not supported)</i></p>
     </audio>
 
+    <audio hidden id="correct_sound" >
+      <source src="https://share01.rsndev.com/charades/correct_sound.mp3" type="audio/mpeg" />
+      <source src="https://share01.rsndev.com/charades/correct_sound.ogg" type="audio/ogg" />
+    </audio>
+    <audio hidden id="incorrect_sound" >
+      <source src="https://share01.rsndev.com/charades/incorrect_sound.mp3" type="audio/mpeg" />
+      <source src="https://share01.rsndev.com/charades/incorrect_sound.ogg" type="audio/ogg" />
+    </audio>
+
+    <audio hidden id="beep_0" >
+      <source src="https://share01.rsndev.com/charades/beep_0.mp3" type="audio/mpeg" />
+      <source src="https://share01.rsndev.com/charades/beep_0.ogg" type="audio/ogg" />
+    </audio>
+    <audio hidden id="beep_1" >
+      <source src="https://share01.rsndev.com/charades/beep_1.mp3" type="audio/mpeg" />
+      <source src="https://share01.rsndev.com/charades/beep_1.ogg" type="audio/ogg" />
+    </audio>
+    <audio hidden id="beep_2" >
+      <source src="https://share01.rsndev.com/charades/beep_2.mp3" type="audio/mpeg" />
+      <source src="https://share01.rsndev.com/charades/beep_2.ogg" type="audio/ogg" />
+    </audio>
+    <audio hidden id="beep_3" >
+      <source src="https://share01.rsndev.com/charades/beep_3.mp3" type="audio/mpeg" />
+      <source src="https://share01.rsndev.com/charades/beep_3.ogg" type="audio/ogg" />
+    </audio>
+
     <script>
       function formatAMPM(date) {
-          var hours = date.getHours();
-          var minutes = date.getMinutes();
-          var ampm = hours >= 12 ? 'pm' : 'am';
+          let hours = date.getHours();
+          let minutes = date.getMinutes();
+          const ampm = hours >= 12 ? 'pm' : 'am';
           hours = hours % 12;
           hours = hours ? hours : 12; // the hour '0' should be '12'
           minutes = minutes < 10 ? '0'+minutes : minutes;
-          var strTime = hours + ':' + minutes + ' ' + ampm;
+          const strTime = hours + ':' + minutes + ' ' + ampm;
           return strTime;
       }
 
       let gameState = {};
       const categories = {};
       const categorySelector = document.getElementById('categorySelector');
-      var menu_music = document.getElementById('menu_music');
+      const menu_music = document.getElementById('menu_music');
 
+			const audio_correct = document.getElementById('correct_sound');
+			const audio_incorrect = document.getElementById('incorrect_sound');
+			const audio_beep_0 = document.getElementById('beep_0');
+			const audio_beep_1 = document.getElementById('beep_1');
+			const audio_beep_2 = document.getElementById('beep_2');
+			const audio_beep_3 = document.getElementById('beep_3');
+			const audio_beeps = [ audio_beep_0, audio_beep_1, audio_beep_2, audio_beep_3 ];
+
+			const charadeImage = document.getElementById('charadeImage');
+			const charadeSuspenseVisibility = document.getElementById('charadeSuspense_visibility');
+			const charadeSuspenseCounter = document.querySelector('#charadeSuspense .counter');
       function nextGameAction() {
         gameState.total++;
 
-        var targetActions = gameState.targetActions;
-        var nextAction = parseInt(Math.random() * targetActions.length);
-        var action = targetActions[nextAction];
+        const targetActions = gameState.targetActions;
+        const nextAction = parseInt(Math.random() * targetActions.length);
+        const action = targetActions[nextAction];
 
         gameState.currentAction = action;
 
-        document.getElementById('charadeImage').src = 'https://share01.rsndev.com/charades/' + action.imagePath.toLowerCase();
+				gameState.startingCountdown = true;
+				charadeSuspenseCounter.innerText = '...thinking...';
+				charadeSuspenseVisibility.checked = false;
+        charadeImage.src = 'https://share01.rsndev.com/charades/' + action.imagePath.toLowerCase();
         document.getElementById('charadeImageLabel').innerText = action["action name"];
         document.getElementById('charadeImageDescription').innerText = action.description;
         document.getElementById('charadeRoundsLabel').innerText = gameState.total + '/' + gameState.rounds;
-
       }
+			const countdownDelay = 1200;
+			function startCountdown() {
+				if (!gameState.startingCountdown) {return;}
+				gameState.startingCountdown = false;
+			
+				gameState.countdown = 3;
+				setTimeout(advanceCountdown, countdownDelay);
+				charadeSuspenseCounter.innerText = '' + gameState.countdown;
+				countdownBeep();
+			}
+			function countdownBeep() {
+				const count = gameState.countdown;
+				if (count < 0 || count >= audio_beeps.length) { return; }
+				audio_beeps[count].play();
+			}
+			charadeImage.addEventListener('load', startCountdown);
+			function advanceCountdown() {
+				gameState.countdown--;
+				countdownBeep();
+				if(gameState.countdown > 0) {
+					charadeSuspenseCounter.innerText = '' + gameState.countdown;
+					setTimeout(advanceCountdown, countdownDelay);
+				} else if(gameState.countdown <= 0) {
+					charadeSuspenseCounter.innerText = 'GO!';
+					setTimeout(finishCountdown, countdownDelay);
+				}
+			}
+			function finishCountdown() {
+				charadeSuspenseVisibility.checked = true;
+			}
       function startGame(category) {
-        var targetActions = category.actions;
+        const targetActions = category.actions;
         gameState.targetActions = targetActions;
         gameState.correct = 0;
         gameState.incorrect = 0;
@@ -311,7 +463,7 @@
         document.querySelector('#charadeImagePanel .cancel').addEventListener('click', ()=>cancelGame());
         function nextCorrect() {
           gameState.correct++;
-
+					audio_correct.play();
           let outcome = {
             action: gameState.currentAction,
             correct: true,
@@ -329,6 +481,7 @@
         document.querySelector('#charadeImagePanel .correct').addEventListener('click', ()=>nextCorrect());
         function nextIncorrect() {
           gameState.incorrect++;
+					audio_incorrect.play();
           let outcome = {
             action: gameState.currentAction,
             correct: false,
@@ -376,7 +529,7 @@
         });
 
         menu_music.volume = 0.2;
-        var audio_controls = document.getElementById('audioControl_visibility');
+        const audio_controls = document.getElementById('audioControl_visibility');
         audio_controls.addEventListener('change', ()=> {
           if (audio_controls.checked) {
             menu_music.play();
