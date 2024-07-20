@@ -71,30 +71,27 @@
         top: 0;
         left: 0;
         width: 100%;
-        height: 100%;
+        height: 90%;
         display:flex;
         flex-direction: column;
+        justify-content: space-around;
         z-index: 100;
         background: white;
+        padding-top:2%;
+        padding-bottom: 6%;
       }
       #charadeImagePanel #charadeImageDescription {
         margin-left: 3em; margin-right: 3em;
-        margin-top: 1em;
-        margin-bottom: 1em;
         font-size: 14pt;
       }
       #charadeImagePanel #charadeRoundsLabel {
         display: inline-block;
         margin-left: auto; margin-right: auto;
-        margin-top: 1em;
-        margin-bottom: 1em;
         font-size: 12pt;
       }
       #charadeImagePanel #charadeImageLabel {
         display: inline-block;
         margin-left: auto; margin-right: auto;
-        margin-top: 1em;
-        margin-bottom: 1em;
         font-size: 18pt;
       }
       #charadeImagePanel #charadeImage {
@@ -198,7 +195,7 @@
 					clip-path: inset(0% 65% 0% 0%);
 			}
 			50% { 
-					clip-path: inset(0% 35% 0% 0%);
+					clip-path: inset(0% 25% 0% 0%);
 			}
 			100% { 
 					clip-path: inset(0% 65% 0% 0%);
@@ -348,11 +345,8 @@
 			const charadeSuspenseVisibility = document.getElementById('charadeSuspense_visibility');
 			const charadeSuspenseCounter = document.querySelector('#charadeSuspense .counter');
       function nextGameAction() {
-        gameState.total++;
-
-        const targetActions = gameState.targetActions;
-        const nextAction = parseInt(Math.random() * targetActions.length);
-        const action = targetActions[nextAction];
+        const action = selectNextAction();
+        gameState.roundsPlayed++;
 
         gameState.currentAction = action;
 
@@ -362,7 +356,7 @@
         charadeImage.src = 'https://share01.rsndev.com/charades/' + action.imagePath.toLowerCase();
         document.getElementById('charadeImageLabel').innerText = action["action name"];
         document.getElementById('charadeImageDescription').innerText = action.description;
-        document.getElementById('charadeRoundsLabel').innerText = gameState.total + '/' + gameState.rounds;
+        document.getElementById('charadeRoundsLabel').innerText = gameState.roundsPlayed + '/' + gameState.rounds;
       }
 			const countdownDelay = 1200;
 			function startCountdown() {
@@ -394,16 +388,74 @@
 			function finishCountdown() {
 				charadeSuspenseVisibility.checked = true;
 			}
+
+      function selectNextAction() {
+        let counter = 0;
+        let targetActions = gameState.targetActions; 
+
+        // pick a random element based on weighted probability
+        const nextProbability = Math.random();
+        for (let action of targetActions) {
+          counter++;
+          if (action.cumulativeProbability > nextProbability) {
+            break;
+          }
+        }
+        if (counter >= targetActions.length) {
+          // this shoudl never happen, but if it does select the element with highest probability
+          counter = targetActions.length - 1;
+        }
+        var selectedAction = targetActions[counter];
+
+        // compute new probability ()
+        var distributableProbability = selectedAction.cumulativeProbability;
+        if (counter > 0) {
+          distributableProbablity = distributableProbability - targetActions[counter-1].cumulativeProbability;
+        }
+        var distributedProbability = distributableProbability / targetActions.length;
+        selectedAction.cumulativeProbability = distributedProbability;
+
+        // re-sort and distribute probability changes at the same time ()
+        var newActions = [];
+        newActions.push(selectedAction);
+        for (let i = 0; i < targetActions.length; i++) {
+          if (i == counter) {
+            continue;
+          }
+          let currentAction = targetActions[i];
+          currentAction.cumulativeProbability += distributedProbability;
+          newActions.push(currentAction);
+        }
+
+        // make sure everything is going to be less than 1
+        const epsilon = 0.001;
+        const normalizer = newActions[newActions.length-1].cumulativeProbability + epsilon;
+        for (let i = 0; i < targetActions.length; i++) {
+          newActions.cumulativeProbability /= normalizer;
+        }
+        gameState.targetActions = newActions;
+
+        return selectedAction;
+      }
+
       function startGame(category) {
         const targetActions = category.actions;
         gameState.targetActions = targetActions;
         gameState.correct = 0;
         gameState.incorrect = 0;
-        gameState.total = 0;
+        gameState.roundsPlayed = 0;
         gameState.rounds = parseInt(document.getElementById('numRounds').value);
         gameState.outcomes = [];
         gameState.startTime = new Date;
         menu_music.pause();
+
+        gameState.actionCount = gameState.targetActions.length;
+        const distributedProbability = 1 / gameState.actionCount;
+        let counter = 0;
+        for (let action of targetActions) {
+          counter++;
+          action.cumulativeProbability =  counter * distributedProbability;
+        }
 
         document.getElementById('charadeImagePanel_visibility').checked = false;
         document.getElementById('categorySelectorPanel_visibility').checked = true;
@@ -419,7 +471,7 @@
           scoreData.className = 'game';
           const roundText = document.createElement('div');
           roundText.className = 'roundText';
-          roundText.innerText = formatAMPM(gameState.startTime) + ' - ' + gameState.correct + '/'+  gameState.total + ' correct - ' + formatAMPM(new Date);
+          roundText.innerText = formatAMPM(gameState.startTime) + ' - ' + gameState.correct + '/'+  gameState.roundsPlayed + ' correct - ' + formatAMPM(new Date);
           scoreData.appendChild(roundText);
 
           const roundImages = document.createElement('div');
@@ -475,7 +527,7 @@
           };
           gameState.outcomes.push(outcome);
 
-          if (gameState.total >= gameState.rounds) {
+          if (gameState.roundsPlayed >= gameState.rounds) {
             finishGame();
           } else {
             nextGameAction();
@@ -493,7 +545,7 @@
           };
           gameState.outcomes.push(outcome);
 
-          if (gameState.total >= gameState.rounds) {
+          if (gameState.roundsPlayed >= gameState.rounds) {
             finishGame();
           } else {
             nextGameAction();
@@ -528,6 +580,10 @@
         });
         fetch('https://share01.rsndev.com/charades/jobs.json').then(response=>response.json()).then(json=>{
                 categories.jobs = json;
+                addCategory(json);
+        });
+        fetch('https://share01.rsndev.com/charades/sports.json').then(response=>response.json()).then(json=>{
+                categories.sports = json;
                 addCategory(json);
         });
 
