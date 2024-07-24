@@ -586,6 +586,10 @@
                 categories.sports = json;
                 addCategory(json);
         });
+        fetch('https://share01.rsndev.com/charades/food_and_drink.json').then(response=>response.json()).then(json=>{
+                categories.food_and_drink = json;
+                addCategory(json);
+        });
 
         var is_music_playing = false;
         menu_music.volume = 0.2;
