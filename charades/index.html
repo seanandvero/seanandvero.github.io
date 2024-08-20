@@ -12,6 +12,7 @@
         right: 1vw;
         width: 15vw;
         max-width: 120px;
+        z-index: 200;
       }
       label {
         cursor: pointer;
@@ -177,30 +178,43 @@
 				left: 0;
 				width: 100%;
 				height: 100%;
-				object-fit: scale-down;
       }
       .progressbar .pb_status{
 					position: absolute;
 					top: 0;
 					left: 0;
-					object-fit: scale-down;
 					width: 100%;
 					height: 100%;
 					/*clip-path: inset(0% 55% 0% 0%);*/
-					animation: 2s progressbar_loop;
+					animation: 1s progressbar_loop;
 					animation-iteration-count: infinite;
       }
-		@keyframes progressbar_loop {
-			0% { 
-					clip-path: inset(0% 65% 0% 0%);
-			}
-			50% { 
-					clip-path: inset(0% 25% 0% 0%);
-			}
-			100% { 
-					clip-path: inset(0% 65% 0% 0%);
-			}
-		}
+      #charadeSuspense_progressReady:checked ~ .progressbar .pb_status {
+					animation-name: progressbar_fill;
+					animation-iteration-count: 1;
+          animation-duration: 4200ms;
+          animation-timing-function: linear;
+          animation-delay: 0s;
+      }
+      @keyframes progressbar_loop {
+        0% { 
+            clip-path: inset(0% 75% 0% 0%);
+        }
+        50% { 
+            clip-path: inset(0% 23% 0% 0%);
+        }
+        100% { 
+            clip-path: inset(0% 75% 0% 0%);
+        }
+      }
+      @keyframes progressbar_fill {
+        0% { 
+            clip-path: inset(0% 82% 0% 0%);
+        }
+        90% { 
+            clip-path: inset(0% 16% 0% 0%);
+        }
+      }
 		#charadeSuspense_Visibility:not(:checked) ~ #charadeImageLabel,
 		#charadeSuspense_Visibility:not(:checked) ~ #charadeRoundsLabel,
 		#charadeSuspense_Visibility:not(:checked) ~ #charadeImageDescription {
@@ -231,12 +245,20 @@
 			flex-direction: column;
 		}
 		#charadeSuspense .counter {
-			font-size: 8vh;
+			font-size: 6vw;
 			text-align: center;
+      display: flex;
+      justify-content: center;
+      white-space: nowrap;
 		}
 		#charadeSuspense .progressbar {
-			width: 50vw;
-			height: 38vh;
+			max-width: 38vh;
+			max-height: 38vh;
+      width: 100%;
+      height: 100%;
+      aspect-ratio: 1/1;
+      margin-left: auto;
+      margin-right: auto;
 		}
     </style>
   </head>
@@ -257,6 +279,7 @@
     <div id="charadeImagePanel">
 			<input class="hidden visibility_input" type="checkbox" name="charadeSuspense_visibility" id="charadeSuspense_visibility" checked />
 			<div id="charadeSuspense">
+        <input class="hidden" type="checkbox" name="charadeSuspense_progressReady" id="charadeSuspense_progressReady" />
 				<div class="counter">...thinking...</div>
 				<div class="progressbar">
 					<img class="pb_container" src="https://share01.rsndev.com/charades/progress_bar_loading_container.png" />
@@ -344,6 +367,7 @@
 			const charadeImage = document.getElementById('charadeImage');
 			const charadeSuspenseVisibility = document.getElementById('charadeSuspense_visibility');
 			const charadeSuspenseCounter = document.querySelector('#charadeSuspense .counter');
+      const charadeSuspenseProgressReady = document.querySelector('#charadeSuspense_progressReady');
       function nextGameAction() {
         const action = selectNextAction();
         gameState.roundsPlayed++;
@@ -353,6 +377,7 @@
 				gameState.startingCountdown = true;
 				charadeSuspenseCounter.innerText = '...thinking...';
 				charadeSuspenseVisibility.checked = false;
+        charadeSuspenseProgressReady.checked = false;
         charadeImage.src = 'https://share01.rsndev.com/charades/' + action.imagePath.toLowerCase();
         document.getElementById('charadeImageLabel').innerText = action["action name"];
         document.getElementById('charadeImageDescription').innerText = action.description;
@@ -362,11 +387,11 @@
 			function startCountdown() {
 				if (!gameState.startingCountdown) {return;}
 				gameState.startingCountdown = false;
-			
 				gameState.countdown = 3;
 				setTimeout(advanceCountdown, countdownDelay);
 				charadeSuspenseCounter.innerText = '' + gameState.countdown;
 				countdownBeep();
+        charadeSuspenseProgressReady.checked = true;
 			}
 			function countdownBeep() {
 				const count = gameState.countdown;
@@ -495,7 +520,7 @@
 
           document.getElementById('charadeScorePanel').appendChild(scoreData);
 
-          if (window.first_game) {
+          if (window.first_game && !is_music_playing) {
             // on first game try and force music to start playing if it wasn't started already
             audio_controls.click();
           } else if (is_music_playing) {
@@ -597,10 +622,16 @@
         audio_controls.addEventListener('change', ()=> {
           if (audio_controls.checked) {
             is_music_playing = true;
-            menu_music.play();
+
+            if (!document.getElementById('categorySelectorPanel_visibility').checked) { 
+              menu_music.play();
+            }
           } else {
             is_music_playing = false;
-            menu_music.pause();
+
+            if (!document.getElementById('categorySelectorPanel_visibility').checked) { 
+              menu_music.pause();
+            }
           }
         });
         window.first_game = true;
