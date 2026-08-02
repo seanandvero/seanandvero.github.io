@@ -103,7 +103,7 @@
     document.write("  <a class=\"articleClose\" href=\"#" + content.thumbId + "\" onclick=\"window.FilmTemplating.handleClose('" + content.key + "');\">Close<\/a>");
     document.write("  <div class=\"clear\"><\/div>");
     document.write("  <div class=\"filmContainer\">");
-    document.write("    <video crossorigin=\"anonymous\" class=\"nodemand\" src=\"" + filmUrl + "\"><\/video>");
+    document.write("    <video crossorigin=\"anonymous\" class=\"nodemand\" src=\"" + filmUrl + "\" controls><\/video>");
     document.write("    <div class=\"video-controller unselectable\" id=\"" + filmIdPrefix + "videoController\">");
     document.write("        <div id=\"" + filmIdPrefix + "playPauseBtn\" class=\"btn-play-pause\" title=\"Play\/Pause\">");
     document.write("            <span id=\"" + filmIdPrefix + "iconPlayPause\" class=\"icon-play\"><\/span>");
